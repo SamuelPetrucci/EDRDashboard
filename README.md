@@ -102,6 +102,28 @@ src/
 - Lucide React (Icons)
 - CSS3
 
+## Deployment
+
+### Push to GitHub
+
+1. Create a new repository on [GitHub](https://github.com/new) (e.g. name: `EDR-Dashboard`). Do not add a README, .gitignore, or license.
+2. From this project folder, add the remote and push:
+   ```powershell
+   git remote add origin https://github.com/YOUR_USERNAME/EDR-Dashboard.git
+   git push -u origin main
+   ```
+   Or run the helper script (after creating the repo):
+   ```powershell
+   .\push-to-github.ps1 https://github.com/YOUR_USERNAME/EDR-Dashboard.git
+   ```
+
+### Deploy to Vercel
+
+1. Go to [vercel.com](https://vercel.com) and sign in (e.g. with GitHub).
+2. **Add New Project** → **Import** your GitHub repository.
+3. Leave the default **Build Command** (`npm run build`) and **Output Directory** (`dist`).
+4. Click **Deploy**. The app will be live at a `*.vercel.app` URL; client-side routes work via `vercel.json` rewrites.
+
 ## Next Steps
 
 - [ ] Add data persistence (localStorage/API)
