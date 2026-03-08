@@ -1,0 +1,244 @@
+.emergency-banner {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  animation: emergency-banner-in 0.3s ease;
+}
+
+@keyframes emergency-banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.emergency-banner--info,
+.emergency-banner--warning,
+.emergency-banner--critical {
+  background: linear-gradient(135deg, #991b1b 0%, #b91c1c 50%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.25);
+}
+
+.emergency-banner-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.emergency-banner-icon {
+  flex-shrink: 0;
+  opacity: 0.95;
+}
+
+.emergency-banner-message {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.emergency-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.emergency-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.emergency-banner-edit {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.emergency-banner-edit:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.emergency-banner-dismiss {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.375rem;
+}
+
+.emergency-banner-dismiss:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Modal */
+.emergency-banner-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 1.5rem;
+}
+
+.emergency-banner-modal {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 480px;
+}
+
+.emergency-banner-modal h3 {
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+  font-weight: 600;
+}
+
+.emergency-banner-modal label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.emergency-banner-modal textarea,
+.emergency-banner-modal select {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: var(--bg-color);
+  color: var(--text-primary);
+}
+
+.emergency-banner-modal textarea:focus,
+.emergency-banner-modal select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+}
+
+.emergency-banner-modal-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.emergency-banner-modal-check input {
+  width: auto;
+  margin: 0;
+}
+
+.emergency-banner-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.emergency-banner-modal-save,
+.emergency-banner-modal-clear,
+.emergency-banner-modal-cancel {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.emergency-banner-modal-save {
+  background: var(--primary-color);
+  color: white;
+}
+
+.emergency-banner-modal-save:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.emergency-banner-modal-clear {
+  background: var(--danger-color);
+  color: white;
+}
+
+.emergency-banner-modal-clear:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.emergency-banner-modal-cancel {
+  background: var(--bg-color);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.emergency-banner-modal-cancel:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+/* Admin bar when no banner */
+.emergency-banner-admin-bar {
+  position: sticky;
+  top: 0;
+  z-index: 899;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.emergency-banner-set-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--primary-color);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.emergency-banner-set-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}

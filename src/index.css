@@ -1,0 +1,77 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Theme Colors - Orange & Dark Navy Blue */
+  --primary-color: #FF6B35; /* Vibrant Orange */
+  --primary-dark: #E85A2B; /* Darker Orange */
+  --primary-light: #FF8C5A; /* Lighter Orange */
+  --navy-color: #2C5F8D; /* Darker Navy Blue */
+  --navy-dark: #1E4A6B; /* Darkest Navy */
+  --navy-light: #3D7BB3; /* Lighter Navy */
+  
+  /* Status Colors */
+  --success-color: #10B981; /* Green for Resilient */
+  --warning-color: #F59E0B; /* Amber for Restoring */
+  --danger-color: #EF4444; /* Red for Need Support */
+  --resilient-color: #10B981;
+  --restoring-color: #F59E0B;
+  --need-support-color: #EF4444;
+  
+  /* Light Mode Colors */
+  --bg-color: #F8FAFC; /* Very light gray-blue */
+  --card-bg: #FFFFFF;
+  --text-primary: #1E293B; /* Dark slate */
+  --text-secondary: #64748B; /* Medium slate */
+  --border-color: #E2E8F0; /* Light slate */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* Background gradients – break up whitespace, modern & professional */
+  --bg-gradient-base: linear-gradient(165deg, #fafbfc 0%, #f1f5f9 18%, #e2e8f0 38%, #cbd5e1 55%, #e2e8f0 72%, #f1f5f9 88%, #fafbfc 100%);
+  --bg-gradient-accent: radial-gradient(ellipse 120% 70% at 50% -15%, rgba(44, 95, 141, 0.08) 0%, transparent 50%);
+  --bg-gradient-warm: radial-gradient(ellipse 80% 50% at 100% 70%, rgba(255, 107, 53, 0.05) 0%, transparent 55%);
+}
+
+/* Dark Mode */
+[data-theme="dark"] {
+  --bg-color: #0F172A; /* Dark slate */
+  --card-bg: #1E293B; /* Darker slate */
+  --text-primary: #F1F5F9; /* Light slate */
+  --text-secondary: #94A3B8; /* Medium light slate */
+  --border-color: #334155; /* Dark border */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --bg-gradient-base: linear-gradient(165deg, #0f172a 0%, #1e293b 20%, #334155 40%, #1e293b 60%, #0f172a 80%, #020617 100%);
+  --bg-gradient-accent: radial-gradient(ellipse 100% 50% at 50% -5%, rgba(56, 189, 248, 0.06) 0%, transparent 50%);
+  --bg-gradient-warm: radial-gradient(ellipse 60% 30% at 95% 70%, rgba(251, 146, 60, 0.05) 0%, transparent 45%);
+}
+
+[data-theme="dark"] body {
+  background-color: #0f172a;
+  background-image: var(--bg-gradient-accent), var(--bg-gradient-warm), var(--bg-gradient-base);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8fafc;
+  background-image: var(--bg-gradient-accent), var(--bg-gradient-warm), var(--bg-gradient-base);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
