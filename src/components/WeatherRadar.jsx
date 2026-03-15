@@ -103,10 +103,7 @@ const WeatherRadar = () => {
 
       <div className="radar-footer">
         <p className="radar-note">
-          <strong>Data Source:</strong> Windy.com / OpenWeatherMap (Demo)
-        </p>
-        <p className="radar-note">
-          In production, this would connect to Jamaica Meteorological Service radar feeds
+          <strong>Data Source:</strong> Windy.com / OpenWeatherMap
         </p>
       </div>
     </div>

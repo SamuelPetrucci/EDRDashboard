@@ -20,6 +20,25 @@
   align-items: center;
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-image {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
 .logo h1 {
   font-size: 1.5rem;
   font-weight: 700;
@@ -29,7 +48,7 @@
 .logo-subtitle {
   font-size: 0.875rem;
   opacity: 0.9;
-  margin-left: 0.5rem;
+  margin-left: 0;
 }
 
 .nav {
@@ -86,6 +105,20 @@
   width: 100%;
   margin: 0 auto;
   padding: 1rem 1.5rem;
+}
+
+/* Intel page: full-height globe dashboard, no padding */
+.main-content.main-content--intel {
+  padding: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.main-content.main-content--intel > * {
+  flex: 1;
+  min-height: 0;
 }
 
 .footer {

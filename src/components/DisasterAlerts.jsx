@@ -154,11 +154,6 @@ const DisasterAlerts = () => {
         })}
       </div>
 
-      <div className="alerts-footer">
-        <p className="demo-notice">
-          ⚠️ Demo Data - In production, this would connect to real alert systems (FEMA, ODPEM, NHC, etc.)
-        </p>
-      </div>
     </div>
   )
 }

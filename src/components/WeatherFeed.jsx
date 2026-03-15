@@ -26,8 +26,19 @@ const WeatherFeed = () => {
     return () => clearInterval(interval)
   }, [])
 
-  if (!weather) {
-    return <div className="weather-feed loading">Loading weather data...</div>
+  if (!weather || !weather.current) {
+    return (
+      <div className="weather-feed">
+        <div className="weather-header">
+          <h2>Live Weather & Events</h2>
+        </div>
+        <div className="no-weather-data">
+          <Cloud size={48} />
+          <p>No weather data</p>
+          <span className="hint">Connect a weather API (NOAA, NWS, Open-Meteo) to show live data.</span>
+        </div>
+      </div>
+    )
   }
 
   const formatTime = (dateString) => {
@@ -129,11 +140,6 @@ const WeatherFeed = () => {
         </div>
       )}
 
-      <div className="weather-footer">
-        <p className="demo-notice">
-          ⚠️ Demo Data - In production, this would connect to real weather APIs (NOAA, NWS, Meteorological Service)
-        </p>
-      </div>
     </div>
   )
 }

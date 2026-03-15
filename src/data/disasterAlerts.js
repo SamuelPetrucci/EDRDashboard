@@ -1,44 +1,8 @@
 // Disaster alert system data
-// In production, this would connect to FEMA, ODPEM, NHC, etc.
+// Connect to FEMA, ODPEM, NHC, etc. for real alerts.
 
 export const getActiveAlerts = () => {
-  // Demo alerts - in production, fetch from real alert systems
-  return [
-    {
-      id: 'alert-1',
-      type: 'hurricane',
-      severity: 'watch', // watch, warning, advisory
-      title: 'Hurricane Watch - Potential System',
-      description: 'Tropical system developing in Atlantic. Monitor closely.',
-      affectedParishes: ['kingston', 'st-andrew', 'st-catherine', 'portland', 'st-mary'],
-      issued: new Date(Date.now() - 10800000).toISOString(),
-      expires: new Date(Date.now() + 172800000).toISOString(),
-      actions: [
-        'Review evacuation routes',
-        'Check emergency supplies',
-        'Monitor official updates',
-        'Secure outdoor items'
-      ],
-      source: 'NHC/ODPEM'
-    },
-    {
-      id: 'alert-2',
-      type: 'flood',
-      severity: 'advisory',
-      title: 'Flood Advisory - Heavy Rainfall Expected',
-      description: 'Heavy rainfall may cause flooding in low-lying areas',
-      affectedParishes: ['st-thomas', 'portland', 'st-mary'],
-      issued: new Date(Date.now() - 3600000).toISOString(),
-      expires: new Date(Date.now() + 86400000).toISOString(),
-      actions: [
-        'Avoid flood-prone areas',
-        'Do not drive through flooded roads',
-        'Monitor water levels',
-        'Prepare sandbags if in flood zone'
-      ],
-      source: 'Meteorological Service'
-    }
-  ]
+  return []
 }
 
 export const alertTypes = {

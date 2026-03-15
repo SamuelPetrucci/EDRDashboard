@@ -234,6 +234,28 @@
   color: var(--text-secondary);
 }
 
+.no-weather-data {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  color: var(--text-secondary);
+}
+
+.no-weather-data svg {
+  opacity: 0.5;
+  margin-bottom: 0.75rem;
+}
+
+.no-weather-data p {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 0.35rem 0;
+}
+
+.no-weather-data .hint {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
   .weather-header {
     flex-direction: column;

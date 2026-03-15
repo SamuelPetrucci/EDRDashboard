@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Home, MapPin, FileText, BookOpen, Phone, Moon, Sun } from 'lucide-react'
+import { Home, MapPin, FileText, BookOpen, Phone, Moon, Sun, Satellite } from 'lucide-react'
 import EmergencyBanner from './EmergencyBanner'
+import headerLogo from '../../headerlogo.webp'
 import './Layout.css'
 
 const Layout = ({ children }) => {
@@ -25,8 +26,11 @@ const Layout = ({ children }) => {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <h1>Disaster Recovery</h1>
-            <span className="logo-subtitle">Dashboard & Coordinator</span>
+            <img src={headerLogo} alt="EDR Dashboard" className="logo-image" />
+            <div className="logo-text">
+              <h1>EDR Dashboard</h1>
+              <span className="logo-subtitle">Disaster Recovery & Coordinator</span>
+            </div>
           </div>
           <nav className="nav">
             <Link 
@@ -49,6 +53,13 @@ const Layout = ({ children }) => {
             >
               <FileText size={18} />
               <span>Scorecard</span>
+            </Link>
+            <Link 
+              to="/intel" 
+              className={`nav-link ${location.pathname === '/intel' ? 'active' : ''}`}
+            >
+              <Satellite size={18} />
+              <span>Intel</span>
             </Link>
             <Link 
               to="/protocols" 
@@ -75,7 +86,7 @@ const Layout = ({ children }) => {
         </div>
       </header>
       <EmergencyBanner />
-      <main className="main-content">
+      <main className={`main-content ${location.pathname === '/intel' ? 'main-content--intel' : ''}`}>
         {children}
       </main>
       <footer className="footer">
