@@ -34,6 +34,7 @@
   position: sticky;
   top: 2rem;
   border: 1px solid var(--border-color);
+  border-top: 8px solid var(--section-protocols);
 }
 
 .types-sidebar h2 {
@@ -132,6 +133,7 @@
   box-shadow: var(--shadow-md);
   min-height: 500px;
   border: 1px solid var(--border-color);
+  border-top: 8px solid var(--section-protocols);
 }
 
 .no-selection {
@@ -423,6 +425,7 @@
   margin-bottom: 2rem;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--border-color);
+  border-top: 8px solid var(--section-training);
   border-left: 4px solid var(--warning-color);
 }
 

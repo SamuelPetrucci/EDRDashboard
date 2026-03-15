@@ -110,6 +110,7 @@
   padding: 1.75rem;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--border-color);
+  border-top: 8px solid var(--section-contacts);
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;

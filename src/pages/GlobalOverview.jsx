@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { getAllParishes } from '../data/jamaicaParishes'
-import { MapPin, Users, Package, AlertCircle, CheckCircle, Clock, TrendingUp, BookOpen, MessageSquare, BarChart3, ArrowRight, GraduationCap, Bell, Cloud, Thermometer, ExternalLink, Radio, Truck, Zap, Heart, UserCheck } from 'lucide-react'
+import { MapPin, Users, Package, AlertCircle, CheckCircle, Clock, BookOpen, MessageSquare, BarChart3, ArrowRight, GraduationCap, Bell, Cloud, Thermometer, ExternalLink, Radio, Truck, Zap, Heart, UserCheck, Satellite, Shield, Phone, LayoutGrid } from 'lucide-react'
 import DisasterAlerts from '../components/DisasterAlerts'
 import { getParishScorecard } from '../utils/scorecardStorage'
 import { getParishEquipment, getParishPersonnel } from '../utils/equipmentStorage'
@@ -118,33 +118,50 @@ const GlobalOverview = () => {
             View Full Scorecard <ArrowRight size={16} />
           </Link>
         </div>
-        <div className="scorecard-grid">
-          <div className="scorecard-weather-card">
-            <div className="weather-card-header">
-              <Cloud size={20} />
-              <span>Weather</span>
-            </div>
-            <div className="weather-card-main">
-              <div className="weather-card-temp">
-                <Thermometer size={24} />
-                <span>{weather.current.temperature}°C</span>
+        <div className="overview-body">
+          <div className="overview-primary">
+            <div className="scorecard-grid">
+              {weather?.current ? (
+                <div className="scorecard-weather-card">
+              <div className="weather-card-header">
+                <Cloud size={20} />
+                <span>Weather</span>
               </div>
-              <div className="weather-card-condition">{weather.current.condition}</div>
-              <div className="weather-card-details">
-                <span>H {weather.current.humidity}%</span>
-                <span>W {weather.current.windSpeed} km/h {weather.current.windDirection}</span>
+              <div className="weather-card-main">
+                <div className="weather-card-temp">
+                  <Thermometer size={24} />
+                  <span>{weather.current.temperature}°C</span>
+                </div>
+                <div className="weather-card-condition">{weather.current.condition}</div>
+                <div className="weather-card-details">
+                  <span>H {weather.current.humidity}%</span>
+                  <span>W {weather.current.windSpeed} km/h {weather.current.windDirection}</span>
+                </div>
+              </div>
+              <a
+                href={satelliteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="weather-satellite-link"
+              >
+                <ExternalLink size={14} />
+                View satellite
+              </a>
+            </div>
+          ) : (
+            <div className="scorecard-weather-card scorecard-weather-card-placeholder">
+              <div className="weather-card-header">
+                <Cloud size={20} />
+                <span>Weather</span>
+              </div>
+              <div className="weather-card-main">
+                <span className="weather-placeholder-text">—</span>
+                <a href={satelliteUrl} target="_blank" rel="noopener noreferrer" className="weather-satellite-link">
+                  <ExternalLink size={14} /> View satellite
+                </a>
               </div>
             </div>
-            <a
-              href={satelliteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="weather-satellite-link"
-            >
-              <ExternalLink size={14} />
-              View satellite
-            </a>
-          </div>
+          )}
           <div className="scorecard-summary-card">
             <div className="score-display">
               <div className="score-circle-large" style={{ borderColor: getRecoveryStatus(averageScore).color }}>
@@ -186,6 +203,20 @@ const GlobalOverview = () => {
                 <h4>{readinessStats.notAssessed}</h4>
                 <p>Not Assessed</p>
               </div>
+            </div>
+          </div>
+        </div>
+          </div>
+          <div className="overview-sidebar">
+            <div className="overview-sidebar-card">
+              <h4 className="overview-sidebar-title"><LayoutGrid size={18} /> Quick access</h4>
+              <nav className="overview-sidebar-links">
+                <Link to="/scorecard" className="overview-sidebar-link"><BarChart3 size={16} /> Full scorecard</Link>
+                <Link to="/intel" className="overview-sidebar-link"><Satellite size={16} /> Intel map</Link>
+                <Link to="/protocols" className="overview-sidebar-link"><Shield size={16} /> Protocols & training</Link>
+                <Link to="/contacts" className="overview-sidebar-link"><Phone size={16} /> Contacts</Link>
+                <Link to="/parish/kingston" className="overview-sidebar-link"><MapPin size={16} /> Parishes</Link>
+              </nav>
             </div>
           </div>
         </div>

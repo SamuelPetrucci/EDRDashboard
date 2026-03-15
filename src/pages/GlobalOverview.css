@@ -67,12 +67,127 @@
   padding: 1.25rem;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--border-color);
+  border-top: 8px solid var(--section-overview);
+}
+
+.overview-body {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 320px);
+  gap: 1rem;
+  align-items: start;
+}
+
+.overview-primary {
+  min-width: 0;
 }
 
 .scorecard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 2fr;
   gap: 1.25rem;
+}
+
+.scorecard-weather-card-placeholder .weather-card-main {
+  justify-content: center;
+  min-height: 50px;
+}
+
+.weather-placeholder-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.overview-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.overview-sidebar-card {
+  background: var(--bg-color);
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.overview-sidebar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.6rem 0;
+}
+
+.overview-sidebar-title svg {
+  color: var(--navy-color);
+}
+
+.overview-sidebar-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.overview-sidebar-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  padding: 0.35rem 0;
+  border-radius: 4px;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.overview-sidebar-link:hover {
+  color: var(--primary-color);
+}
+
+.overview-sidebar-link svg {
+  color: var(--navy-color);
+  flex-shrink: 0;
+}
+
+.overview-sidebar-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.overview-sidebar-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.overview-sidebar-stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.overview-sidebar-stat-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.overview-sidebar-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.overview-sidebar-cta:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
 }
 
 .scorecard-summary-card {
@@ -287,12 +402,21 @@
   align-self: start;
 }
 
+.training-section-card {
+  border-top: 8px solid var(--section-training);
+}
+
+.inventory-section-card {
+  border-top: 8px solid var(--section-inventory);
+}
+
 .communication-section-card {
   background: var(--card-bg);
   border-radius: 12px;
   padding: 1rem;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--border-color);
+  border-top: 8px solid var(--section-communications);
   align-self: stretch;
 }
 
@@ -561,6 +685,10 @@
   margin-top: 1rem;
 }
 
+.parishes-section .section-header {
+  border-top: 8px solid var(--section-parishes);
+}
+
 .parishes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -736,6 +864,21 @@
 }
 
 @media (max-width: 1000px) {
+  .overview-body {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .overview-sidebar-card {
+    flex: 1;
+    min-width: 200px;
+  }
+
   .scorecard-grid {
     grid-template-columns: 1fr 1fr;
   }

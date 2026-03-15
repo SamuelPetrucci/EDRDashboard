@@ -329,6 +329,7 @@
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-color);
+  border-top: 8px solid var(--section-overview);
   width: 100%;
   max-width: 720px;
   max-height: calc(100vh - 3rem);
@@ -450,6 +451,7 @@
   border-radius: 12px;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--border-color);
+  border-top: 8px solid var(--section-overview);
   transition: all 0.3s ease;
   overflow: hidden;
 }

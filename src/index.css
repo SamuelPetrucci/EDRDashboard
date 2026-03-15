@@ -20,9 +20,19 @@
   --resilient-color: #10B981;
   --restoring-color: #F59E0B;
   --need-support-color: #EF4444;
-  
+
+  /* Section card header accent – colored top bar on cards */
+  --section-overview: #1E4A6B;
+  --section-training: #E85A2B;
+  --section-inventory: #0F766E;
+  --section-communications: #6D28D9;
+  --section-parishes: #0F172A;
+  --section-protocols: #1D4ED8;
+  --section-contacts: #0F766E;
+
   /* Light Mode Colors */
   --bg-color: #F8FAFC; /* Very light gray-blue */
+  --bg: #F8FAFC;
   --card-bg: #FFFFFF;
   --text-primary: #1E293B; /* Dark slate */
   --text-secondary: #64748B; /* Medium slate */
@@ -40,6 +50,7 @@
 /* Dark Mode */
 [data-theme="dark"] {
   --bg-color: #0F172A; /* Dark slate */
+  --bg: #0F172A;
   --card-bg: #1E293B; /* Darker slate */
   --text-primary: #F1F5F9; /* Light slate */
   --text-secondary: #94A3B8; /* Medium light slate */
