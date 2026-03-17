@@ -11,6 +11,7 @@ import { fetchShipsInBounds, isRealAISEnabled } from '../data/maritimeFeed'
 import { searchPlaces } from '../data/geocode'
 import { getWeatherAtPoint } from '../data/weatherAtPoint'
 import { fetchCamerasNearPoint } from '../data/cameraFeed'
+import { fetchNewsForBounds } from '../data/newsFeed'
 import { fetchGdacsEvents } from '../data/gdacsFeed'
 import { fetchEarthquakes } from '../data/earthquakeFeed'
 import { detectAnomalies } from '../utils/anomalyDetection'
@@ -145,6 +146,9 @@ const Intel = () => {
   const [webcamList, setWebcamList] = useState([])
   const [webcamLoading, setWebcamLoading] = useState(false)
   const [webcamError, setWebcamError] = useState(null)
+  const [newsArticles, setNewsArticles] = useState([])
+  const [newsLoading, setNewsLoading] = useState(false)
+  const [newsError, setNewsError] = useState(null)
   const mapSearchWrapRef = useRef(null)
   const mapboxToken = typeof import.meta !== 'undefined' && import.meta.env?.VITE_MAPBOX_TOKEN
   const hasWebcamKey = typeof import.meta !== 'undefined' && (import.meta.env?.VITE_WINDY_WEBCAM_API_KEY || import.meta.env?.VITE_WINDY_API_KEY)
@@ -216,6 +220,18 @@ const Intel = () => {
     const load = () => {
       fetchGdacsEvents(mapBbox).then(setGdacsEvents).catch(() => setGdacsEvents([]))
       fetchEarthquakes(mapBbox).then(setEarthquakes).catch(() => setEarthquakes([]))
+      setNewsLoading(true)
+      setNewsError(null)
+      fetchNewsForBounds(mapBbox, 24)
+        .then((list) => {
+          setNewsArticles(Array.isArray(list) ? list : [])
+          setNewsError(null)
+        })
+        .catch(() => {
+          setNewsArticles([])
+          setNewsError('Failed to load news for this region.')
+        })
+        .finally(() => setNewsLoading(false))
     }
     load()
     const t = setInterval(load, 5 * 60 * 1000)
@@ -978,11 +994,48 @@ const Intel = () => {
                 {controlTab === 'news' && (
                   <div className="intel-tab-pane intel-tab-news">
                     <div className="intel-sources-header"><h2>News</h2></div>
-                    <p className="intel-tab-desc">News aggregate for the visible region and selected topics. Coming soon.</p>
-                    <div className="intel-news-placeholder">
-                      <Newspaper size={32} className="intel-news-placeholder-icon" />
-                      <p>Regional news and alerts will appear here. You can filter by area (map bounds) and category (disasters, security, weather).</p>
-                    </div>
+                    <p className="intel-tab-desc">Regional news and alerts for the visible map area. Set VITE_NEWS_API_URL / VITE_NEWS_API_KEY to enable a backend.</p>
+                    {newsLoading ? (
+                      <p className="intel-news-loading">Loading news…</p>
+                    ) : (
+                      <>
+                        {newsError && <p className="intel-news-error">{newsError}</p>}
+                        {newsArticles.length === 0 && !newsError && (
+                          <div className="intel-news-placeholder">
+                            <Newspaper size={32} className="intel-news-placeholder-icon" />
+                            <p>No news articles for this area yet.</p>
+                            <p className="intel-news-hint">Configure <code>VITE_NEWS_API_URL</code> and <code>VITE_NEWS_API_KEY</code> in your environment to connect a news service.</p>
+                          </div>
+                        )}
+                        {newsArticles.length > 0 && (
+                          <ul className="intel-news-list">
+                            {newsArticles.map((a) => (
+                              <li key={a.id} className="intel-news-item">
+                                <div className="intel-news-item-main">
+                                  <a
+                                    href={a.url || '#'}
+                                    target={a.url ? '_blank' : undefined}
+                                    rel={a.url ? 'noopener noreferrer' : undefined}
+                                    className="intel-news-title"
+                                  >
+                                    {a.title}
+                                  </a>
+                                  {a.summary && <p className="intel-news-summary">{a.summary}</p>}
+                                </div>
+                                <div className="intel-news-meta">
+                                  {a.source && <span className="intel-news-source">{a.source}</span>}
+                                  {a.publishedAt && (
+                                    <span className="intel-news-time">
+                                      {new Date(a.publishedAt).toLocaleString()}
+                                    </span>
+                                  )}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
               </div>

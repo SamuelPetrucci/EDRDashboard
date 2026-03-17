@@ -18,6 +18,8 @@ Create a `.env` file in the project root (and optionally `.env.local` for local 
 | `VITE_WINDY_WEBCAM_API_KEY` | Windy **Webcams** API key (live cameras on Intel map) | No – try OpenWebcamDB or leave empty |
 | `VITE_WINDY_API_KEY` | Legacy: used as fallback for both forecast and webcams if the keys above are not set | No |
 | `VITE_OPENWEBCAMDB_API_KEY` | OpenWebcamDB API key for cameras near a point | No – demo camera list if missing |
+| `VITE_NEWS_API_URL` | Backend endpoint for news/articles API (expects bbox + limit) | No – News tab shows placeholder if missing |
+| `VITE_NEWS_API_KEY` | Optional API key for the news backend (sent as Bearer token) | No |
 
 Example `.env`:
 
