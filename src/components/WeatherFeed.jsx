@@ -7,12 +7,12 @@ const WeatherFeed = () => {
   const [weather, setWeather] = useState(null)
   const [events, setEvents] = useState([])
   const [lastUpdate, setLastUpdate] = useState(null)
+  const [forecastView, setForecastView] = useState('hourly') // 'hourly' | 'weekly'
 
   useEffect(() => {
-    // Load initial data
-    const loadData = () => {
-      const weatherData = getWeatherData()
-      const currentEvents = getCurrentEvents()
+    const loadData = async () => {
+      const weatherData = await getWeatherData()
+      const currentEvents = await getCurrentEvents()
       setWeather(weatherData)
       setEvents(currentEvents)
       setLastUpdate(new Date())
@@ -101,27 +101,74 @@ const WeatherFeed = () => {
       )}
 
       {/* Forecast */}
-      <div className="forecast">
-        <h3>3-Day Forecast</h3>
-        <div className="forecast-grid">
-          {weather.forecast.map((day, index) => (
-            <div key={index} className="forecast-day">
-              <div className="forecast-date">
-                {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-              </div>
-              <div className="forecast-condition">{day.condition}</div>
-              <div className="forecast-temps">
-                <span className="high">{day.high}°</span>
-                <span className="low">{day.low}°</span>
-              </div>
-              <div className="forecast-precip">
-                <Droplets size={14} />
-                <span>{day.precipitation}%</span>
-              </div>
+      {weather.forecast && weather.forecast.length > 0 && (
+        <div className="forecast">
+          <div className="forecast-header">
+            <h3>Forecast</h3>
+            <div className="forecast-toggle">
+              <button
+                type="button"
+                className={forecastView === 'hourly' ? 'active' : ''}
+                onClick={() => setForecastView('hourly')}
+              >
+                Next 24h
+              </button>
+              <button
+                type="button"
+                className={forecastView === 'weekly' ? 'active' : ''}
+                onClick={() => setForecastView('weekly')}
+              >
+                7-day
+              </button>
             </div>
-          ))}
+          </div>
+
+          {forecastView === 'hourly' && weather.hourly && weather.hourly.length > 0 && (
+            <div className="forecast-grid forecast-grid--hourly">
+              {weather.hourly.slice(0, 12).map((h, index) => (
+                <div key={index} className="forecast-hour">
+                  <div className="forecast-date">
+                    {h.time.toLocaleTimeString('en-US', { hour: 'numeric' })}
+                  </div>
+                  <div className="forecast-condition">{h.condition}</div>
+                  <div className="forecast-temps">
+                    <span className="high">{h.temperature}°</span>
+                  </div>
+                  <div className="forecast-precip">
+                    <Droplets size={14} />
+                    <span>{h.precipitation} mm</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {forecastView === 'weekly' && (
+            <div className="forecast-grid">
+              {weather.forecast.map((day, index) => (
+                <div key={index} className="forecast-day">
+                  <div className="forecast-date">
+                    {new Date(day.date).toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </div>
+                  <div className="forecast-condition">{day.condition}</div>
+                  <div className="forecast-temps">
+                    <span className="high">{day.high}°</span>
+                    <span className="low">{day.low}°</span>
+                  </div>
+                  <div className="forecast-precip">
+                    <Droplets size={14} />
+                    <span>{day.precipitation}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Current Events */}
       {events.length > 0 && (

@@ -14,7 +14,9 @@ Create a `.env` file in the project root (and optionally `.env.local` for local 
 | `VITE_AISHUB_USERNAME` | AISHub account username (for real ship/AIS data) | No – mock ships used if missing |
 | `VITE_AISHUB_KEY` | AISHub API key | No – mock ships used if missing |
 | `VITE_RAINVIEWER_TILE_URL` | Weather radar tile URL (e.g. RainViewer or OpenWeatherMap radar) | No – radar overlay hidden if missing |
-| `VITE_WINDY_API_KEY` | Windy Webcams API key (global cameras) | No – try OpenWebcamDB or demo if missing |
+| `VITE_WINDY_FORECAST_API_KEY` | Windy **Point Forecast** API key (weather on Overview + Intel) | No – weather card shows placeholder if missing |
+| `VITE_WINDY_WEBCAM_API_KEY` | Windy **Webcams** API key (live cameras on Intel map) | No – try OpenWebcamDB or leave empty |
+| `VITE_WINDY_API_KEY` | Legacy: used as fallback for both forecast and webcams if the keys above are not set | No |
 | `VITE_OPENWEBCAMDB_API_KEY` | OpenWebcamDB API key for cameras near a point | No – demo camera list if missing |
 
 Example `.env`:
@@ -30,14 +32,20 @@ VITE_AISHUB_KEY=your_key
 # Weather radar overlay – e.g. OpenWeatherMap: https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=YOUR_OWM_KEY
 # VITE_RAINVIEWER_TILE_URL=https://...
 
-# Global cameras (Windy = largest worldwide) – https://api.windy.com/keys
-# VITE_WINDY_API_KEY=your_key
+# Windy – use separate keys for forecast vs webcams (or one key for both): https://api.windy.com/keys
+# VITE_WINDY_FORECAST_API_KEY=your_forecast_key
+# VITE_WINDY_WEBCAM_API_KEY=your_webcam_key
+# Or legacy (single key for both): VITE_WINDY_API_KEY=your_key
 
 # Or OpenWebcamDB – https://openwebcamdb.com/
 # VITE_OPENWEBCAMDB_API_KEY=your_key
 ```
 
 Restart the dev server after changing `.env` (`npm run dev`).
+
+### Vercel
+
+For deployments on [Vercel](https://vercel.com), add the same variables in **Project → Settings → Environment Variables**. Use the exact names above (e.g. `VITE_MAPBOX_TOKEN`). Add them for **Production**, and optionally for **Preview** and **Development**. Redeploy after adding or changing variables.
 
 ---
 
@@ -74,11 +82,25 @@ The map can show a radar tile layer if you provide a tile URL.
 
 ---
 
-## 5. Windy Webcams (global cameras)
+## 5. Windy: Forecast and Webcams (separate keys)
 
-- Get an API key at [api.windy.com/keys](https://api.windy.com/keys) (Webcams API, **Webcams** product).
-- Set `VITE_WINDY_API_KEY` in `.env` (no quotes; the app trims whitespace). The app uses **API v3** with the `x-windy-api-key` header and requests webcams near the clicked or searched point (radius up to 200 km). Windy has a large global repository; preview image URLs expire after 10 minutes (free tier), so thumbnails may need a refresh by re-clicking the map or searching again.
+Windy uses **different API products** for weather and cameras. You can set one key per product, or a single legacy key for both.
+
+- **Weather (Overview + Intel):** Create a key at [api.windy.com/keys](https://api.windy.com/keys) with **Point Forecast API** enabled. Set `VITE_WINDY_FORECAST_API_KEY` in `.env`. If unset, the app falls back to `VITE_WINDY_API_KEY`.
+- **Webcams (Intel map):** Create a key with **Webcams API** enabled. Set `VITE_WINDY_WEBCAM_API_KEY` in `.env`. If unset, the app falls back to `VITE_WINDY_API_KEY`.
+- **Legacy:** Setting only `VITE_WINDY_API_KEY` still works for both forecast and webcams if that key has both products enabled.
+
+### Windy Point Forecast (weather)
+
+- Get a key at [api.windy.com/keys](https://api.windy.com/keys) with **Point Forecast API** enabled.
+- Set `VITE_WINDY_FORECAST_API_KEY` in `.env`. The Overview page weather card and Intel “Feeds at this area” weather use this for current conditions, hourly and 7‑day forecast (Jamaica center). Restart the dev server after changing `.env`.
+
+### Windy Webcams (global cameras)
+
+- Get a Webcams API key at [api.windy.com/keys](https://api.windy.com/keys) (enable **Webcams** product).
+- Set `VITE_WINDY_WEBCAM_API_KEY` in `.env` (no quotes; the app trims whitespace). The app uses **API v3** with the `x-windy-api-key` header and requests webcams near the clicked or searched point (radius up to 200 km). Windy has a large global repository; preview image URLs expire after 10 minutes (free tier), so thumbnails may need a refresh by re-clicking the map or searching again.
 - **If live feeds don’t appear:** (1) Confirm the key is for **Webcams API** (not only Weather). (2) New keys can take a few minutes to work globally. (3) **CORS:** The app calls Windy from the browser. If Windy does not allow your origin, you’ll see a Windy error in the “Feeds at this area” panel; in that case use a small backend proxy that adds `x-windy-api-key` and forwards requests to `https://api.windy.com/webcams/api/v3/webcams`, or run the app from a domain Windy allows. (4) Try a well-covered location (e.g. search “London” or “Tokyo”) and click the map there before opening the right panel.
+- **Webcam locations on the map:** After you click a point (or search and go there), webcams near that location load in the right-hand “Feeds at this area” panel. They also appear as **orange camera markers (📹)** on the **2D map**. In the layer control (top-right), ensure the **Webcams** overlay is checked. Switch to **2D** (not 3D globe) to see the markers; click a marker’s popup to open “Watch live”.
 - **Preferred for “real camera feeds from around the world”.**
 
 ---

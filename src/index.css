@@ -34,8 +34,9 @@
   --bg-color: #F8FAFC; /* Very light gray-blue */
   --bg: #F8FAFC;
   --card-bg: #FFFFFF;
-  --text-primary: #1E293B; /* Dark slate */
-  --text-secondary: #64748B; /* Medium slate */
+  --text-primary: #0F172A; /* High-contrast dark slate */
+  --text-secondary: #475569; /* Clearer medium slate */
+  --text-tertiary: #64748B; /* Muted but readable */
   --border-color: #E2E8F0; /* Light slate */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -52,8 +53,9 @@
   --bg-color: #0F172A; /* Dark slate */
   --bg: #0F172A;
   --card-bg: #1E293B; /* Darker slate */
-  --text-primary: #F1F5F9; /* Light slate */
-  --text-secondary: #94A3B8; /* Medium light slate */
+  --text-primary: #F8FAFC; /* Brighter primary text */
+  --text-secondary: #CBD5E1; /* Brighter secondary for clarity */
+  --text-tertiary: #94A3B8; /* Muted but readable */
   --border-color: #334155; /* Dark border */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
@@ -74,11 +76,25 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   background-color: #f8fafc;
   background-image: var(--bg-gradient-accent), var(--bg-gradient-warm), var(--bg-gradient-base);
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
+  font-weight: 450;
+  letter-spacing: 0.01em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+p {
+  color: inherit;
+  line-height: 1.5;
 }
 
 code {

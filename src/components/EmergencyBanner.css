@@ -21,9 +21,10 @@
 .emergency-banner--info,
 .emergency-banner--warning,
 .emergency-banner--critical {
-  background: linear-gradient(135deg, #991b1b 0%, #b91c1c 50%, #dc2626 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.25);
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%);
+  color: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .emergency-banner-inner {

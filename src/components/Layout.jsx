@@ -8,8 +8,8 @@ import './Layout.css'
 const Layout = ({ children }) => {
   const location = useLocation()
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('theme')
-    return saved || 'light'
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') : null
+    return saved || 'dark'
   })
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const Layout = ({ children }) => {
   }, [theme])
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'))
   }
 
   return (

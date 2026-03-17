@@ -11,6 +11,7 @@ const WINDY_WEBCAM_BASES = [
 
 /**
  * Fetch webcams near a point. Windy: nearby=lat,lon,radius (km), limit.
+ * Key: VITE_WINDY_WEBCAM_API_KEY (or fallback VITE_WINDY_API_KEY).
  * @param {{ lat: number, lng: number }} point
  * @param {number} [radiusKm]
  * @returns {Promise<Array<{ id: string, lat: number, lng: number, name: string, url: string, thumbnail?: string }>>}
@@ -19,7 +20,9 @@ export async function fetchCamerasNearPoint(point, radiusKm = 50) {
   if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') {
     return []
   }
-  const windyKey = typeof import.meta !== 'undefined' && import.meta.env?.VITE_WINDY_API_KEY
+  const webcamKey = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_WINDY_WEBCAM_API_KEY : null
+  const legacyKey = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_WINDY_API_KEY : null
+  const windyKey = (webcamKey && String(webcamKey).trim()) || (legacyKey && String(legacyKey).trim()) || null
   const owKey = typeof import.meta !== 'undefined' && import.meta.env?.VITE_OPENWEBCAMDB_API_KEY
 
   let lastWindyError = null
@@ -74,19 +77,14 @@ async function fetchWindyWebcams(point, radiusKm, apiKey, baseUrl) {
       typeof img === 'string'
         ? img
         : img?.current?.preview ?? img?.current?.icon ?? img?.preview ?? img?.icon
-    // v3: urls.current.day or urls.day; v2: url, link; fallback: windy webcam page
-    const urlObj = w.urls
-    const link =
-      (typeof urlObj === 'object' && (urlObj?.current?.day ?? urlObj?.day ?? urlObj?.link)) ||
-      w.url ||
-      w.link ||
-      (w.id ? `https://www.windy.com/-/webcams/${w.id}` : '#')
+    // Always use Windy webcam page for viewing; API urls.current.day are often image URLs that expire
+    const windyPageUrl = w.id ? `https://www.windy.com/-/webcams/${w.id}` : '#'
     return {
       id: `windy-${w.id ?? `${lat}-${lng}`}`,
       lat,
       lng,
       name: w.title ?? w.name ?? 'Webcam',
-      url: typeof link === 'string' ? link : '#',
+      url: windyPageUrl,
       thumbnail: thumbnail || undefined,
     }
   })

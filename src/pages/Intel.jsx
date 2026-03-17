@@ -18,6 +18,7 @@ import MapBoundsReporter from '../components/MapBoundsReporter'
 import MapClickHandler from '../components/MapClickHandler'
 import FlyToTarget from '../components/FlyToTarget'
 import FollowTrackedVessel from '../components/FollowTrackedVessel'
+import IntelDashboardScaffold from '../components/IntelDashboardScaffold'
 import GlobeView from '../components/GlobeView'
 import 'leaflet/dist/leaflet.css'
 import './Intel.css'
@@ -36,8 +37,17 @@ const { BaseLayer, Overlay } = LayersControl
 /** 3D globe camera presets: pitch (tilt) and bearing (rotation) in degrees */
 const VIEW_PRESETS = {
   top: { pitch: 0, bearing: 0, label: 'Top-down' },
-  oblique: { pitch: 45, bearing: 0, label: 'Oblique' },
+  oblique: { pitch: 48, bearing: 0, label: 'Oblique' },
   horizon: { pitch: 60, bearing: 0, label: 'Horizon' },
+}
+
+/** Initial 3D globe view: angled at Jamaica like a cylindrical globe spawning in */
+const GLOBE_JAMAICA_VIEW = {
+  longitude: jamaicaCenter.lng,
+  latitude: jamaicaCenter.lat,
+  zoom: 5.5,
+  pitch: 48,
+  bearing: 0,
 }
 
 /** Plane icon, rotated by heading (degrees). Anomaly = red ring. */
@@ -79,6 +89,17 @@ function createAlertIcon(color) {
   })
 }
 
+/** Webcam/camera marker – video icon style. */
+function createCameraIcon() {
+  const size = 32
+  return L.divIcon({
+    className: 'intel-camera-marker',
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#FF6B35;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;color:white;font-size:16px;" title="Webcam">📹</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  })
+}
+
 const Intel = () => {
   const parishes = getAllParishes()
   const [mapBbox, setMapBbox] = useState(JAMAICA_BBOX)
@@ -102,21 +123,31 @@ const Intel = () => {
   const [earthquakes, setEarthquakes] = useState([])
   const [showGdacs, setShowGdacs] = useState(true)
   const [showEarthquakes, setShowEarthquakes] = useState(true)
-  const [trailLengthMinutes, setTrailLengthMinutes] = useState(0)
+  const [trailLengthMinutes, setTrailLengthMinutes] = useState(2)
   const [trailHistory, setTrailHistory] = useState({ flights: {}, ships: {} })
   const [displayLimitIndex, setDisplayLimitIndex] = useState(1)
   const [trackedEntity, setTrackedEntity] = useState(null) // { id, type: 'flight'|'ship', label }
   const [viewMode, setViewMode] = useState('3d') // '2d' | '3d' – 3D globe by default
   const [selectedCamera, setSelectedCamera] = useState(null) // { id, name, url } for live feed modal
+  const [selectedMapFeature, setSelectedMapFeature] = useState(null) // { type: 'flight'|'ship'|'webcam', id, lat, lng } for 3D globe popup
   const [sourcesOpen, setSourcesOpen] = useState(false)
   const [controlsCollapsed, setControlsCollapsed] = useState(false)
-  const [viewPreset, setViewPreset] = useState('top') // 'top' | 'oblique' | 'horizon' – 3D camera angle
+  const [viewPreset, setViewPreset] = useState('oblique') // 'top' | 'oblique' | 'horizon' – 3D camera angle (oblique = angled Jamaica spawn)
   const [mapStyleKey, setMapStyleKey] = useState('standard') // 'standard' = 3D buildings with elevation, 'satellite' = satellite imagery
-  const [controlTab, setControlTab] = useState('search') // 'search' | 'map' | 'layers' | 'intel' | 'maps' | 'news'
+  const [intelView, setIntelView] = useState('map') // 'map' | 'dashboard'
+  const [controlTab, setControlTab] = useState('search') // 'search' | 'map' | 'layers' | 'intel' | 'webcams' | 'maps' | 'news'
   const [mapMode, setMapMode] = useState('tactical') // 'tactical' | 'disaster' | 'strategy' – for different map contexts / future response plans
-  const fetchCountRef = useRef(0)
+  const [webcamSearchQuery, setWebcamSearchQuery] = useState('')
+  const [webcamSearchResults, setWebcamSearchResults] = useState([])
+  const [webcamSearchOpen, setWebcamSearchOpen] = useState(false)
+  const [webcamSearching, setWebcamSearching] = useState(false)
+  const [webcamPlace, setWebcamPlace] = useState(null)
+  const [webcamList, setWebcamList] = useState([])
+  const [webcamLoading, setWebcamLoading] = useState(false)
+  const [webcamError, setWebcamError] = useState(null)
   const mapSearchWrapRef = useRef(null)
   const mapboxToken = typeof import.meta !== 'undefined' && import.meta.env?.VITE_MAPBOX_TOKEN
+  const hasWebcamKey = typeof import.meta !== 'undefined' && (import.meta.env?.VITE_WINDY_WEBCAM_API_KEY || import.meta.env?.VITE_WINDY_API_KEY)
 
   useEffect(() => {
     if (!searchDropdownOpen) return
@@ -126,6 +157,11 @@ const Intel = () => {
     document.addEventListener('mousedown', close)
     return () => document.removeEventListener('mousedown', close)
   }, [searchDropdownOpen])
+
+  // Default selected point so area feeds (weather, webcams) load for initial map view
+  useEffect(() => {
+    setSelectedPoint((prev) => prev ?? jamaicaCenter)
+  }, [])
 
   const parishById = useMemo(() => {
     const map = {}
@@ -159,17 +195,12 @@ const Intel = () => {
       fetchFlightsInBounds(bbox).then((data) => {
         setFlights(data)
         setFlightError(false)
-        if (trailLengthMinutes > 0) {
-          fetchCountRef.current += 1
-          if (fetchCountRef.current % 2 === 0) setTrailHistory((prev) => mergeTrail(prev, 'flights', data, nowMs, windowMs))
-        }
+        if (trailLengthMinutes > 0) setTrailHistory((prev) => mergeTrail(prev, 'flights', data, nowMs, windowMs))
       }).catch(() => setFlightError(true)),
       fetchShipsInBounds(bbox).then((data) => {
         setShips(data)
         setShipError(false)
-        if (trailLengthMinutes > 0) {
-          if (fetchCountRef.current % 2 === 0) setTrailHistory((prev) => mergeTrail(prev, 'ships', data, nowMs, windowMs))
-        }
+        if (trailLengthMinutes > 0) setTrailHistory((prev) => mergeTrail(prev, 'ships', data, nowMs, windowMs))
       }).catch(() => setShipError(true)),
     ]).then(() => setLastUpdated(Date.now()))
   }, [mapBbox, trailLengthMinutes])
@@ -238,7 +269,58 @@ const Intel = () => {
     setSearchDropdownOpen(false)
   }
 
-  const handleMapClick = useCallback((point) => setSelectedPoint(point), [])
+  const handleWebcamSearch = async (e) => {
+    e?.preventDefault()
+    const q = webcamSearchQuery.trim()
+    if (!q) return
+    setWebcamSearching(true)
+    setWebcamSearchResults([])
+    setWebcamSearchOpen(true)
+    try {
+      const results = await searchPlaces(q, 5)
+      setWebcamSearchResults(results || [])
+    } catch {
+      setWebcamSearchResults([])
+    }
+    setWebcamSearching(false)
+  }
+
+  const pickWebcamPlace = (place) => {
+    setWebcamPlace(place)
+    setWebcamSearchQuery(place.displayName)
+    setWebcamSearchResults([])
+    setWebcamSearchOpen(false)
+  }
+
+  useEffect(() => {
+    if (!webcamPlace || typeof webcamPlace.lat !== 'number' || typeof webcamPlace.lng !== 'number') return
+    setWebcamLoading(true)
+    setWebcamError(null)
+    const point = { lat: webcamPlace.lat, lng: webcamPlace.lng }
+    fetchCamerasNearPoint(point, 50)
+      .then((list) => {
+        setWebcamList(Array.isArray(list) ? list : [])
+        setWebcamError(null)
+      })
+      .catch((err) => {
+        setWebcamList([])
+        setWebcamError(err?.message || 'Failed to load webcams')
+      })
+      .finally(() => setWebcamLoading(false))
+  }, [webcamPlace?.lat, webcamPlace?.lng])
+
+  const handleMapClick = useCallback((point) => {
+    setSelectedPoint(point)
+    setSelectedMapFeature(null)
+  }, [])
+  const handleGlobeFeatureClick = useCallback((feature) => {
+    setSelectedMapFeature({
+      type: feature.type,
+      id: feature.id,
+      lat: feature.lat,
+      lng: feature.lng,
+    })
+  }, [])
   const startTracking = useCallback((id, type, label) => setTrackedEntity({ id, type, label }), [])
   const stopTracking = useCallback(() => setTrackedEntity(null), [])
 
@@ -264,10 +346,79 @@ const Intel = () => {
   const limits = DISPLAY_LIMIT_OPTIONS[displayLimitIndex] ?? DISPLAY_LIMIT_OPTIONS[1]
   const displayedFlights = useMemo(() => flightsWithAnomalies.slice(0, limits.flights), [flightsWithAnomalies, limits.flights])
   const displayedShips = useMemo(() => shipsWithAnomalies.slice(0, limits.ships), [shipsWithAnomalies, limits.ships])
+  const displayedCameras = useMemo(() => {
+    const byId = {}
+    ;(areaFeeds.cameras || []).forEach((c) => { byId[c.id] = c })
+    ;(webcamList || []).forEach((c) => { byId[c.id] = c })
+    return Object.values(byId)
+  }, [areaFeeds.cameras, webcamList])
   const anomalyList = useMemo(() => [
     ...flightsWithAnomalies.filter((f) => f.isAnomaly).map((f) => ({ ...f, type: 'flight' })),
     ...shipsWithAnomalies.filter((s) => s.isAnomaly).map((s) => ({ ...s, type: 'ship' })),
   ], [flightsWithAnomalies, shipsWithAnomalies])
+
+  const globePopupContent = useMemo(() => {
+    if (!selectedMapFeature) return null
+    const { type, id } = selectedMapFeature
+    if (type === 'flight') {
+      const f = displayedFlights.find((x) => x.id === id)
+      if (!f) return null
+      return (
+        <div className="intel-popup intel-movement-popup intel-flight-detail">
+          <strong className="intel-flight-callsign">{f.meta?.callsign || f.id}</strong>
+          <div className="intel-flight-meta">
+            <span>ICAO24: {f.meta?.icao24 || f.id}</span>
+            <span>Country: {f.meta?.originCountry ?? '—'}</span>
+            <span>Altitude: {f.altitude != null ? `${Math.round(f.altitude)} m (${Math.round(f.altitude * 3.28084)} ft)` : '—'}</span>
+            <span>Speed: {f.speed != null ? `${Math.round(f.speed)} m/s (${Math.round(f.speed * 1.94384)} kt)` : '—'}</span>
+            <span>Heading: {f.heading != null ? `${Math.round(f.heading)}°` : '—'}</span>
+            {f.verticalRate != null && <span>Vertical: {f.verticalRate > 0 ? '+' : ''}{f.verticalRate.toFixed(0)} m/s</span>}
+            {f.onGround && <span className="intel-flight-onground">On ground</span>}
+          </div>
+          {f.isAnomaly && <span className="intel-popup-anomaly"><AlertTriangle size={14} /> {f.anomalyReasons.join(', ')}</span>}
+          <div className="intel-popup-actions">
+            <button type="button" className="intel-popup-track-btn" onClick={() => startTracking(f.id, 'flight', f.meta?.callsign || f.id)}>
+              <Navigation size={14} /> Track live
+            </button>
+            <a href={`https://opensky-network.org/network/explorer?icao24=${encodeURIComponent(f.id)}`} target="_blank" rel="noopener noreferrer" className="intel-popup-link">
+              More info (OpenSky) <ExternalLink size={12} />
+            </a>
+          </div>
+        </div>
+      )
+    }
+    if (type === 'ship') {
+      const s = displayedShips.find((x) => x.id === id)
+      if (!s) return null
+      return (
+        <div className="intel-popup intel-movement-popup">
+          <strong>{s.meta?.name || s.id}</strong>
+          <span className="intel-popup-meta">{s.meta?.shipType ?? '—'} · {s.speed != null ? `${s.speed.toFixed(1)} kn` : '—'}</span>
+          {s.isAnomaly && <span className="intel-popup-anomaly"><AlertTriangle size={14} /> {s.anomalyReasons.join(', ')}</span>}
+          <button type="button" className="intel-popup-track-btn" onClick={() => startTracking(s.id, 'ship', s.meta?.name || s.id)}>
+            <Navigation size={14} /> Track live
+          </button>
+        </div>
+      )
+    }
+    if (type === 'webcam') {
+      const c = displayedCameras.find((x) => x.id === id)
+      if (!c) return null
+      return (
+        <div className="intel-popup intel-camera-popup">
+          <strong>{c.name}</strong>
+          <span className="intel-popup-meta">Live webcam</span>
+          <button type="button" className="intel-popup-track-btn" onClick={() => setSelectedCamera(c)}>
+            <Video size={14} /> Watch live
+          </button>
+          {c.url && c.url !== '#' && (
+            <a href={c.url} target="_blank" rel="noopener noreferrer" className="intel-popup-link">Open in new tab <ExternalLink size={12} /></a>
+          )}
+        </div>
+      )
+    }
+    return null
+  }, [selectedMapFeature, displayedFlights, displayedShips, displayedCameras, startTracking])
 
   const trailWindowMs = trailLengthMinutes * 60 * 1000
   const flightTrailLines = useMemo(() => {
@@ -295,33 +446,65 @@ const Intel = () => {
 
   return (
     <div className="intel-dashboard">
+      <header className="intel-page-header">
+        <div className="intel-page-header-tabs">
+          <button
+            type="button"
+            className={intelView === 'map' ? 'active' : ''}
+            onClick={() => setIntelView('map')}
+          >
+            Map
+          </button>
+          <button
+            type="button"
+            className={intelView === 'dashboard' ? 'active' : ''}
+            onClick={() => setIntelView('dashboard')}
+          >
+            Dashboard
+          </button>
+        </div>
+      </header>
       <div className="intel-dashboard-main">
         <div className="intel-map-wrapper">
-          {viewMode === '3d' && mapboxToken ? (
-            <GlobeView
-              mapboxAccessToken={mapboxToken}
-              initialViewState={{
-                longitude: jamaicaCenter.lng,
-                latitude: jamaicaCenter.lat,
-                zoom: defaultZoom,
-                pitch: VIEW_PRESETS[viewPreset]?.pitch ?? 0,
-                bearing: VIEW_PRESETS[viewPreset]?.bearing ?? 0,
-              }}
-              pitch={VIEW_PRESETS[viewPreset]?.pitch ?? 0}
-              bearing={VIEW_PRESETS[viewPreset]?.bearing ?? 0}
-              flyToTarget={flyToTarget}
-              onFlyToComplete={() => setFlyToTarget(null)}
-              mapStyleKey={mapStyleKey}
-              flights={displayedFlights}
-              ships={displayedShips}
-              showFlights={showFlights}
-              showShips={showShips}
-              showTraffic={showTraffic}
-              onClick={handleMapClick}
-              onBoundsChange={setMapBbox}
-              className="intel-globe"
-              style={{ height: '100%', minHeight: 400 }}
-            />
+          {intelView === 'dashboard' ? (
+            <IntelDashboardScaffold />
+          ) : viewMode === '3d' && mapboxToken ? (
+            <>
+              {trackedEntity && (
+                <div className="intel-tracking-pill">
+                  <Navigation size={16} />
+                  <span>Tracking: {trackedEntity.label}</span>
+                  <button type="button" className="intel-tracking-stop" onClick={stopTracking} aria-label="Stop tracking">Stop</button>
+                </div>
+              )}
+              <GlobeView
+                mapboxAccessToken={mapboxToken}
+                initialViewState={GLOBE_JAMAICA_VIEW}
+                spawnFlyToDuration={1800}
+                pitch={VIEW_PRESETS[viewPreset]?.pitch ?? GLOBE_JAMAICA_VIEW.pitch}
+                bearing={VIEW_PRESETS[viewPreset]?.bearing ?? GLOBE_JAMAICA_VIEW.bearing}
+                flyToTarget={flyToTarget}
+                onFlyToComplete={() => setFlyToTarget(null)}
+                mapStyleKey={mapStyleKey}
+                flights={displayedFlights}
+                ships={displayedShips}
+                cameras={displayedCameras}
+                flightTrails={flightTrailLines}
+                shipTrails={shipTrailLines}
+                showFlights={showFlights}
+                showShips={showShips}
+                showTraffic={showTraffic}
+                onClick={handleMapClick}
+                onBoundsChange={setMapBbox}
+                onFeatureClick={handleGlobeFeatureClick}
+                selectedFeature={selectedMapFeature}
+                popupContent={globePopupContent}
+                onClosePopup={() => setSelectedMapFeature(null)}
+                trackedEntity={trackedEntity}
+                className="intel-globe"
+                style={{ height: '100%', minHeight: 400 }}
+              />
+            </>
           ) : viewMode === '3d' && !mapboxToken ? (
             <GlobeView mapboxAccessToken={null} className="intel-globe" style={{ height: '100%', minHeight: 400 }} />
           ) : (
@@ -371,16 +554,31 @@ const Intel = () => {
               </Overlay>
               <Overlay name="Flights" checked={showFlights}>
                 <LayerGroup>
-                  {showFlights && displayedFlights.map((f) => (
+                  {showFlights && displayedFlights
+                    .filter((f) => typeof f.lat === 'number' && typeof f.lng === 'number' && !Number.isNaN(f.lat) && !Number.isNaN(f.lng))
+                    .map((f) => (
                     <Marker key={`f-${f.id}`} position={[f.lat, f.lng]} icon={createMovementIcon('flight', f.isAnomaly, f.heading)}>
                       <Popup>
-                        <div className="intel-popup intel-movement-popup">
-                          <strong>{f.meta?.callsign || f.id}</strong>
-                          <span className="intel-popup-meta">{f.meta?.originCountry ?? '—'} · {f.altitude != null ? `${Math.round(f.altitude)} m` : '—'} · {f.speed != null ? `${Math.round(f.speed)} m/s` : '—'}</span>
+                        <div className="intel-popup intel-movement-popup intel-flight-detail">
+                          <strong className="intel-flight-callsign">{f.meta?.callsign || f.id}</strong>
+                          <div className="intel-flight-meta">
+                            <span>ICAO24: {f.meta?.icao24 || f.id}</span>
+                            <span>Country: {f.meta?.originCountry ?? '—'}</span>
+                            <span>Altitude: {f.altitude != null ? `${Math.round(f.altitude)} m (${Math.round(f.altitude * 3.28084)} ft)` : '—'}</span>
+                            <span>Speed: {f.speed != null ? `${Math.round(f.speed)} m/s (${Math.round(f.speed * 1.94384)} kt)` : '—'}</span>
+                            <span>Heading: {f.heading != null ? `${Math.round(f.heading)}°` : '—'}</span>
+                            {f.verticalRate != null && <span>Vertical: {f.verticalRate > 0 ? '+' : ''}{f.verticalRate.toFixed(0)} m/s</span>}
+                            {f.onGround && <span className="intel-flight-onground">On ground</span>}
+                          </div>
                           {f.isAnomaly && <span className="intel-popup-anomaly"><AlertTriangle size={14} /> {f.anomalyReasons.join(', ')}</span>}
-                          <button type="button" className="intel-popup-track-btn" onClick={() => startTracking(f.id, 'flight', f.meta?.callsign || f.id)}>
-                            <Navigation size={14} /> Track live
-                          </button>
+                          <div className="intel-popup-actions">
+                            <button type="button" className="intel-popup-track-btn" onClick={() => startTracking(f.id, 'flight', f.meta?.callsign || f.id)}>
+                              <Navigation size={14} /> Track live
+                            </button>
+                            <a href={`https://opensky-network.org/network/explorer?icao24=${encodeURIComponent(f.id)}`} target="_blank" rel="noopener noreferrer" className="intel-popup-link">
+                              More info (OpenSky) <ExternalLink size={12} />
+                            </a>
+                          </div>
                         </div>
                       </Popup>
                     </Marker>
@@ -427,6 +625,26 @@ const Intel = () => {
                   ))}
                 </LayerGroup>
               </Overlay>
+              <Overlay name="Webcams" checked={true}>
+                <LayerGroup>
+                  {areaFeeds.cameras.filter((c) => typeof c.lat === 'number' && typeof c.lng === 'number' && !Number.isNaN(c.lat) && !Number.isNaN(c.lng)).map((c) => (
+                    <Marker key={c.id} position={[c.lat, c.lng]} icon={createCameraIcon()}>
+                      <Popup>
+                        <div className="intel-popup intel-camera-popup">
+                          <strong>{c.name}</strong>
+                          <span className="intel-popup-meta">Live webcam</span>
+                          <button type="button" className="intel-popup-track-btn" onClick={() => setSelectedCamera(c)}>
+                            <Video size={14} /> Watch live
+                          </button>
+                          {c.url && c.url !== '#' && (
+                            <a href={c.url} target="_blank" rel="noopener noreferrer" className="intel-popup-link">Open in new tab <ExternalLink size={12} /></a>
+                          )}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+                </LayerGroup>
+              </Overlay>
             </LayersControl>
             {Object.entries(parishCoordinates).map(([parishId, coords]) => {
               const parish = parishById[parishId]
@@ -450,6 +668,31 @@ const Intel = () => {
           </MapContainer>
           </>
           )}
+          {intelView !== 'dashboard' && (
+            <div className="intel-map-legend" role="list" aria-label="Map legend">
+              <div className="intel-map-legend-title">Map legend</div>
+              <div className="intel-map-legend-item">
+                <span className="intel-map-legend-icon intel-map-legend-flight" aria-hidden>✈</span>
+                <span>Flights</span>
+              </div>
+              <div className="intel-map-legend-item">
+                <span className="intel-map-legend-icon intel-map-legend-ship" aria-hidden>🚢</span>
+                <span>Ships</span>
+              </div>
+              <div className="intel-map-legend-item">
+                <span className="intel-map-legend-icon intel-map-legend-webcam" aria-hidden>📹</span>
+                <span>Webcams</span>
+              </div>
+              <div className="intel-map-legend-item">
+                <span className="intel-map-legend-dot intel-map-legend-disaster" />
+                <span>Disasters (GDACS)</span>
+              </div>
+              <div className="intel-map-legend-item">
+                <span className="intel-map-legend-dot intel-map-legend-earthquake" />
+                <span>Earthquakes</span>
+              </div>
+            </div>
+          )}
           <div className="intel-map-footer">
             {lastUpdated && <span>Updated {new Date(lastUpdated).toLocaleTimeString()}</span>}
             {flightError && <span className="intel-feed-error">Flights error</span>}
@@ -467,6 +710,7 @@ const Intel = () => {
                 <button type="button" role="tab" aria-selected={controlTab === 'map'} className={`intel-control-tab ${controlTab === 'map' ? 'active' : ''}`} onClick={() => setControlTab('map')} title="Map view and 2D/3D"><Map size={14} /> Map</button>
                 <button type="button" role="tab" aria-selected={controlTab === 'layers'} className={`intel-control-tab ${controlTab === 'layers' ? 'active' : ''}`} onClick={() => setControlTab('layers')} title="Layers and filters"><Layers size={14} /> Layers</button>
                 <button type="button" role="tab" aria-selected={controlTab === 'intel'} className={`intel-control-tab ${controlTab === 'intel' ? 'active' : ''}`} onClick={() => setControlTab('intel')} title="Area intel and feeds"><Target size={14} /> Intel</button>
+                <button type="button" role="tab" aria-selected={controlTab === 'webcams'} className={`intel-control-tab ${controlTab === 'webcams' ? 'active' : ''}`} onClick={() => setControlTab('webcams')} title="Live Windy webcams"><Video size={14} /> Webcams</button>
                 <button type="button" role="tab" aria-selected={controlTab === 'maps'} className={`intel-control-tab ${controlTab === 'maps' ? 'active' : ''}`} onClick={() => setControlTab('maps')} title="Map modes"><Globe size={14} /> Maps</button>
                 <button type="button" role="tab" aria-selected={controlTab === 'news'} className={`intel-control-tab ${controlTab === 'news' ? 'active' : ''}`} onClick={() => setControlTab('news')} title="News"><Newspaper size={14} /> News</button>
               </div>
@@ -601,17 +845,20 @@ const Intel = () => {
                             <div className="intel-area-section intel-cameras">
                               <strong><Video size={14} /> Live webcams</strong>
                               {areaFeeds.cameras.length > 0 ? (
-                                <ul className="intel-camera-list">
-                                  {areaFeeds.cameras.map((c) => (
-                                    <li key={c.id} className="intel-camera-item">
-                                      <a href={c.url} target="_blank" rel="noopener noreferrer" className="intel-camera-link">
-                                        {c.thumbnail ? <img src={c.thumbnail} alt="" className="intel-camera-thumb" /> : <span className="intel-camera-placeholder" />}
-                                        <span className="intel-camera-name">{c.name}</span>
-                                      </a>
-                                      <button type="button" className="intel-camera-watch-btn" onClick={() => setSelectedCamera(c)} title="Watch live"><Video size={14} /> Watch</button>
-                                    </li>
-                                  ))}
-                                </ul>
+                                <>
+                                  <p className="intel-camera-list-hint">Click a camera name or <strong>Watch</strong> to open the live stream. If the player does not load, use <strong>Open in new tab</strong> to watch on Windy.com.</p>
+                                  <ul className="intel-camera-list">
+                                    {areaFeeds.cameras.map((c) => (
+                                      <li key={c.id} className="intel-camera-item">
+                                        <a href={c.url} target="_blank" rel="noopener noreferrer" className="intel-camera-link">
+                                          {c.thumbnail ? <img src={c.thumbnail} alt="" className="intel-camera-thumb" /> : <span className="intel-camera-placeholder" />}
+                                          <span className="intel-camera-name">{c.name}</span>
+                                        </a>
+                                        <button type="button" className="intel-camera-watch-btn" onClick={() => setSelectedCamera(c)} title="Watch live"><Video size={14} /> Watch</button>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </>
                               ) : (
                                 <>
                                   {areaFeeds.error && (
@@ -619,7 +866,7 @@ const Intel = () => {
                                       {areaFeeds.error.startsWith('Windy:') ? 'Windy: check key or CORS (see MANUAL_SETUP.md).' : areaFeeds.error}
                                     </p>
                                   )}
-                                  <p className="intel-area-no-cameras">No webcams here. Search a city (e.g. London, Tokyo) or set VITE_WINDY_API_KEY for more.</p>
+                                  <p className="intel-area-no-cameras">No webcams here. Search a city (e.g. London, Tokyo) or set VITE_WINDY_WEBCAM_API_KEY in .env for more.</p>
                                 </>
                               )}
                             </div>
@@ -629,8 +876,78 @@ const Intel = () => {
                     ) : (
                       <div className="intel-area-feeds-card">
                         <div className="intel-sources-header"><h2>Area intel</h2></div>
-                        <p className="intel-area-hint">Click a point on the map to see feeds, weather, and webcams for that area. Use search to jump to a place.</p>
+                        <p className="intel-area-hint">Click a point on the map (or search for a city, e.g. London, Tokyo) to load feeds and webcams for that area.</p>
+                        <p className="intel-area-hint intel-webcam-where">Real webcam links appear under <strong>Live webcams</strong> in this panel after you click or search; each opens the live stream on Windy.com.</p>
                         <p className="intel-intel-note">Future: gather intel from map data (terrain, infrastructure, population) to understand regions and support response planning.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {controlTab === 'webcams' && (
+                  <div className="intel-tab-pane intel-tab-webcams">
+                    <div className="intel-sources-header"><h2><Video size={18} /> Live Windy webcams</h2></div>
+                    <p className="intel-tab-desc">Search a city or place to list nearby webcams. Links open the live stream on Windy.com.</p>
+                    {!hasWebcamKey && (
+                      <p className="intel-webcam-key-hint">Set <code>VITE_WINDY_WEBCAM_API_KEY</code> in <code>.env</code> and restart the app to load webcams.</p>
+                    )}
+                    <form className="intel-dashboard-search" onSubmit={handleWebcamSearch}>
+                      <Search size={18} aria-hidden />
+                      <input
+                        type="text"
+                        placeholder="City or place (e.g. London, Tokyo, Montego Bay)"
+                        value={webcamSearchQuery}
+                        onChange={(e) => { setWebcamSearchQuery(e.target.value); setWebcamSearchOpen(false) }}
+                        onFocus={() => webcamSearchResults.length > 0 && setWebcamSearchOpen(true)}
+                        disabled={webcamSearching}
+                        aria-label="Search for webcams by place"
+                        autoComplete="off"
+                      />
+                      <button type="submit" disabled={webcamSearching} title="Search">{webcamSearching ? '…' : 'Go'}</button>
+                    </form>
+                    {webcamSearchOpen && webcamSearchResults.length > 0 && (
+                      <ul className="intel-map-search-results" role="listbox">
+                        {webcamSearchResults.map((place, i) => (
+                          <li
+                            key={`${place.lat}-${place.lng}-${i}`}
+                            role="option"
+                            className="intel-map-search-result"
+                            onClick={() => pickWebcamPlace(place)}
+                          >
+                            <MapPin size={14} />
+                            <span>{place.displayName}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {webcamPlace && (
+                      <div className="intel-webcam-result-panel">
+                        <p className="intel-webcam-place">{webcamPlace.displayName}</p>
+                        {webcamLoading ? (
+                          <p className="intel-area-loading">Loading webcams…</p>
+                        ) : (
+                          <>
+                            {webcamError && (
+                              <p className="intel-area-feed-error" title={webcamError}>
+                                {webcamError.startsWith('Windy:') ? 'Windy: check key or CORS (see MANUAL_SETUP.md).' : webcamError}
+                              </p>
+                            )}
+                            {webcamList.length > 0 ? (
+                              <ul className="intel-camera-list">
+                                {webcamList.map((c) => (
+                                  <li key={c.id} className="intel-camera-item">
+                                    <a href={c.url} target="_blank" rel="noopener noreferrer" className="intel-camera-link">
+                                      {c.thumbnail ? <img src={c.thumbnail} alt="" className="intel-camera-thumb" /> : <span className="intel-camera-placeholder" />}
+                                      <span className="intel-camera-name">{c.name}</span>
+                                    </a>
+                                    <button type="button" className="intel-camera-watch-btn" onClick={() => setSelectedCamera(c)} title="Watch live"><Video size={14} /> Watch</button>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              !webcamError && <p className="intel-area-no-cameras">No webcams found here. Try another city (e.g. London, Tokyo).</p>
+                            )}
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
@@ -698,13 +1015,17 @@ const Intel = () => {
           <div className="intel-camera-modal" onClick={(e) => e.stopPropagation()}>
             <div className="intel-camera-modal-header">
               <h3><Video size={20} /> {selectedCamera.name}</h3>
+              <a href={selectedCamera.url && selectedCamera.url !== '#' ? selectedCamera.url : 'https://www.windy.com'} target="_blank" rel="noopener noreferrer" className="intel-camera-modal-open-tab">Open live stream in new tab</a>
               <button type="button" className="intel-camera-modal-close" onClick={() => setSelectedCamera(null)} aria-label="Close"><X size={24} /></button>
             </div>
             <div className="intel-camera-modal-body">
               {selectedCamera.url && selectedCamera.url !== '#' && !selectedCamera.url.startsWith('#') ? (
-                <iframe title={selectedCamera.name} src={selectedCamera.url} className="intel-camera-iframe" />
+                <>
+                  <iframe title={selectedCamera.name} src={selectedCamera.url} className="intel-camera-iframe" />
+                  <p className="intel-camera-modal-fallback">If the player does not load, use <strong>Open live stream in new tab</strong> above to watch on Windy.com.</p>
+                </>
               ) : (
-                <p className="intel-camera-modal-fallback">No embed URL. <a href={selectedCamera.url && selectedCamera.url !== '#' ? selectedCamera.url : 'https://www.windy.com'} target="_blank" rel="noopener noreferrer">Open in new tab</a></p>
+                <p className="intel-camera-modal-fallback">Open the link above to watch this webcam on Windy.com.</p>
               )}
             </div>
           </div>

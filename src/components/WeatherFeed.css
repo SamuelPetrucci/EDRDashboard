@@ -47,7 +47,7 @@
 .temp-value {
   font-size: 3rem;
   font-weight: 700;
-  color: var(--navy-color);
+  color: var(--text-primary);
 }
 
 .condition {
@@ -73,8 +73,9 @@
 .weather-alerts {
   margin-bottom: 2rem;
   padding: 1rem;
-  background: var(--bg-color);
-  border-radius: 8px;
+  background: var(--card-bg);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
 }
 
 .weather-alerts h3 {
@@ -85,13 +86,13 @@
 
 .alert-item {
   padding: 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   margin-bottom: 0.75rem;
   border-left: 4px solid;
 }
 
 .alert-moderate {
-  background: #FEF3C7;
+  background: rgba(245, 158, 11, 0.08);
   border-color: var(--warning-color);
 }
 
@@ -111,10 +112,42 @@
   margin-bottom: 2rem;
 }
 
-.forecast h3 {
-  font-size: 1.1rem;
+.forecast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 1rem;
+}
+
+.forecast-header h3 {
+  font-size: 1.1rem;
   color: var(--text-primary);
+  margin: 0;
+}
+
+.forecast-toggle {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(15, 23, 42, 0.2);
+  padding: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+}
+
+.forecast-toggle button {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.forecast-toggle button.active {
+  background: var(--primary-color);
+  color: #0f172a;
 }
 
 .forecast-grid {
@@ -123,11 +156,24 @@
   gap: 1rem;
 }
 
+.forecast-grid--hourly {
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+}
+
 .forecast-day {
-  background: var(--bg-color);
+  background: var(--card-bg);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: 10px;
   text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.forecast-hour {
+  background: var(--card-bg);
+  padding: 0.75rem;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid var(--border-color);
 }
 
 .forecast-date {
@@ -180,9 +226,10 @@
 
 .event-item {
   padding: 1rem;
-  background: var(--bg-color);
-  border-radius: 8px;
+  background: var(--card-bg);
+  border-radius: 10px;
   margin-bottom: 0.75rem;
+  border: 1px solid var(--border-color);
   border-left: 4px solid var(--primary-color);
 }
 
