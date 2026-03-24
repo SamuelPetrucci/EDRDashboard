@@ -3,7 +3,7 @@
   border-radius: 12px;
   padding: 1.75rem;
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -52,7 +52,7 @@
   background: var(--bg-color);
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
 }
 
 .radar-type-selector svg {
@@ -149,7 +149,7 @@
   border-radius: 8px;
   overflow: hidden;
   background: var(--bg-color);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   margin-bottom: 1rem;
 }
 
@@ -170,7 +170,7 @@
 .radar-footer {
   margin-top: auto;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
+  border-top: var(--card-border-width) solid var(--border-color);
 }
 
 .radar-note {

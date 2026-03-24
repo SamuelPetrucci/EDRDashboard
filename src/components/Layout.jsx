@@ -3,7 +3,8 @@ import { Link, useLocation } from 'react-router-dom'
 import { Home, MapPin, FileText, BookOpen, Phone, Moon, Sun, Satellite } from 'lucide-react'
 import EmergencyBanner from './EmergencyBanner'
 import EnterpriseFooter from './EnterpriseFooter'
-import brandLogo from '../../headerlogo.png'
+import skillvantageLogo from '../../skillvantagelogo.png'
+import drisLogo from '../../DRISlogo.png'
 import './Layout.css'
 
 const Layout = ({ children }) => {
@@ -28,10 +29,19 @@ const Layout = ({ children }) => {
     <div className={`layout${isIntelPage ? ' layout--intel-page' : ''}`}>
       <header className="header">
         <div className="header-content">
-          <div className="logo">
-            <img src={brandLogo} alt="Emergency Resilience Scorecard (TM)" className="logo-image" />
+          <div className="header-logos" aria-label="Skillvantage and DRIS">
+            <img
+              src={skillvantageLogo}
+              alt="Skillvantage Enterprise"
+              className="header-logo header-logo--skillvantage"
+            />
+            <img
+              src={drisLogo}
+              alt="DRIS — Disaster Resilience Intelligence Scorecard"
+              className="header-logo header-logo--dris"
+            />
           </div>
-          <nav className="nav">
+          <nav className="nav" aria-label="Primary">
             <Link 
               to="/" 
               className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}

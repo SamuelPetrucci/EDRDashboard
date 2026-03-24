@@ -24,7 +24,7 @@
   background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%);
   color: rgba(255, 255, 255, 0.98);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: var(--card-border-width) solid rgba(0, 0, 0, 0.2);
 }
 
 .emergency-banner-inner {
@@ -106,7 +106,7 @@
   background: var(--card-bg);
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   padding: 1.5rem;
   width: 100%;
   max-width: 480px;
@@ -132,7 +132,7 @@
   width: 100%;
   padding: 0.625rem 0.75rem;
   margin-bottom: 1rem;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 8px;
   font-size: 0.95rem;
   font-family: inherit;
@@ -200,7 +200,7 @@
 .emergency-banner-modal-cancel {
   background: var(--bg-color);
   color: var(--text-secondary);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
 }
 
 .emergency-banner-modal-cancel:hover {
@@ -219,7 +219,7 @@
   gap: 0.75rem;
   padding: 0.5rem 1rem;
   background: var(--bg-color);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--card-border-width) solid var(--border-color);
   font-size: 0.875rem;
   color: var(--text-secondary);
 }

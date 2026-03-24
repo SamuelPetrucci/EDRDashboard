@@ -13,7 +13,7 @@
   background: linear-gradient(135deg, var(--navy-dark), #020617);
   border-radius: 12px;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
 }
 
 .intel-dashboard-scaffold-title {
@@ -43,7 +43,7 @@
   font-size: 0.75rem;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
+  border: var(--card-border-width) solid rgba(148, 163, 184, 0.6);
   color: #e5e7eb;
   background: rgba(15, 23, 42, 0.7);
 }
@@ -68,7 +68,7 @@
 .intel-dashboard-card {
   background: var(--card-bg);
   border-radius: 12px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   box-shadow: var(--shadow-sm);
   padding: 0.85rem 1rem 0.9rem;
 }
@@ -118,7 +118,7 @@
   padding: 0.55rem 0.6rem;
   border-radius: 8px;
   background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(148, 163, 184, 0.4);
+  border: var(--card-border-width) solid rgba(148, 163, 184, 0.4);
 }
 
 .intel-dashboard-alert-main strong {
@@ -139,7 +139,7 @@
   border-radius: 999px;
   background: rgba(56, 189, 248, 0.12);
   color: #7dd3fc;
-  border: 1px solid rgba(56, 189, 248, 0.7);
+  border: var(--card-border-width) solid rgba(56, 189, 248, 0.7);
   white-space: nowrap;
 }
 

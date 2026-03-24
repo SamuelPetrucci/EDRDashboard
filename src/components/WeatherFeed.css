@@ -4,7 +4,7 @@
   padding: 1.75rem;
   box-shadow: var(--shadow-md);
   margin-bottom: 2rem;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
 }
 
 .weather-header {
@@ -75,7 +75,7 @@
   padding: 1rem;
   background: var(--card-bg);
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
 }
 
 .weather-alerts h3 {
@@ -131,7 +131,7 @@
   background: rgba(15, 23, 42, 0.2);
   padding: 0.25rem;
   border-radius: 999px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
 }
 
 .forecast-toggle button {
@@ -165,7 +165,7 @@
   padding: 1rem;
   border-radius: 10px;
   text-align: center;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
 }
 
 .forecast-hour {
@@ -173,7 +173,7 @@
   padding: 0.75rem;
   border-radius: 10px;
   text-align: center;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
 }
 
 .forecast-date {
@@ -229,7 +229,7 @@
   background: var(--card-bg);
   border-radius: 10px;
   margin-bottom: 0.75rem;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-left: 4px solid var(--primary-color);
 }
 
@@ -265,7 +265,7 @@
 .weather-footer {
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
+  border-top: var(--card-border-width) solid var(--border-color);
 }
 
 .demo-notice {

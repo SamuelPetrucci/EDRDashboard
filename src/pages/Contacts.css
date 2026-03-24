@@ -34,7 +34,7 @@
   background: var(--card-bg);
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   box-shadow: var(--shadow-sm);
 }
 
@@ -63,7 +63,7 @@
   background: var(--card-bg);
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   box-shadow: var(--shadow-sm);
 }
 
@@ -109,7 +109,7 @@
   border-radius: 12px;
   padding: 1.75rem;
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-top: 8px solid var(--section-contacts);
   transition: all 0.3s ease;
   display: flex;
@@ -220,7 +220,7 @@
 .contact-category {
   margin-top: auto;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
+  border-top: var(--card-border-width) solid var(--border-color);
 }
 
 .category-badge {
@@ -239,7 +239,7 @@
   border-radius: 12px;
   padding: 2rem;
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   margin-top: 3rem;
 }
 

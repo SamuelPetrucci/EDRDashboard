@@ -33,14 +33,14 @@
   align-items: center;
   padding: 0.6rem 1rem;
   background: rgba(15, 23, 42, 0.95);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--card-border-width) solid var(--border-color);
   z-index: 10;
 }
 
 .intel-page-header-tabs {
   display: inline-flex;
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   padding: 0.2rem;
   background: rgba(30, 41, 59, 0.8);
   box-shadow: var(--shadow-sm);
@@ -79,7 +79,7 @@
 .intel-view-mode-toggle {
   display: inline-flex;
   border-radius: 999px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   padding: 0.1rem;
   background: rgba(15, 23, 42, 0.7);
 }
@@ -106,7 +106,7 @@
   font-weight: 600;
   padding: 0.5rem 0.65rem 0.35rem;
   color: var(--navy-dark);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--card-border-width) solid var(--border-color);
 }
 
 .main-content--intel .intel-panel-title {
@@ -122,7 +122,7 @@
   min-width: 0;
   padding: 0.4rem 0.6rem;
   background: var(--bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 8px;
   font-size: 0.9rem;
 }
@@ -188,7 +188,7 @@
   padding: 0.35rem 0;
   list-style: none;
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 8px;
   box-shadow: var(--shadow-lg);
   max-height: 240px;
@@ -259,7 +259,7 @@
   gap: 0.3rem;
   padding: 0.35rem 0.6rem;
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 6px;
   font-size: 0.85rem;
   cursor: pointer;
@@ -289,7 +289,7 @@
   padding: 0.35rem 0.5rem;
   font-size: 0.85rem;
   background: var(--bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 6px;
   color: var(--navy-dark);
   cursor: pointer;
@@ -304,7 +304,7 @@
   padding: 0.35rem 0.5rem;
   font-size: 0.85rem;
   background: var(--bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 6px;
   color: var(--navy-dark);
   cursor: pointer;
@@ -338,7 +338,7 @@
 }
 
 .intel-map-smooth .leaflet-control-zoom {
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
@@ -355,7 +355,7 @@
   gap: 0.5rem;
   padding: 0.5rem 0.85rem;
   background: var(--card-bg);
-  border: 1px solid var(--primary-color);
+  border: var(--card-border-width) solid var(--primary-color);
   border-radius: 999px;
   box-shadow: var(--shadow-md);
   font-size: 0.9rem;
@@ -402,7 +402,7 @@
 }
 
 .intel-map .leaflet-control-layers {
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 8px;
   box-shadow: var(--shadow-sm);
 }
@@ -413,7 +413,7 @@
   color: var(--text-primary);
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   box-shadow: var(--shadow-md);
 }
 
@@ -445,7 +445,7 @@
 
 .intel-sources-card {
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-top: 8px solid var(--section-overview);
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
@@ -492,7 +492,7 @@
 .intel-sources-coming {
   padding-top: 0.5rem;
   margin-top: 0.25rem;
-  border-top: 1px solid var(--border-color);
+  border-top: var(--card-border-width) solid var(--border-color);
   color: var(--text-secondary);
   font-style: italic;
 }
@@ -514,7 +514,7 @@
   font-size: 0.8rem;
   color: var(--text-primary, #f1f5f9);
   background: rgba(15, 23, 42, 0.88);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 8px;
   backdrop-filter: blur(8px);
   box-shadow: var(--shadow-md);
@@ -545,23 +545,23 @@
 .intel-map-legend-icon.intel-map-legend-flight {
   background: #2563eb;
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.4);
+  border: var(--card-border-width) solid rgba(255,255,255,0.4);
 }
 .intel-map-legend-icon.intel-map-legend-ship {
   background: #059669;
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.4);
+  border: var(--card-border-width) solid rgba(255,255,255,0.4);
 }
 .intel-map-legend-icon.intel-map-legend-webcam {
   background: #2563eb;
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.4);
+  border: var(--card-border-width) solid rgba(255,255,255,0.4);
 }
 .intel-map-legend-dot {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: var(--card-border-width) solid #fff;
   flex-shrink: 0;
 }
 .intel-map-legend-dot.intel-map-legend-disaster {
@@ -584,7 +584,7 @@
   font-size: 0.78rem;
   color: var(--text-secondary);
   background: rgba(255, 255, 255, 0.92);
-  border-top: 1px solid var(--border-color);
+  border-top: var(--card-border-width) solid var(--border-color);
   backdrop-filter: blur(6px);
 }
 
@@ -626,7 +626,7 @@
   width: 32px;
   padding: 0.35rem;
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 8px 0 0 8px;
   cursor: pointer;
   color: var(--text-secondary);
@@ -655,7 +655,7 @@
   gap: 0;
   padding: 0;
   background: rgba(255, 255, 255, 0.95);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-left: none;
   border-radius: 0 10px 10px 0;
   box-shadow: var(--shadow-md);
@@ -723,7 +723,7 @@
   gap: 2px;
   padding: 0.35rem 0.35rem 0 0.35rem;
   background: var(--bg);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--card-border-width) solid var(--border-color);
   flex-shrink: 0;
 }
 
@@ -800,13 +800,13 @@
   padding: 0.4rem 0.5rem;
   background: rgba(37, 99, 235, 0.12);
   border-radius: 6px;
-  border: 1px solid rgba(37, 99, 235, 0.3);
+  border: var(--card-border-width) solid rgba(37, 99, 235, 0.3);
 }
 
 .intel-webcam-result-panel {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--border-color);
+  border-top: var(--card-border-width) solid var(--border-color);
 }
 
 .intel-webcam-place {
@@ -821,7 +821,7 @@
   font-style: italic;
   margin: 0.5rem 0 0 0;
   padding-top: 0.5rem;
-  border-top: 1px solid var(--border-color);
+  border-top: var(--card-border-width) solid var(--border-color);
 }
 
 .intel-map-mode-list {
@@ -836,7 +836,7 @@
   gap: 0.15rem;
   padding: 0.6rem 0.65rem;
   background: var(--bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
@@ -871,7 +871,7 @@
   text-align: center;
   padding: 1.5rem 1rem;
   background: var(--bg);
-  border: 1px dashed var(--border-color);
+  border: var(--card-border-width) dashed var(--border-color);
   border-radius: 10px;
   color: var(--text-secondary);
 }
@@ -915,7 +915,7 @@
 
 .intel-news-item {
   padding: 0.6rem 0.4rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--card-border-width) solid var(--border-color);
 }
 
 .intel-news-item:last-child {
@@ -978,7 +978,7 @@
   align-items: center;
   justify-content: center;
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
   color: var(--text-secondary);
@@ -998,7 +998,7 @@
   min-width: 220px;
   padding: 0.5rem;
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 10px;
   box-shadow: var(--shadow-lg);
   z-index: 1;
@@ -1010,7 +1010,7 @@
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   padding-bottom: 0.35rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--card-border-width) solid var(--border-color);
 }
 
 .intel-sources-popover .intel-sources-header h3 {
@@ -1055,7 +1055,7 @@
 .intel-filters-card,
 .intel-anomalies-card {
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-top: 8px solid var(--section-overview);
   border-radius: 12px;
   padding: 1.35rem 1.5rem;
@@ -1093,7 +1093,7 @@
   width: 100%;
   max-width: 140px;
   padding: 0.35rem 0.5rem;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 6px;
   font-size: 0.9rem;
   background: var(--card-bg);
@@ -1109,7 +1109,7 @@
   width: 100%;
   max-width: 140px;
   padding: 0.35rem 0.5rem;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 6px;
   font-size: 0.9rem;
   background: var(--card-bg);
@@ -1156,7 +1156,7 @@
   gap: 0.35rem;
   margin-top: 0.35rem;
   padding-top: 0.35rem;
-  border-top: 1px solid var(--border-color);
+  border-top: var(--card-border-width) solid var(--border-color);
 }
 .intel-popup-actions .intel-popup-track-btn {
   margin: 0;
@@ -1186,7 +1186,7 @@
 .intel-anomaly-item {
   font-size: 0.85rem;
   padding: 0.4rem 0;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--card-border-width) solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -1220,7 +1220,7 @@
 /* Feeds at this area panel */
 .intel-area-feeds-card {
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-top: 8px solid var(--section-overview);
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
@@ -1282,7 +1282,7 @@
   gap: 0.5rem;
   font-size: 0.9rem;
   padding: 0.4rem 0;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--card-border-width) solid var(--border-color);
 }
 
 .intel-area-section:last-of-type {
@@ -1410,7 +1410,7 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--card-border-width) solid var(--border-color);
   background: var(--navy-dark);
   color: white;
 }
@@ -1429,7 +1429,7 @@
   color: #93c5fd;
   text-decoration: none;
   padding: 0.35rem 0.6rem;
-  border: 1px solid rgba(147, 197, 253, 0.5);
+  border: var(--card-border-width) solid rgba(147, 197, 253, 0.5);
   border-radius: 6px;
   white-space: nowrap;
 }

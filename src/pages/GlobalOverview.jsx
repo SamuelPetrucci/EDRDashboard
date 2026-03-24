@@ -218,14 +218,24 @@ const GlobalOverview = () => {
   return (
     <div className="global-overview">
       <div className="page-header">
-        <h1>National Overview</h1>
-        <p className="subtitle">Strategic Emergency Management - 14 Parishes Overview</p>
+        <div className="page-header-main">
+          <h1>National Overview</h1>
+          <p className="subtitle">Strategic Emergency Management - 14 Parishes Overview</p>
+        </div>
+        <div className="page-header-dris">
+          <p className="page-header-dris-title">
+            SkillVantage Disaster Resilience Intelligence Scorecard™ (DRIS™)
+          </p>
+          <p className="page-header-dris-tagline">
+            Turning Readiness into Intelligence: From Preparedness to Resilience.
+          </p>
+        </div>
       </div>
 
       {/* At-a-Glance Overview */}
       <div className="scorecard-overview-section">
         <div className="section-header">
-          <div className="header-content">
+          <div className="section-header-content">
             <BarChart3 size={24} />
             <h2>Overview</h2>
           </div>
@@ -359,29 +369,29 @@ const GlobalOverview = () => {
           </div>
           <div className="readiness-stats-grid-compact">
             <div className="readiness-stat-card-compact readiness-stat-card-compact--resilient">
-              <CheckCircle size={26} style={{ color: 'var(--resilient-color)' }} />
-              <div>
+              <CheckCircle className="readiness-stat-card-compact__icon" size={26} aria-hidden />
+              <div className="readiness-stat-card-compact__text">
                 <h4>{readinessStats.resilient}</h4>
                 <p>Resilient</p>
               </div>
             </div>
             <div className="readiness-stat-card-compact readiness-stat-card-compact--restoring">
-              <Clock size={26} style={{ color: 'var(--restoring-color)' }} />
-              <div>
+              <Clock className="readiness-stat-card-compact__icon" size={26} aria-hidden />
+              <div className="readiness-stat-card-compact__text">
                 <h4>{readinessStats.restoring}</h4>
                 <p>Restoring</p>
               </div>
             </div>
             <div className="readiness-stat-card-compact readiness-stat-card-compact--need-support">
-              <AlertCircle size={26} style={{ color: 'var(--overview-accent-need-support)' }} />
-              <div>
+              <AlertCircle className="readiness-stat-card-compact__icon" size={26} aria-hidden />
+              <div className="readiness-stat-card-compact__text">
                 <h4>{readinessStats.needSupport}</h4>
                 <p>Need Support</p>
               </div>
             </div>
             <div className="readiness-stat-card-compact readiness-stat-card-compact--not-assessed">
-              <AlertCircle size={26} style={{ color: 'var(--text-secondary)' }} />
-              <div>
+              <AlertCircle className="readiness-stat-card-compact__icon" size={26} aria-hidden />
+              <div className="readiness-stat-card-compact__text">
                 <h4>{readinessStats.notAssessed}</h4>
                 <p>Not Assessed</p>
               </div>
@@ -473,7 +483,7 @@ const GlobalOverview = () => {
       {/* Intelligence Overview */}
       <div className="intel-overview-section">
         <div className="section-header">
-          <div className="header-content">
+          <div className="section-header-content">
             <Satellite size={22} />
             <h2>Intelligence overview</h2>
           </div>
@@ -559,7 +569,7 @@ const GlobalOverview = () => {
         {/* Training Section */}
         <div className="training-section-card">
           <div className="section-header">
-            <div className="header-content">
+            <div className="section-header-content">
               <GraduationCap size={24} />
               <h2>Training & Protocols</h2>
             </div>
@@ -594,7 +604,7 @@ const GlobalOverview = () => {
         {/* Inventory Summary Section - under Training */}
         <div className="inventory-section-card">
           <div className="section-header">
-            <div className="header-content">
+            <div className="section-header-content">
               <Package size={24} />
               <h2>Inventory Summary</h2>
             </div>
@@ -657,7 +667,7 @@ const GlobalOverview = () => {
         {/* Communication & Alerts Section - embedded scroll */}
         <div className="communication-section-card">
           <div className="section-header">
-            <div className="header-content">
+            <div className="section-header-content">
               <MessageSquare size={24} />
               <h2>Communication & Alerts</h2>
             </div>
@@ -734,7 +744,7 @@ const GlobalOverview = () => {
       {/* Parishes Grid */}
       <div className="parishes-section">
         <div className="section-header">
-          <div className="header-content">
+          <div className="section-header-content">
             <MapPin size={24} />
             <h2>Parish Overview</h2>
           </div>

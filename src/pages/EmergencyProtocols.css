@@ -33,7 +33,7 @@
   height: fit-content;
   position: sticky;
   top: 2rem;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-top: 8px solid var(--section-protocols);
 }
 
@@ -53,7 +53,7 @@
 .category-filter {
   padding: 0.5rem 0.75rem;
   background: var(--bg-color);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
@@ -85,7 +85,7 @@
   gap: 1rem;
   padding: 1rem;
   background: var(--bg-color);
-  border: 2px solid transparent;
+  border: var(--card-border-width) solid transparent;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
@@ -132,7 +132,7 @@
   padding: 2rem;
   box-shadow: var(--shadow-md);
   min-height: 500px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-top: 8px solid var(--section-protocols);
 }
 
@@ -205,7 +205,7 @@
   background: var(--bg-color);
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
 }
 
 .phase-header {
@@ -286,7 +286,7 @@
   position: relative;
   color: var(--text-secondary);
   line-height: 1.6;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--card-border-width) solid var(--border-color);
 }
 
 .action-items li:last-child {
@@ -424,7 +424,7 @@
   padding: 2rem;
   margin-bottom: 2rem;
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   border-top: 8px solid var(--section-training);
   border-left: 4px solid var(--warning-color);
 }
@@ -490,7 +490,7 @@
   background: var(--card-bg);
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   box-shadow: var(--shadow-sm);
 }
 
@@ -519,7 +519,7 @@
   background: var(--card-bg);
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   box-shadow: var(--shadow-sm);
 }
 
@@ -589,7 +589,7 @@
   border-radius: 12px;
   padding: 1.75rem;
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
+  border: var(--card-border-width) solid var(--border-color);
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -692,7 +692,7 @@
 .training-resources {
   margin-top: auto;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
+  border-top: var(--card-border-width) solid var(--border-color);
 }
 
 .training-resources strong {
