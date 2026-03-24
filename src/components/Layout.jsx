@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Home, MapPin, FileText, BookOpen, Phone, Moon, Sun, Satellite } from 'lucide-react'
 import EmergencyBanner from './EmergencyBanner'
+import EnterpriseFooter from './EnterpriseFooter'
 import brandLogo from '../../headerlogo.png'
 import './Layout.css'
 
@@ -21,8 +22,10 @@ const Layout = ({ children }) => {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'))
   }
 
+  const isIntelPage = location.pathname === '/intel'
+
   return (
-    <div className="layout">
+    <div className={`layout${isIntelPage ? ' layout--intel-page' : ''}`}>
       <header className="header">
         <div className="header-content">
           <div className="logo">
@@ -82,10 +85,10 @@ const Layout = ({ children }) => {
         </div>
       </header>
       <EmergencyBanner />
-      <main className={`main-content ${location.pathname === '/intel' ? 'main-content--intel' : ''}`}>
+      <main className={`main-content ${isIntelPage ? 'main-content--intel' : ''}`}>
         {children}
       </main>
-      <footer className="footer footer--minimal" />
+      {!isIntelPage && <EnterpriseFooter />}
     </div>
   )
 }
