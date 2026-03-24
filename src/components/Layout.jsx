@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Home, MapPin, FileText, BookOpen, Phone, Moon, Sun, Satellite } from 'lucide-react'
 import EmergencyBanner from './EmergencyBanner'
-import headerLogo from '../../headerlogo.webp'
+import brandLogo from '../../image.png'
 import './Layout.css'
 
 const Layout = ({ children }) => {
@@ -26,11 +26,7 @@ const Layout = ({ children }) => {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <img src={headerLogo} alt="EDR Dashboard" className="logo-image" />
-            <div className="logo-text">
-              <h1>EDR Dashboard</h1>
-              <span className="logo-subtitle">Disaster Recovery & Coordinator</span>
-            </div>
+            <img src={brandLogo} alt="Emergency Resilience Scorecard (TM)" className="logo-image" />
           </div>
           <nav className="nav">
             <Link 
@@ -90,7 +86,11 @@ const Layout = ({ children }) => {
         {children}
       </main>
       <footer className="footer">
-        <p>Disaster Recovery Dashboard & Coordinator │ Emergency Management System for Jamaica</p>
+        <div className="footer-content">
+          <div className="footer-brand">
+            <img src={brandLogo} alt="Emergency Resilience Scorecard (TM)" className="footer-logo-image" />
+          </div>
+        </div>
       </footer>
     </div>
   )

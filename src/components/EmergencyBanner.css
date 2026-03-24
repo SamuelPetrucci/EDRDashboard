@@ -144,7 +144,7 @@
 .emergency-banner-modal select:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 .emergency-banner-modal-check {

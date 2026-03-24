@@ -19,7 +19,8 @@ Create a `.env` file in the project root (and optionally `.env.local` for local 
 | `VITE_WINDY_API_KEY` | Legacy: used as fallback for both forecast and webcams if the keys above are not set | No |
 | `VITE_OPENWEBCAMDB_API_KEY` | OpenWebcamDB API key for cameras near a point | No – demo camera list if missing |
 | `VITE_NEWS_API_URL` | Backend endpoint for news/articles API (expects bbox + limit) | No – News tab shows placeholder if missing |
-| `VITE_NEWS_API_KEY` | Optional API key for the news backend (sent as Bearer token) | No |
+| `VITE_NEWS_API_KEY` | Token sent as Bearer token to news backend | No |
+| `NEWS_BACKEND_TOKEN` | Server-side token to protect `/api/news` | No (recommended for production) |
 
 Example `.env`:
 
@@ -41,6 +42,14 @@ VITE_AISHUB_KEY=your_key
 
 # Or OpenWebcamDB – https://openwebcamdb.com/
 # VITE_OPENWEBCAMDB_API_KEY=your_key
+
+# News aggregation endpoint (Vercel serverless function)
+# Production: leave as /api/news when same domain
+# VITE_NEWS_API_URL=/api/news
+# Optional auth token (client -> backend)
+# VITE_NEWS_API_KEY=replace_with_random_token
+# Backend token (set on server only, do NOT prefix with VITE_)
+# NEWS_BACKEND_TOKEN=replace_with_same_random_token
 ```
 
 Restart the dev server after changing `.env` (`npm run dev`).
@@ -123,6 +132,30 @@ For production (e.g. Vercel):
 1. In the Vercel project **Settings → Environment Variables**, add the same variables with the **VITE_** prefix.
 2. Redeploy so the build picks them up.
 3. **Do not** expose secret keys in client-side code except where intended (e.g. `VITE_*` are embedded in the build). For AISHub/OpenWebcamDB, the keys are used in the browser; for higher security you could add a small backend proxy that holds the key and forwards requests.
+
+### Production News Aggregation (GDELT + RSS)
+
+This project now includes a serverless endpoint at `api/news.js` for Vercel:
+
+- Route: `GET /api/news?bbox=lamin,lomin,lamax,lomax&limit=24`
+- Sources: **GDELT** + **Google News RSS fallback**
+- Returns normalized list expected by `src/data/newsFeed.js`
+
+Recommended production setup:
+
+1. Set `VITE_NEWS_API_URL=/api/news` in Vercel environment variables.
+2. Generate a random token (32+ chars).
+3. Set:
+   - `VITE_NEWS_API_KEY=<token>` (frontend sends Bearer)
+   - `NEWS_BACKEND_TOKEN=<token>` (backend verifies Bearer)
+4. Redeploy.
+
+Notes:
+
+- If you do not set `NEWS_BACKEND_TOKEN`, endpoint still works (open).
+- In local `npm run dev`, `/api/news` is not served by Vercel functions. Use:
+  - `vercel dev`, or
+  - point `VITE_NEWS_API_URL` to your deployed URL.
 
 ---
 

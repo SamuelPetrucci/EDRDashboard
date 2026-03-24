@@ -95,7 +95,7 @@ function createCameraIcon() {
   const size = 32
   return L.divIcon({
     className: 'intel-camera-marker',
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#FF6B35;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;color:white;font-size:16px;" title="Webcam">📹</div>`,
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#2563EB;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;color:white;font-size:16px;" title="Webcam">📹</div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   })
@@ -329,6 +329,8 @@ const Intel = () => {
     setSelectedPoint(point)
     setSelectedMapFeature(null)
   }, [])
+  const startTracking = useCallback((id, type, label) => setTrackedEntity({ id, type, label }), [])
+  const stopTracking = useCallback(() => setTrackedEntity(null), [])
   const handleGlobeFeatureClick = useCallback((feature) => {
     setSelectedMapFeature({
       type: feature.type,
@@ -336,9 +338,14 @@ const Intel = () => {
       lat: feature.lat,
       lng: feature.lng,
     })
-  }, [])
-  const startTracking = useCallback((id, type, label) => setTrackedEntity({ id, type, label }), [])
-  const stopTracking = useCallback(() => setTrackedEntity(null), [])
+    if (feature.type === 'flight') {
+      const flight = flights.find((f) => f.id === feature.id)
+      startTracking(feature.id, 'flight', flight?.meta?.callsign || feature.id)
+    } else if (feature.type === 'ship') {
+      const ship = ships.find((s) => s.id === feature.id)
+      startTracking(feature.id, 'ship', ship?.meta?.name || feature.id)
+    }
+  }, [flights, ships, startTracking])
 
   const minSpeed = minSpeedFilter === '' ? null : parseFloat(minSpeedFilter)
   const filteredFlights = useMemo(() => {
@@ -372,6 +379,11 @@ const Intel = () => {
     ...flightsWithAnomalies.filter((f) => f.isAnomaly).map((f) => ({ ...f, type: 'flight' })),
     ...shipsWithAnomalies.filter((s) => s.isAnomaly).map((s) => ({ ...s, type: 'ship' })),
   ], [flightsWithAnomalies, shipsWithAnomalies])
+  const trackedEntityData = useMemo(() => {
+    if (!trackedEntity) return null
+    if (trackedEntity.type === 'flight') return displayedFlights.find((f) => f.id === trackedEntity.id) || null
+    return displayedShips.find((s) => s.id === trackedEntity.id) || null
+  }, [trackedEntity, displayedFlights, displayedShips])
 
   const globePopupContent = useMemo(() => {
     if (!selectedMapFeature) return null
@@ -459,6 +471,20 @@ const Intel = () => {
     }
     return out
   }, [trailHistory.ships, trailLengthMinutes])
+  const trackedFlightTrailPoints = useMemo(() => {
+    if (!trackedEntity || trackedEntity.type !== 'flight' || trailLengthMinutes <= 0) return []
+    const nowMs = Date.now()
+    const points = (trailHistory.flights?.[trackedEntity.id] || []).filter((p) => p.t > nowMs - trailWindowMs)
+    return points.length >= 2 ? points : []
+  }, [trackedEntity, trailHistory.flights, trailLengthMinutes, trailWindowMs])
+  const trackedFlightTrail2D = useMemo(
+    () => trackedFlightTrailPoints.map((p) => [p.lat, p.lng]),
+    [trackedFlightTrailPoints]
+  )
+  const trackedFlightTrail3D = useMemo(
+    () => trackedFlightTrailPoints.map((p) => [p.lng, p.lat]),
+    [trackedFlightTrailPoints]
+  )
 
   return (
     <div className="intel-dashboard">
@@ -489,7 +515,11 @@ const Intel = () => {
               {trackedEntity && (
                 <div className="intel-tracking-pill">
                   <Navigation size={16} />
-                  <span>Tracking: {trackedEntity.label}</span>
+                  <span>
+                    Tracking: {trackedEntity.label}
+                    {trackedEntity.type === 'flight' && trackedEntityData?.altitude != null && ` · ${Math.round(trackedEntityData.altitude * 3.28084)} ft`}
+                    {trackedEntityData?.speed != null && ` · ${trackedEntity.type === 'flight' ? `${Math.round(trackedEntityData.speed * 1.94384)} kt` : `${trackedEntityData.speed.toFixed(1)} kn`}`}
+                  </span>
                   <button type="button" className="intel-tracking-stop" onClick={stopTracking} aria-label="Stop tracking">Stop</button>
                 </div>
               )}
@@ -517,6 +547,7 @@ const Intel = () => {
                 popupContent={globePopupContent}
                 onClosePopup={() => setSelectedMapFeature(null)}
                 trackedEntity={trackedEntity}
+                trackedFlightTrail={trackedFlightTrail3D}
                 className="intel-globe"
                 style={{ height: '100%', minHeight: 400 }}
               />
@@ -528,7 +559,11 @@ const Intel = () => {
           {trackedEntity && (
             <div className="intel-tracking-pill">
               <Navigation size={16} />
-              <span>Tracking: {trackedEntity.label}</span>
+              <span>
+                Tracking: {trackedEntity.label}
+                {trackedEntity.type === 'flight' && trackedEntityData?.altitude != null && ` · ${Math.round(trackedEntityData.altitude * 3.28084)} ft`}
+                {trackedEntityData?.speed != null && ` · ${trackedEntity.type === 'flight' ? `${Math.round(trackedEntityData.speed * 1.94384)} kt` : `${trackedEntityData.speed.toFixed(1)} kn`}`}
+              </span>
               <button type="button" className="intel-tracking-stop" onClick={stopTracking} aria-label="Stop tracking">Stop</button>
             </div>
           )}
@@ -547,6 +582,12 @@ const Intel = () => {
             <MapClickHandler onMapClick={handleMapClick} />
             <FlyToTarget target={flyToTarget} onComplete={() => setFlyToTarget(null)} />
             <FollowTrackedVessel trackedEntity={trackedEntity} flights={displayedFlights} ships={displayedShips} />
+            {trackedEntity?.type === 'flight' && trackedFlightTrail2D.length >= 2 && (
+              <Polyline
+                positions={trackedFlightTrail2D}
+                pathOptions={{ color: '#f97316', weight: 4, opacity: 0.95, dashArray: '10 8' }}
+              />
+            )}
             <LayersControl position="topright">
               {BASEMAP_LAYERS.map((layer) => (
                 <BaseLayer key={layer.id} name={layer.name} checked={!!layer.default}>
@@ -573,7 +614,12 @@ const Intel = () => {
                   {showFlights && displayedFlights
                     .filter((f) => typeof f.lat === 'number' && typeof f.lng === 'number' && !Number.isNaN(f.lat) && !Number.isNaN(f.lng))
                     .map((f) => (
-                    <Marker key={`f-${f.id}`} position={[f.lat, f.lng]} icon={createMovementIcon('flight', f.isAnomaly, f.heading)}>
+                    <Marker
+                      key={`f-${f.id}`}
+                      position={[f.lat, f.lng]}
+                      icon={createMovementIcon('flight', f.isAnomaly, f.heading)}
+                      eventHandlers={{ click: () => startTracking(f.id, 'flight', f.meta?.callsign || f.id) }}
+                    >
                       <Popup>
                         <div className="intel-popup intel-movement-popup intel-flight-detail">
                           <strong className="intel-flight-callsign">{f.meta?.callsign || f.id}</strong>
@@ -622,7 +668,7 @@ const Intel = () => {
               <Overlay name="Disasters (GDACS)" checked={showGdacs}>
                 <LayerGroup>
                   {showGdacs && gdacsEvents.map((e) => (
-                    <Marker key={e.id} position={[e.lat, e.lng]} icon={createAlertIcon(e.severity === 'Red' ? '#EF4444' : e.severity === 'Orange' ? '#F59E0B' : '#10B981')}>
+                    <Marker key={e.id} position={[e.lat, e.lng]} icon={createAlertIcon(e.severity === 'Red' ? '#EF4444' : e.severity === 'Orange' ? '#0EA5E9' : '#10B981')}>
                       <Popup>
                         <div className="intel-popup"><strong>{e.type}</strong> {e.label} {e.url && <a href={e.url} target="_blank" rel="noopener noreferrer">Details</a>}</div>
                       </Popup>

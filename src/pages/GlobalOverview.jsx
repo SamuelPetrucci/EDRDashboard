@@ -11,6 +11,8 @@ import { calculateOverallScore, getRecoveryStatus } from '../data/scorecardDomai
 import { getRequiredTrainings, getAllTrainings } from '../data/trainings'
 import { getWeatherData } from '../data/weatherFeed'
 import { getCommunications } from '../data/communications'
+import { fetchNewsForBounds } from '../data/newsFeed'
+import { JAMAICA_BBOX } from '../data/intelSources'
 import { searchPlaces } from '../data/geocode'
 import { getWeatherAtPoint } from '../data/weatherAtPoint'
 import { fetchCamerasNearPoint } from '../data/cameraFeed'
@@ -36,6 +38,9 @@ const GlobalOverview = () => {
   const [feedCameras, setFeedCameras] = useState([])
   const [feedLoading, setFeedLoading] = useState(false)
   const [feedError, setFeedError] = useState(null)
+  const [newsArticles, setNewsArticles] = useState([])
+  const [newsLoading, setNewsLoading] = useState(false)
+  const [newsError, setNewsError] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -99,6 +104,33 @@ const GlobalOverview = () => {
       })
       .finally(() => setFeedLoading(false))
   }, [feedSelectedPlace?.lat, feedSelectedPlace?.lng])
+
+  useEffect(() => {
+    let cancelled = false
+    const loadNews = async () => {
+      setNewsLoading(true)
+      setNewsError(null)
+      try {
+        const list = await fetchNewsForBounds(JAMAICA_BBOX, 12)
+        if (cancelled) return
+        setNewsArticles(Array.isArray(list) ? list : [])
+        setNewsError(null)
+      } catch {
+        if (cancelled) return
+        setNewsArticles([])
+        setNewsError('Unable to load news aggregate right now.')
+      } finally {
+        if (!cancelled) setNewsLoading(false)
+      }
+    }
+
+    loadNews()
+    const interval = setInterval(loadNews, 5 * 60 * 1000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [])
 
   // Get readiness status for each parish
   const getParishReadiness = (parish) => {
@@ -185,8 +217,8 @@ const GlobalOverview = () => {
   return (
     <div className="global-overview">
       <div className="page-header">
-        <h1>Jamaica Disaster Recovery Dashboard</h1>
-        <p className="subtitle">Coordinated Emergency Management - 14 Parishes Overview</p>
+        <h1>Emergency Resilience Scorecard (TM)</h1>
+        <p className="subtitle">Strategic Emergency Management - 14 Parishes Overview</p>
       </div>
 
       {/* At-a-Glance Overview */}
@@ -318,29 +350,29 @@ const GlobalOverview = () => {
             </div>
           </div>
           <div className="readiness-stats-grid-compact">
-            <div className="readiness-stat-card-compact" style={{ borderColor: 'var(--resilient-color)' }}>
-              <CheckCircle size={20} style={{ color: 'var(--resilient-color)' }} />
+            <div className="readiness-stat-card-compact">
+              <CheckCircle size={26} style={{ color: 'var(--resilient-color)' }} />
               <div>
                 <h4>{readinessStats.resilient}</h4>
                 <p>Resilient</p>
               </div>
             </div>
-            <div className="readiness-stat-card-compact" style={{ borderColor: 'var(--restoring-color)' }}>
-              <Clock size={20} style={{ color: 'var(--restoring-color)' }} />
+            <div className="readiness-stat-card-compact">
+              <Clock size={26} style={{ color: 'var(--restoring-color)' }} />
               <div>
                 <h4>{readinessStats.restoring}</h4>
                 <p>Restoring</p>
               </div>
             </div>
-            <div className="readiness-stat-card-compact" style={{ borderColor: 'var(--need-support-color)' }}>
-              <AlertCircle size={20} style={{ color: 'var(--need-support-color)' }} />
+            <div className="readiness-stat-card-compact">
+              <AlertCircle size={26} style={{ color: 'var(--need-support-color)' }} />
               <div>
                 <h4>{readinessStats.needSupport}</h4>
                 <p>Need Support</p>
               </div>
             </div>
-            <div className="readiness-stat-card-compact" style={{ borderColor: 'var(--text-secondary)' }}>
-              <AlertCircle size={20} style={{ color: 'var(--text-secondary)' }} />
+            <div className="readiness-stat-card-compact">
+              <AlertCircle size={26} style={{ color: 'var(--text-secondary)' }} />
               <div>
                 <h4>{readinessStats.notAssessed}</h4>
                 <p>Not Assessed</p>
@@ -648,6 +680,43 @@ const GlobalOverview = () => {
                 </div>
               ) : (
                 <p className="communications-empty">No recent bulletins.</p>
+              )}
+            </div>
+            <div className="communications-section news-aggregate-section">
+              <h3 className="communications-title">
+                <Shield size={18} />
+                News Aggregate
+              </h3>
+              <p className="communications-intro">
+                Consolidated headlines and updates relevant to regional operations.
+              </p>
+              {newsLoading ? (
+                <p className="communications-empty">Loading news...</p>
+              ) : newsError ? (
+                <p className="communications-empty">{newsError}</p>
+              ) : newsArticles.length > 0 ? (
+                <div className="communications-list news-aggregate-list">
+                  {newsArticles.slice(0, 6).map((article) => (
+                    <div key={article.id} className="communications-item news-aggregate-item">
+                      <Bell size={14} />
+                      <div>
+                        <a
+                          href={article.url || '#'}
+                          target={article.url ? '_blank' : undefined}
+                          rel={article.url ? 'noopener noreferrer' : undefined}
+                          className="news-aggregate-title"
+                        >
+                          {article.title}
+                        </a>
+                        <div className="communications-item-meta">
+                          {(article.source || 'News')}{article.publishedAt ? ` · ${new Date(article.publishedAt).toLocaleString()}` : ''}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="communications-empty">No news items available yet.</p>
               )}
             </div>
           </div>

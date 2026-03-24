@@ -5,47 +5,47 @@
 }
 
 :root {
-  /* Theme Colors - Orange & Dark Navy Blue */
-  --primary-color: #FF6B35; /* Vibrant Orange */
-  --primary-dark: #E85A2B; /* Darker Orange */
-  --primary-light: #FF8C5A; /* Lighter Orange */
+  /* Theme Colors - Subtle Orange Accents */
+  --primary-color: #F97316;
+  --primary-dark: #EA580C;
+  --primary-light: #FDBA74;
   --navy-color: #2C5F8D; /* Darker Navy Blue */
   --navy-dark: #1E4A6B; /* Darkest Navy */
   --navy-light: #3D7BB3; /* Lighter Navy */
   
   /* Status Colors */
   --success-color: #10B981; /* Green for Resilient */
-  --warning-color: #F59E0B; /* Amber for Restoring */
+  --warning-color: #F97316;
   --danger-color: #EF4444; /* Red for Need Support */
   --resilient-color: #10B981;
-  --restoring-color: #F59E0B;
+  --restoring-color: #F97316;
   --need-support-color: #EF4444;
 
   /* Section card header accent – colored top bar on cards */
   --section-overview: #1E4A6B;
-  --section-training: #E85A2B;
+  --section-training: #C2410C;
   --section-inventory: #0F766E;
   --section-communications: #6D28D9;
   --section-parishes: #0F172A;
-  --section-protocols: #1D4ED8;
+  --section-protocols: #C2410C;
   --section-contacts: #0F766E;
 
-  /* Light Mode Colors */
-  --bg-color: #F8FAFC; /* Very light gray-blue */
-  --bg: #F8FAFC;
-  --card-bg: #FFFFFF;
-  --text-primary: #0F172A; /* High-contrast dark slate */
-  --text-secondary: #475569; /* Clearer medium slate */
-  --text-tertiary: #64748B; /* Muted but readable */
-  --border-color: #E2E8F0; /* Light slate */
+  /* Base Colors (dark-first for light text clarity) */
+  --bg-color: #0F172A;
+  --bg: #0F172A;
+  --card-bg: #1E293B;
+  --text-primary: #F8FAFC;
+  --text-secondary: #E2E8F0;
+  --text-tertiary: #CBD5E1;
+  --border-color: #334155;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
   /* Background gradients – break up whitespace, modern & professional */
-  --bg-gradient-base: linear-gradient(165deg, #fafbfc 0%, #f1f5f9 18%, #e2e8f0 38%, #cbd5e1 55%, #e2e8f0 72%, #f1f5f9 88%, #fafbfc 100%);
-  --bg-gradient-accent: radial-gradient(ellipse 120% 70% at 50% -15%, rgba(44, 95, 141, 0.08) 0%, transparent 50%);
-  --bg-gradient-warm: radial-gradient(ellipse 80% 50% at 100% 70%, rgba(255, 107, 53, 0.05) 0%, transparent 55%);
+  --bg-gradient-base: linear-gradient(165deg, #0f172a 0%, #1e293b 20%, #334155 40%, #1e293b 60%, #0f172a 80%, #020617 100%);
+  --bg-gradient-accent: radial-gradient(ellipse 100% 50% at 50% -5%, rgba(56, 189, 248, 0.04) 0%, transparent 50%);
+  --bg-gradient-warm: radial-gradient(ellipse 72% 40% at 95% 70%, rgba(249, 115, 22, 0.12) 0%, transparent 48%);
 }
 
 /* Dark Mode */
@@ -54,15 +54,15 @@
   --bg: #0F172A;
   --card-bg: #1E293B; /* Darker slate */
   --text-primary: #F8FAFC; /* Brighter primary text */
-  --text-secondary: #CBD5E1; /* Brighter secondary for clarity */
-  --text-tertiary: #94A3B8; /* Muted but readable */
+  --text-secondary: #E2E8F0;
+  --text-tertiary: #CBD5E1;
   --border-color: #334155; /* Dark border */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
   --bg-gradient-base: linear-gradient(165deg, #0f172a 0%, #1e293b 20%, #334155 40%, #1e293b 60%, #0f172a 80%, #020617 100%);
-  --bg-gradient-accent: radial-gradient(ellipse 100% 50% at 50% -5%, rgba(56, 189, 248, 0.06) 0%, transparent 50%);
-  --bg-gradient-warm: radial-gradient(ellipse 60% 30% at 95% 70%, rgba(251, 146, 60, 0.05) 0%, transparent 45%);
+  --bg-gradient-accent: radial-gradient(ellipse 100% 50% at 50% -5%, rgba(56, 189, 248, 0.04) 0%, transparent 50%);
+  --bg-gradient-warm: radial-gradient(ellipse 72% 40% at 95% 70%, rgba(249, 115, 22, 0.12) 0%, transparent 48%);
 }
 
 [data-theme="dark"] body {
@@ -77,7 +77,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background-color: #f8fafc;
+  background-color: #0f172a;
   background-image: var(--bg-gradient-accent), var(--bg-gradient-warm), var(--bg-gradient-base);
   background-attachment: fixed;
   color: var(--text-primary);
@@ -95,6 +95,16 @@ h1, h2, h3, h4, h5, h6 {
 p {
   color: inherit;
   line-height: 1.5;
+}
+
+/* Force high-contrast readable text across dashboard pages */
+body :is(h1, h2, h3, h4, h5, h6, p, span, strong, em, small, li, a, label, input, textarea, select) {
+  color: var(--text-primary) !important;
+}
+
+/* Secondary/supporting copy stays off-white, never saturated accent colors */
+body :is(.subtitle, .hint, .meta, .description, .time, .timestamp, .label, .secondary, .muted, .text-secondary) {
+  color: var(--text-secondary) !important;
 }
 
 code {

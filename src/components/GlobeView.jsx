@@ -184,8 +184,8 @@ function GlobeTrafficSync({ showTraffic }) {
                 'match',
                 ['get', 'congestion'],
                 'low', '#22c55e',
-                'moderate', '#eab308',
-                'heavy', '#f97316',
+                'moderate', '#0284c7',
+                'heavy', '#0369a1',
                 'severe', '#ef4444',
                 'closed', '#64748b',
                 '#94a3b8',
@@ -364,6 +364,7 @@ export default function GlobeView({
   popupContent,
   onClosePopup,
   trackedEntity,
+  trackedFlightTrail = [],
   style,
   className,
 }) {
@@ -508,6 +509,33 @@ export default function GlobeView({
                 />
               </Source>
             )}
+            {Array.isArray(trackedFlightTrail) && trackedFlightTrail.length >= 2 && (
+              <Source
+                id="tracked-flight-trail"
+                type="geojson"
+                data={{
+                  type: 'FeatureCollection',
+                  features: [
+                    {
+                      type: 'Feature',
+                      geometry: { type: 'LineString', coordinates: trackedFlightTrail },
+                      properties: {},
+                    },
+                  ],
+                }}
+              >
+                <Layer
+                  id="tracked-flight-trail-line"
+                  type="line"
+                  paint={{
+                    'line-color': '#f97316',
+                    'line-width': 4,
+                    'line-opacity': 0.95,
+                    'line-dasharray': [2, 2],
+                  }}
+                />
+              </Source>
+            )}
             <Source id="movements" type="geojson" data={movementData}>
               <Layer
                 id="movements-circles"
@@ -548,7 +576,7 @@ export default function GlobeView({
                   type="circle"
                   paint={{
                     'circle-radius': 10,
-                    'circle-color': '#FF6B35',
+                    'circle-color': '#2563EB',
                     'circle-stroke-width': 2,
                     'circle-stroke-color': '#fff',
                     'circle-opacity': 0.95,
