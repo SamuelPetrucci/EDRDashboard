@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { getAllParishes } from '../data/jamaicaParishes'
 import { getParishScorecard } from '../utils/scorecardStorage'
-import { calculateOverallScore, getRecoveryStatus } from '../data/scorecardDomains'
+import { calculateOverallScore, getRecoveryStatus, getRecoveryGaugeAccent } from '../data/scorecardDomains'
 import { CheckCircle, Clock, AlertCircle, MapPin } from 'lucide-react'
 import './PreparednessMap.css'
 
@@ -24,7 +24,7 @@ const PreparednessMap = () => {
 
     const overallScore = calculateOverallScore(scorecardData.domains)
     const recoveryStatus = getRecoveryStatus(overallScore)
-    
+
     let Icon
     if (overallScore >= 80) {
       Icon = CheckCircle
@@ -33,11 +33,11 @@ const PreparednessMap = () => {
     } else {
       Icon = AlertCircle
     }
-    
+
     return {
       score: overallScore,
       status: recoveryStatus.status,
-      color: recoveryStatus.color,
+      color: getRecoveryGaugeAccent(overallScore),
       icon: Icon,
       assessed: true
     }

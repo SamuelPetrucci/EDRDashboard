@@ -7,7 +7,7 @@ import { MapPin, Users, Package, AlertCircle, CheckCircle, Clock, BookOpen, Mess
 import DisasterAlerts from '../components/DisasterAlerts'
 import { getParishScorecard } from '../utils/scorecardStorage'
 import { getParishEquipment, getParishPersonnel } from '../utils/equipmentStorage'
-import { calculateOverallScore, getRecoveryStatus } from '../data/scorecardDomains'
+import { calculateOverallScore, getRecoveryStatus, getRecoveryGaugeAccent } from '../data/scorecardDomains'
 import { getRequiredTrainings, getAllTrainings } from '../data/trainings'
 import { getWeatherData } from '../data/weatherFeed'
 import { getCommunications } from '../data/communications'
@@ -147,11 +147,11 @@ const GlobalOverview = () => {
 
     const overallScore = calculateOverallScore(scorecardData.domains)
     const recoveryStatus = getRecoveryStatus(overallScore)
-    
+
     return {
       score: overallScore,
       status: recoveryStatus.status,
-      color: recoveryStatus.color,
+      color: getRecoveryGaugeAccent(overallScore),
       assessed: true
     }
   }
@@ -213,11 +213,12 @@ const GlobalOverview = () => {
   const averageScore = assessedParishes.length > 0
     ? assessedParishes.reduce((sum, p) => sum + getParishReadiness(p).score, 0) / assessedParishes.length
     : 0
+  const averageGaugeAccent = getRecoveryGaugeAccent(averageScore)
 
   return (
     <div className="global-overview">
       <div className="page-header">
-        <h1>Emergency Resilience Scorecard (TM)</h1>
+        <h1>National Overview</h1>
         <p className="subtitle">Strategic Emergency Management - 14 Parishes Overview</p>
       </div>
 
@@ -236,7 +237,7 @@ const GlobalOverview = () => {
           <div className="overview-primary">
             <div className="scorecard-grid">
               {weather?.current ? (
-                <div className="scorecard-weather-card">
+                <div className="scorecard-weather-card scorecard-overview-card scorecard-overview-card--weather">
                   <div className="weather-card-header">
                     <Cloud size={20} />
                     <span>Weather</span>
@@ -307,7 +308,7 @@ const GlobalOverview = () => {
                   </a>
                 </div>
               ) : (
-                <div className="scorecard-weather-card scorecard-weather-card-placeholder">
+                <div className="scorecard-weather-card scorecard-weather-card-placeholder scorecard-overview-card scorecard-overview-card--weather">
                   <div className="weather-card-header">
                     <Cloud size={20} />
                     <span>Weather</span>
@@ -336,42 +337,49 @@ const GlobalOverview = () => {
                   </div>
                 </div>
               )}
-              <div className="scorecard-summary-card">
+              <div className="scorecard-summary-card scorecard-overview-card scorecard-overview-card--summary">
+            <div className="scorecard-summary-card-header">
+              <BarChart3 size={18} aria-hidden />
+              <span>Average Readiness</span>
+            </div>
             <div className="score-display">
-              <div className="score-circle-large" style={{ borderColor: getRecoveryStatus(averageScore).color }}>
+              <div
+                className="score-circle-large"
+                style={{ '--score-ring': averageGaugeAccent }}
+              >
                 <span className="score-value-large">{averageScore.toFixed(0)}%</span>
               </div>
               <div className="score-info">
-                <h3>Average Readiness</h3>
-                <div className="status-badge-large" style={{ backgroundColor: getRecoveryStatus(averageScore).color }}>
+                <h3>Parish aggregate</h3>
+                <div className="status-badge-large status-badge-large--soft" style={{ backgroundColor: averageGaugeAccent }}>
                   {getRecoveryStatus(averageScore).status}
                 </div>
               </div>
             </div>
           </div>
           <div className="readiness-stats-grid-compact">
-            <div className="readiness-stat-card-compact">
+            <div className="readiness-stat-card-compact readiness-stat-card-compact--resilient">
               <CheckCircle size={26} style={{ color: 'var(--resilient-color)' }} />
               <div>
                 <h4>{readinessStats.resilient}</h4>
                 <p>Resilient</p>
               </div>
             </div>
-            <div className="readiness-stat-card-compact">
+            <div className="readiness-stat-card-compact readiness-stat-card-compact--restoring">
               <Clock size={26} style={{ color: 'var(--restoring-color)' }} />
               <div>
                 <h4>{readinessStats.restoring}</h4>
                 <p>Restoring</p>
               </div>
             </div>
-            <div className="readiness-stat-card-compact">
-              <AlertCircle size={26} style={{ color: 'var(--need-support-color)' }} />
+            <div className="readiness-stat-card-compact readiness-stat-card-compact--need-support">
+              <AlertCircle size={26} style={{ color: 'var(--overview-accent-need-support)' }} />
               <div>
                 <h4>{readinessStats.needSupport}</h4>
                 <p>Need Support</p>
               </div>
             </div>
-            <div className="readiness-stat-card-compact">
+            <div className="readiness-stat-card-compact readiness-stat-card-compact--not-assessed">
               <AlertCircle size={26} style={{ color: 'var(--text-secondary)' }} />
               <div>
                 <h4>{readinessStats.notAssessed}</h4>

@@ -13,9 +13,10 @@ export const JAMAICA_BBOX = {
 }
 
 /** Refresh intervals in ms */
+/** OpenSky anonymous tier is strict; keep a single combined poll interval (see Intel map). */
 export const FEED_REFRESH_MS = {
-  flights: 50000,
-  ships: 65000,
+  flights: 90000,
+  ships: 90000,
 }
 
 /** Max markers to render (avoids lag). User can raise via display limit. */

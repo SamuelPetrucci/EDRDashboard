@@ -27,7 +27,7 @@
 }
 
 .logo-image {
-  height: 52px;
+  height: 72px;
   width: auto;
   object-fit: contain;
   display: block;
@@ -116,6 +116,11 @@
   border-top: 1px solid rgba(148, 163, 184, 0.28);
 }
 
+.footer.footer--minimal {
+  padding: 0;
+  min-height: 10px;
+}
+
 .footer-content {
   max-width: 1400px;
   margin: 0 auto;
@@ -181,6 +186,10 @@
 
   .footer-brand {
     align-items: center;
+  }
+
+  .logo-image {
+    height: 56px;
   }
 }
 

@@ -13,6 +13,25 @@ const MAPBOX_STYLES = {
   standard: 'mapbox://styles/mapbox/standard',
 }
 
+const INTERACTIVE_LAYER_IDS = ['movements-circles', 'movements-symbols', 'webcams-circles', 'webcams-symbols']
+
+function queryInteractiveFeatures(map, point) {
+  if (!map || typeof map.queryRenderedFeatures !== 'function' || typeof map.getLayer !== 'function') return []
+  const layers = INTERACTIVE_LAYER_IDS.filter((id) => {
+    try {
+      return !!map.getLayer(id)
+    } catch {
+      return false
+    }
+  })
+  if (layers.length === 0) return []
+  try {
+    return map.queryRenderedFeatures(point, { layers })
+  } catch {
+    return []
+  }
+}
+
 /** Convert flights/ships to GeoJSON FeatureCollection for Mapbox */
 function toMovementGeoJSON(flights, ships, showFlights, showShips) {
   const features = []
@@ -453,9 +472,7 @@ export default function GlobeView({
         onMouseMove={(e) => {
           const map = e.target
           if (!map || typeof map.queryRenderedFeatures !== 'function') return
-          const features = map.queryRenderedFeatures(e.point, {
-            layers: ['movements-circles', 'movements-symbols', 'webcams-circles', 'webcams-symbols'],
-          })
+          const features = queryInteractiveFeatures(map, e.point)
           const canvas = map.getCanvas()
           if (canvas) canvas.style.cursor = features.length > 0 ? 'pointer' : ''
         }}

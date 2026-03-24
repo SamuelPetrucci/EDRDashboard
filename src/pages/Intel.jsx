@@ -24,6 +24,24 @@ import GlobeView from '../components/GlobeView'
 import 'leaflet/dist/leaflet.css'
 import './Intel.css'
 
+/** Windy viewer URLs load the full map (often satellite) in an iframe; use a new tab for those. */
+function cameraUrlEmbedsInline(url) {
+  if (!url || url === '#') return false
+  try {
+    const u = new URL(url)
+    return !u.hostname.includes('windy.com')
+  } catch {
+    return false
+  }
+}
+
+function formatCameraFeedError(msg) {
+  if (!msg) return msg
+  if (msg.startsWith('Windy:')) return 'Windy: check key or CORS (see MANUAL_SETUP.md).'
+  if (msg.startsWith('OpenWebcamDB:')) return 'OpenWebcamDB: check API key (see MANUAL_SETUP.md).'
+  return msg
+}
+
 const DefaultIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -151,7 +169,11 @@ const Intel = () => {
   const [newsError, setNewsError] = useState(null)
   const mapSearchWrapRef = useRef(null)
   const mapboxToken = typeof import.meta !== 'undefined' && import.meta.env?.VITE_MAPBOX_TOKEN
-  const hasWebcamKey = typeof import.meta !== 'undefined' && (import.meta.env?.VITE_WINDY_WEBCAM_API_KEY || import.meta.env?.VITE_WINDY_API_KEY)
+  const hasWebcamKey =
+    typeof import.meta !== 'undefined' &&
+    (import.meta.env?.VITE_WINDY_WEBCAM_API_KEY ||
+      import.meta.env?.VITE_WINDY_API_KEY ||
+      import.meta.env?.VITE_OPENWEBCAMDB_API_KEY)
 
   useEffect(() => {
     if (!searchDropdownOpen) return
@@ -211,9 +233,9 @@ const Intel = () => {
 
   useEffect(() => {
     fetchFeeds()
-    const t1 = setInterval(fetchFeeds, FEED_REFRESH_MS.flights)
-    const t2 = setInterval(fetchFeeds, FEED_REFRESH_MS.ships)
-    return () => { clearInterval(t1); clearInterval(t2) }
+    const ms = Math.max(FEED_REFRESH_MS.flights, FEED_REFRESH_MS.ships)
+    const t = setInterval(fetchFeeds, ms)
+    return () => clearInterval(t)
   }, [fetchFeeds])
 
   useEffect(() => {
@@ -772,7 +794,7 @@ const Intel = () => {
                 <button type="button" role="tab" aria-selected={controlTab === 'map'} className={`intel-control-tab ${controlTab === 'map' ? 'active' : ''}`} onClick={() => setControlTab('map')} title="Map view and 2D/3D"><Map size={14} /> Map</button>
                 <button type="button" role="tab" aria-selected={controlTab === 'layers'} className={`intel-control-tab ${controlTab === 'layers' ? 'active' : ''}`} onClick={() => setControlTab('layers')} title="Layers and filters"><Layers size={14} /> Layers</button>
                 <button type="button" role="tab" aria-selected={controlTab === 'intel'} className={`intel-control-tab ${controlTab === 'intel' ? 'active' : ''}`} onClick={() => setControlTab('intel')} title="Area intel and feeds"><Target size={14} /> Intel</button>
-                <button type="button" role="tab" aria-selected={controlTab === 'webcams'} className={`intel-control-tab ${controlTab === 'webcams' ? 'active' : ''}`} onClick={() => setControlTab('webcams')} title="Live Windy webcams"><Video size={14} /> Webcams</button>
+                <button type="button" role="tab" aria-selected={controlTab === 'webcams'} className={`intel-control-tab ${controlTab === 'webcams' ? 'active' : ''}`} onClick={() => setControlTab('webcams')} title="Live webcams (OpenWebcamDB or Windy)"><Video size={14} /> Webcams</button>
                 <button type="button" role="tab" aria-selected={controlTab === 'maps'} className={`intel-control-tab ${controlTab === 'maps' ? 'active' : ''}`} onClick={() => setControlTab('maps')} title="Map modes"><Globe size={14} /> Maps</button>
                 <button type="button" role="tab" aria-selected={controlTab === 'news'} className={`intel-control-tab ${controlTab === 'news' ? 'active' : ''}`} onClick={() => setControlTab('news')} title="News"><Newspaper size={14} /> News</button>
               </div>
@@ -908,7 +930,7 @@ const Intel = () => {
                               <strong><Video size={14} /> Live webcams</strong>
                               {areaFeeds.cameras.length > 0 ? (
                                 <>
-                                  <p className="intel-camera-list-hint">Click a camera name or <strong>Watch</strong> to open the live stream. If the player does not load, use <strong>Open in new tab</strong> to watch on Windy.com.</p>
+                                  <p className="intel-camera-list-hint">Click a camera name or <strong>Watch</strong> to preview. Windy feeds must use <strong>Open in new tab</strong>; OpenWebcamDB may play inline when the stream allows it.</p>
                                   <ul className="intel-camera-list">
                                     {areaFeeds.cameras.map((c) => (
                                       <li key={c.id} className="intel-camera-item">
@@ -925,10 +947,10 @@ const Intel = () => {
                                 <>
                                   {areaFeeds.error && (
                                     <p className="intel-area-feed-error" title={areaFeeds.error}>
-                                      {areaFeeds.error.startsWith('Windy:') ? 'Windy: check key or CORS (see MANUAL_SETUP.md).' : areaFeeds.error}
+                                      {formatCameraFeedError(areaFeeds.error)}
                                     </p>
                                   )}
-                                  <p className="intel-area-no-cameras">No webcams here. Search a city (e.g. London, Tokyo) or set VITE_WINDY_WEBCAM_API_KEY in .env for more.</p>
+                                  <p className="intel-area-no-cameras">No webcams in range. Try another city or set VITE_OPENWEBCAMDB_API_KEY / Windy keys in .env (see MANUAL_SETUP.md).</p>
                                 </>
                               )}
                             </div>
@@ -939,7 +961,7 @@ const Intel = () => {
                       <div className="intel-area-feeds-card">
                         <div className="intel-sources-header"><h2>Area intel</h2></div>
                         <p className="intel-area-hint">Click a point on the map (or search for a city, e.g. London, Tokyo) to load feeds and webcams for that area.</p>
-                        <p className="intel-area-hint intel-webcam-where">Real webcam links appear under <strong>Live webcams</strong> in this panel after you click or search; each opens the live stream on Windy.com.</p>
+                        <p className="intel-area-hint intel-webcam-where">Set <code>VITE_OPENWEBCAMDB_API_KEY</code> and/or Windy webcam keys in <code>.env</code>. After you click or search, cameras list under <strong>Live webcams</strong>.</p>
                         <p className="intel-intel-note">Future: gather intel from map data (terrain, infrastructure, population) to understand regions and support response planning.</p>
                       </div>
                     )}
@@ -947,10 +969,10 @@ const Intel = () => {
                 )}
                 {controlTab === 'webcams' && (
                   <div className="intel-tab-pane intel-tab-webcams">
-                    <div className="intel-sources-header"><h2><Video size={18} /> Live Windy webcams</h2></div>
-                    <p className="intel-tab-desc">Search a city or place to list nearby webcams. Links open the live stream on Windy.com.</p>
+                    <div className="intel-sources-header"><h2><Video size={18} /> Live webcams</h2></div>
+                    <p className="intel-tab-desc">Search a place to list nearby cameras (OpenWebcamDB when configured, otherwise Windy).</p>
                     {!hasWebcamKey && (
-                      <p className="intel-webcam-key-hint">Set <code>VITE_WINDY_WEBCAM_API_KEY</code> in <code>.env</code> and restart the app to load webcams.</p>
+                      <p className="intel-webcam-key-hint">Set <code>VITE_OPENWEBCAMDB_API_KEY</code> and/or <code>VITE_WINDY_WEBCAM_API_KEY</code> in <code>.env</code> and restart the app.</p>
                     )}
                     <form className="intel-dashboard-search" onSubmit={handleWebcamSearch}>
                       <Search size={18} aria-hidden />
@@ -990,7 +1012,7 @@ const Intel = () => {
                           <>
                             {webcamError && (
                               <p className="intel-area-feed-error" title={webcamError}>
-                                {webcamError.startsWith('Windy:') ? 'Windy: check key or CORS (see MANUAL_SETUP.md).' : webcamError}
+                                {formatCameraFeedError(webcamError)}
                               </p>
                             )}
                             {webcamList.length > 0 ? (
@@ -1114,17 +1136,28 @@ const Intel = () => {
           <div className="intel-camera-modal" onClick={(e) => e.stopPropagation()}>
             <div className="intel-camera-modal-header">
               <h3><Video size={20} /> {selectedCamera.name}</h3>
-              <a href={selectedCamera.url && selectedCamera.url !== '#' ? selectedCamera.url : 'https://www.windy.com'} target="_blank" rel="noopener noreferrer" className="intel-camera-modal-open-tab">Open live stream in new tab</a>
+              <a
+                href={selectedCamera.url && selectedCamera.url !== '#' ? selectedCamera.url : 'https://www.windy.com'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="intel-camera-modal-open-tab"
+              >
+                Open in new tab
+              </a>
               <button type="button" className="intel-camera-modal-close" onClick={() => setSelectedCamera(null)} aria-label="Close"><X size={24} /></button>
             </div>
             <div className="intel-camera-modal-body">
-              {selectedCamera.url && selectedCamera.url !== '#' && !selectedCamera.url.startsWith('#') ? (
+              {selectedCamera.url && selectedCamera.url !== '#' && !selectedCamera.url.startsWith('#') && cameraUrlEmbedsInline(selectedCamera.url) ? (
                 <>
                   <iframe title={selectedCamera.name} src={selectedCamera.url} className="intel-camera-iframe" />
-                  <p className="intel-camera-modal-fallback">If the player does not load, use <strong>Open live stream in new tab</strong> above to watch on Windy.com.</p>
+                  <p className="intel-camera-modal-fallback">If the player does not load, use <strong>Open in new tab</strong> above.</p>
                 </>
               ) : (
-                <p className="intel-camera-modal-fallback">Open the link above to watch this webcam on Windy.com.</p>
+                <p className="intel-camera-modal-fallback">
+                  {selectedCamera.url && selectedCamera.url.includes('windy.com')
+                    ? 'Windy camera pages cannot play inside this window (you would see the map/satellite view). Use Open in new tab above for the webcam viewer.'
+                    : 'Use Open in new tab above to watch this camera.'}
+                </p>
               )}
             </div>
           </div>

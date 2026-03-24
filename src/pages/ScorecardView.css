@@ -5,8 +5,22 @@
   gap: 1.25rem;
 }
 
+/* Page title band */
 .scorecard-header {
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1e293b 0%, var(--navy-dark) 55%, #0f172a 100%);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
+.scorecard-header h1 {
+  color: #f8fafc;
+}
+
+.scorecard-header .subtitle {
+  color: #cbd5e1;
 }
 
 .scorecard-header-top {
@@ -28,7 +42,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--navy-color);
+  color: #bae6fd;
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s;
@@ -36,22 +50,57 @@
 }
 
 .back-link:hover {
-  color: var(--primary-color);
+  color: #fff;
   transform: translateX(-2px);
 }
 
 .scorecard-header h1 {
   font-size: 2.25rem;
-  color: var(--navy-dark);
   margin-bottom: 0.5rem;
   font-weight: 700;
   letter-spacing: -0.5px;
 }
 
-.subtitle {
-  color: var(--text-secondary);
+.scorecard-header .subtitle {
   font-size: 1rem;
   font-weight: 400;
+}
+
+/* Section panels – gradient headers, soft outer border */
+.scorecard-panel {
+  margin-bottom: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  background: var(--card-bg);
+}
+
+.scorecard-panel-header {
+  padding: 0.65rem 1.25rem;
+  background: linear-gradient(135deg, #1e3a5f 0%, var(--section-overview) 48%, #0f172a 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.scorecard-panel--domains .scorecard-panel-header {
+  background: linear-gradient(135deg, #0c4a6e 0%, #155e75 50%, #134e4a 100%);
+}
+
+.scorecard-panel--glance .scorecard-panel-header {
+  background: linear-gradient(135deg, #1e3a5f 0%, var(--navy-dark) 45%, #0f172a 100%);
+}
+
+.scorecard-panel-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  letter-spacing: 0.02em;
+}
+
+.scorecard-panel-body {
+  padding: 1rem 1.25rem 1.25rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.4) 0%, var(--card-bg) 100%);
 }
 
 .scorecard-parish-filter {
@@ -102,16 +151,15 @@
   font-weight: 600;
 }
 
-/* At a Glance – Compact Score Summary */
+/* At a Glance – Compact Score Summary (inside panel body) */
 .scorecard-at-a-glance {
-  background: var(--card-bg);
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
-  border-left: 4px solid;
-  background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+  background: transparent;
+  border-radius: 0;
+  padding: 0 0 0 1rem;
+  margin: 0;
+  box-shadow: none;
+  border: none;
+  border-left: 3px solid var(--glance-accent, var(--section-overview));
 }
 
 .at-a-glance-score {
@@ -124,13 +172,13 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  border: 3px solid;
+  border: 2px solid;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   background: var(--card-bg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .at-a-glance-circle span {
@@ -185,13 +233,8 @@
   transition: width 0.4s ease;
 }
 
-/* Domain Overview – click cards to open scorecard modal */
-.domains-overview {
-  margin-bottom: 1.25rem;
-}
-
 .domains-overview-hint {
-  margin: -0.5rem 0 1rem 0;
+  margin: 0 0 1rem 0;
   font-size: 0.9rem;
   color: var(--text-secondary);
 }
@@ -209,21 +252,21 @@
   text-align: left;
   font: inherit;
   color: inherit;
-  background: var(--card-bg);
+  background: linear-gradient(165deg, rgba(30, 41, 59, 0.6) 0%, var(--card-bg) 100%);
   border-radius: 10px;
   padding: 1.25rem;
-  box-shadow: var(--shadow-md);
-  border: 2px solid var(--border-color);
-  border-left: 4px solid;
-  transition: all 0.3s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-left: 4px solid var(--domain-accent, var(--section-overview));
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   cursor: pointer;
   appearance: none;
 }
 
 .domain-overview-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary-color);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  border-color: rgba(148, 163, 184, 0.45);
 }
 
 .domain-overview-header {
@@ -328,14 +371,23 @@
   background: var(--card-bg);
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-color);
-  border-top: 8px solid var(--section-overview);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-top: none;
   width: 100%;
   max-width: 720px;
   max-height: calc(100vh - 3rem);
   display: flex;
   flex-direction: column;
   animation: scorecard-modal-slide-in 0.25s ease;
+  overflow: hidden;
+}
+
+.scorecard-modal::before {
+  content: '';
+  display: block;
+  height: 5px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, var(--section-overview) 0%, var(--navy-light) 45%, var(--primary-color) 100%);
 }
 
 @keyframes scorecard-modal-slide-in {
@@ -355,9 +407,10 @@
   align-items: flex-start;
   gap: 1rem;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  border-left: 4px solid;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  border-left: 3px solid;
   flex-shrink: 0;
+  background: linear-gradient(180deg, rgba(30, 58, 95, 0.25) 0%, transparent 100%);
 }
 
 .scorecard-modal-header h2 {
@@ -642,9 +695,9 @@
 }
 
 .score-checkbox-label.active .score-checkbox-custom.score-0 {
-  background: var(--need-support-color);
+  background: var(--section-training);
   color: white;
-  border-color: var(--need-support-color);
+  border-color: var(--section-training);
 }
 
 .score-checkbox-label.active .score-checkbox-custom.score-1 {
@@ -664,7 +717,7 @@
 }
 
 .score-checkbox-label.active.score-0 {
-  border-color: var(--need-support-color);
+  border-color: var(--section-training);
 }
 
 .score-checkbox-label.active.score-1 {
@@ -737,10 +790,6 @@
     flex-direction: column;
     text-align: center;
     gap: 1rem;
-  }
-
-  .at-a-glance-info h2 {
-    font-size: 1rem;
   }
 
   .criteria-grid-compact {

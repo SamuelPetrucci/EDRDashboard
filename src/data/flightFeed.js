@@ -5,11 +5,17 @@
 
 const OPENSKY_BASE = 'https://opensky-network.org/api'
 
+/** Back off after 429 to avoid hammering OpenSky (anonymous limit is low). */
+let openskyBackoffUntil = 0
+
 /**
  * @param {{ lamin: number, lomin: number, lamax: number, lomax: number }} bbox
  * @returns {Promise<Array<{ id: string, lat: number, lng: number, type: 'flight', speed?: number, heading?: number, altitude?: number, label?: string, meta?: object, lastSeen?: number }>>}
  */
 export async function fetchFlightsInBounds(bbox) {
+  const now = Date.now()
+  if (now < openskyBackoffUntil) return []
+
   const params = new URLSearchParams({
     lamin: String(bbox.lamin),
     lomin: String(bbox.lomin),
@@ -20,7 +26,12 @@ export async function fetchFlightsInBounds(bbox) {
     const res = await fetch(`${OPENSKY_BASE}/states/all?${params}`, {
       signal: AbortSignal.timeout(10000),
     })
+    if (res.status === 429) {
+      openskyBackoffUntil = Date.now() + 120000
+      return []
+    }
     if (!res.ok) return []
+    openskyBackoffUntil = 0
     const data = await res.json()
     if (!data.states || !Array.isArray(data.states)) return []
     const time = data.time || Math.floor(Date.now() / 1000)

@@ -110,7 +110,7 @@ Windy uses **different API products** for weather and cameras. You can set one k
 
 - Get a Webcams API key at [api.windy.com/keys](https://api.windy.com/keys) (enable **Webcams** product).
 - Set `VITE_WINDY_WEBCAM_API_KEY` in `.env` (no quotes; the app trims whitespace). The app uses **API v3** with the `x-windy-api-key` header and requests webcams near the clicked or searched point (radius up to 200 km). Windy has a large global repository; preview image URLs expire after 10 minutes (free tier), so thumbnails may need a refresh by re-clicking the map or searching again.
-- **If live feeds don’t appear:** (1) Confirm the key is for **Webcams API** (not only Weather). (2) New keys can take a few minutes to work globally. (3) **CORS:** The app calls Windy from the browser. If Windy does not allow your origin, you’ll see a Windy error in the “Feeds at this area” panel; in that case use a small backend proxy that adds `x-windy-api-key` and forwards requests to `https://api.windy.com/webcams/api/v3/webcams`, or run the app from a domain Windy allows. (4) Try a well-covered location (e.g. search “London” or “Tokyo”) and click the map there before opening the right panel.
+- **If live feeds don’t appear:** (1) Confirm the key is for **Webcams API** (not only Weather). (2) New keys can take a few minutes to work globally. (3) **CORS / production:** Browsers cannot call Windy’s API directly from most hosts (e.g. Vercel). This repo includes **`api/windy-webcams.js`**: in production builds the app calls **`/api/windy-webcams`** (same origin). In **Vercel → Project → Environment Variables**, set **`WINDY_WEBCAM_API_KEY`** (or reuse `VITE_WINDY_WEBCAM_API_KEY` / `VITE_WINDY_API_KEY`) so the serverless function can add `x-windy-api-key` server-side. Redeploy after adding variables. To disable the proxy and use direct API (e.g. local tests), set **`VITE_WINDY_WEBCAM_PROXY_URL`=`0`**. (4) Try a well-covered location (e.g. search “London” or “Tokyo”) and click the map there before opening the right panel.
 - **Webcam locations on the map:** After you click a point (or search and go there), webcams near that location load in the right-hand “Feeds at this area” panel. They also appear as **orange camera markers (📹)** on the **2D map**. In the layer control (top-right), ensure the **Webcams** overlay is checked. Switch to **2D** (not 3D globe) to see the markers; click a marker’s popup to open “Watch live”.
 - **Preferred for “real camera feeds from around the world”.**
 
@@ -120,8 +120,9 @@ Windy uses **different API products** for weather and cameras. You can set one k
 
 - Sign up at [OpenWebcamDB](https://openwebcamdb.com/) and create an API key (Account → API key).
 - Set `VITE_OPENWEBCAMDB_API_KEY` in `.env` to your key (used as **Bearer** token; base URL is `https://openwebcamdb.com/api/v1`).
-- **Live webcams only load after you click the map or search for a place** – then open the right-hand “Feeds at this area” panel. If you see “No webcams here”, try a city name (e.g. London, Tokyo) or add **Windy** (see §5) for more coverage.
-- OpenWebcamDB list is filtered by distance from the clicked point; if the API returns no cameras with coordinates, you’ll see the “No webcams” message.
+- **v1 API:** The list endpoint does **not** include `stream_url`. The app loads nearby cameras from the list (with coordinates), then calls `GET /webcams/{slug}` for each to obtain the stream URL (see [API docs](https://openwebcamdb.com/docs/api) — *Breaking Changes*).
+- **Priority:** If `VITE_OPENWEBCAMDB_API_KEY` is set, the app uses **OpenWebcamDB first**, then falls back to Windy if no cameras are found in range.
+- **Live webcams only load after you click the map or search for a place** – then open the right-hand “Feeds at this area” panel. If you see “No webcams here”, try a well-covered city (e.g. London, Tokyo) or add **Windy** (see §5). The app fetches **one** list page and filters by distance; detail requests are rate-limited (few cameras per area). Sparse regions may still return none.
 
 ---
 

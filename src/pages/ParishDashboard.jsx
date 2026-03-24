@@ -5,7 +5,7 @@ import { ArrowLeft, Users, Package, TrendingUp, GraduationCap, MessageSquare, Ph
 import EditableInventory from '../components/EditableInventory'
 import { getParishEquipment, getParishPersonnel } from '../utils/equipmentStorage'
 import { getParishScorecard } from '../utils/scorecardStorage'
-import { calculateOverallScore, getRecoveryStatus } from '../data/scorecardDomains'
+import { calculateOverallScore } from '../data/scorecardDomains'
 import { getRequiredTrainings, getAllTrainings } from '../data/trainings'
 import { getParishContacts } from '../data/contacts'
 import { getCommunications } from '../data/communications'
@@ -73,8 +73,7 @@ const ParishDashboard = () => {
   // Get scorecard data
   const scorecardData = getParishScorecard(parishId)
   const overallScore = scorecardData?.domains ? calculateOverallScore(scorecardData.domains) : 0
-  const recoveryStatus = getRecoveryStatus(overallScore)
-  
+
   // Get training data
   const requiredTrainings = getRequiredTrainings()
   const allTrainings = getAllTrainings()

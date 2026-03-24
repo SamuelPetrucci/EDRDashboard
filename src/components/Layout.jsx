@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Home, MapPin, FileText, BookOpen, Phone, Moon, Sun, Satellite } from 'lucide-react'
 import EmergencyBanner from './EmergencyBanner'
-import brandLogo from '../../image.png'
+import brandLogo from '../../headerlogo.png'
 import './Layout.css'
 
 const Layout = ({ children }) => {
@@ -85,13 +85,7 @@ const Layout = ({ children }) => {
       <main className={`main-content ${location.pathname === '/intel' ? 'main-content--intel' : ''}`}>
         {children}
       </main>
-      <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <img src={brandLogo} alt="Emergency Resilience Scorecard (TM)" className="footer-logo-image" />
-          </div>
-        </div>
-      </footer>
+      <footer className="footer footer--minimal" />
     </div>
   )
 }

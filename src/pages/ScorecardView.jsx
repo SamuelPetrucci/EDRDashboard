@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { scorecardDomains, calculateDomainScore, calculateOverallScore, getRecoveryStatus, TOTAL_POSSIBLE_SCORE } from '../data/scorecardDomains'
+import { scorecardDomains, calculateDomainScore, calculateOverallScore, getRecoveryStatus, getRecoveryGaugeAccent, TOTAL_POSSIBLE_SCORE } from '../data/scorecardDomains'
 import { getParishById, getAllParishes } from '../data/jamaicaParishes'
 import { initializeParishScorecard, saveParishScorecard } from '../utils/scorecardStorage'
 import { ArrowLeft, CheckCircle2, Clock, AlertCircle, TrendingUp, X, MapPin } from 'lucide-react'
@@ -55,6 +55,7 @@ const ScorecardView = () => {
 
   const overallScore = calculateOverallScore(domains)
   const recoveryStatus = getRecoveryStatus(overallScore)
+  const overallGaugeAccent = getRecoveryGaugeAccent(overallScore)
   const totalPoints = domains.reduce((sum, d) => sum + d.criteria.reduce((s, c) => s + c.score, 0), 0)
 
   const openDomainModal = (domainId) => {
@@ -142,84 +143,97 @@ const ScorecardView = () => {
       </div>
 
       {/* At a Glance – Compact Score Summary */}
-      <div className="scorecard-at-a-glance" style={{ borderLeftColor: recoveryStatus.color }}>
-        <div className="at-a-glance-score">
-          <div className="at-a-glance-circle" style={{ borderColor: recoveryStatus.color }}>
-            <span>{overallScore.toFixed(0)}%</span>
-          </div>
-          <div className="at-a-glance-info">
-            <h2>Overall Recovery Health</h2>
-            <div className="at-a-glance-status" style={{ backgroundColor: recoveryStatus.color }}>
-              {getStatusIcon(recoveryStatus.status)}
-              {recoveryStatus.status}
+      <section className="scorecard-panel scorecard-panel--glance">
+        <div className="scorecard-panel-header">
+          <h2 className="scorecard-panel-title">Overall Recovery Health</h2>
+        </div>
+        <div className="scorecard-panel-body">
+          <div className="scorecard-at-a-glance" style={{ '--glance-accent': overallGaugeAccent }}>
+            <div className="at-a-glance-score">
+              <div className="at-a-glance-circle" style={{ borderColor: overallGaugeAccent }}>
+                <span>{overallScore.toFixed(0)}%</span>
+              </div>
+              <div className="at-a-glance-info">
+                <div className="at-a-glance-status" style={{ backgroundColor: overallGaugeAccent }}>
+                  {getStatusIcon(recoveryStatus.status)}
+                  {recoveryStatus.status}
+                </div>
+                <p className="at-a-glance-points">{totalPoints} / {TOTAL_POSSIBLE_SCORE} points</p>
+              </div>
             </div>
-            <p className="at-a-glance-points">{totalPoints} / {TOTAL_POSSIBLE_SCORE} points</p>
+            <div className="at-a-glance-bar">
+              <div
+                className="at-a-glance-fill"
+                style={{ width: `${overallScore}%`, backgroundColor: overallGaugeAccent }}
+              />
+            </div>
           </div>
         </div>
-        <div className="at-a-glance-bar">
-          <div 
-            className="at-a-glance-fill" 
-            style={{ width: `${overallScore}%`, backgroundColor: recoveryStatus.color }}
-          />
-        </div>
-      </div>
+      </section>
 
       {/* Domain Overview – click a card to open scorecard modal */}
-      <div className="domains-overview">
-        <h2 className="section-title">Domain Overview</h2>
-        <p className="domains-overview-hint">Click a domain to assess or edit scores.</p>
-        <div className="domains-grid-overview">
-          {domains.map((domain) => {
-            const domainScore = calculateDomainScore(domain)
-            const domainStatus = getRecoveryStatus(domainScore)
-            const completedCriteria = domain.criteria.filter(c => c.score === 2).length
-            const totalCriteria = domain.criteria.length
+      <section className="scorecard-panel scorecard-panel--domains">
+        <div className="scorecard-panel-header">
+          <h2 className="scorecard-panel-title">Domain Overview</h2>
+        </div>
+        <div className="scorecard-panel-body">
+          <p className="domains-overview-hint">Click a domain to assess or edit scores.</p>
+          <div className="domains-grid-overview">
+            {domains.map((domain) => {
+              const domainScore = calculateDomainScore(domain)
+              const domainStatus = getRecoveryStatus(domainScore)
+              const gaugeAccent = getRecoveryGaugeAccent(domainScore)
+              const completedCriteria = domain.criteria.filter((c) => c.score === 2).length
+              const totalCriteria = domain.criteria.length
 
-            return (
-              <button 
-                key={domain.id} 
-                type="button"
-                className="domain-overview-card"
-                onClick={() => openDomainModal(domain.id)}
-                style={{ borderColor: domainStatus.color }}
-              >
-                <div className="domain-overview-header">
-                  <div className="domain-overview-title">
-                    <h3>{domain.name}</h3>
-                    <p className="domain-overview-desc">{domain.description}</p>
-                  </div>
-                  <div className="domain-overview-score">
-                    <div className="domain-score-modern" style={{ color: domainStatus.color }}>
-                      {domainScore.toFixed(0)}%
+              return (
+                <button
+                  key={domain.id}
+                  type="button"
+                  className="domain-overview-card"
+                  onClick={() => openDomainModal(domain.id)}
+                  style={{ '--domain-accent': gaugeAccent }}
+                >
+                  <div className="domain-overview-header">
+                    <div className="domain-overview-title">
+                      <h3>{domain.name}</h3>
+                      <p className="domain-overview-desc">{domain.description}</p>
+                    </div>
+                    <div className="domain-overview-score">
+                      <div className="domain-score-modern" style={{ color: gaugeAccent }}>
+                        {domainScore.toFixed(0)}%
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="domain-overview-stats">
-                  <div className="domain-stat-item">
-                    <TrendingUp size={14} />
-                    <span>{completedCriteria}/{totalCriteria} Complete</span>
+                  <div className="domain-overview-stats">
+                    <div className="domain-stat-item">
+                      <TrendingUp size={14} />
+                      <span>
+                        {completedCriteria}/{totalCriteria} Complete
+                      </span>
+                    </div>
+                    <div className="domain-status-badge" style={{ backgroundColor: gaugeAccent }}>
+                      {getStatusIcon(domainStatus.status)}
+                      {domainStatus.status}
+                    </div>
                   </div>
-                  <div className="domain-status-badge" style={{ backgroundColor: domainStatus.color }}>
-                    {getStatusIcon(domainStatus.status)}
-                    {domainStatus.status}
+                  <div className="domain-overview-progress">
+                    <div className="domain-progress-bar">
+                      <div
+                        className="domain-progress-fill"
+                        style={{
+                          width: `${domainScore}%`,
+                          backgroundColor: gaugeAccent,
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="domain-overview-progress">
-                  <div className="domain-progress-bar">
-                    <div 
-                      className="domain-progress-fill" 
-                      style={{ 
-                        width: `${domainScore}%`,
-                        backgroundColor: domainStatus.color
-                      }}
-                    />
-                  </div>
-                </div>
-              </button>
-            )
-          })}
+                </button>
+              )
+            })}
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Domain Scorecard Modal – popup form */}
       {modalDomainId && (() => {
@@ -227,6 +241,7 @@ const ScorecardView = () => {
         if (!domain) return null
         const domainScore = calculateDomainScore(domain)
         const domainStatus = getRecoveryStatus(domainScore)
+        const modalGaugeAccent = getRecoveryGaugeAccent(domainScore)
         return (
           <div 
             className="scorecard-modal-backdrop" 
@@ -240,16 +255,16 @@ const ScorecardView = () => {
               aria-modal="true"
               aria-labelledby="scorecard-modal-title"
             >
-              <div className="scorecard-modal-header" style={{ borderLeftColor: domainStatus.color }}>
+              <div className="scorecard-modal-header" style={{ borderLeftColor: modalGaugeAccent }}>
                 <div>
                   <h2 id="scorecard-modal-title">{domain.name}</h2>
                   <p className="scorecard-modal-desc">{domain.description}</p>
                   <div className="scorecard-modal-meta">
-                    <div className="domain-status-badge" style={{ backgroundColor: domainStatus.color }}>
+                    <div className="domain-status-badge" style={{ backgroundColor: modalGaugeAccent }}>
                       {getStatusIcon(domainStatus.status)}
                       {domainStatus.status}
                     </div>
-                    <span className="scorecard-modal-score" style={{ color: domainStatus.color }}>
+                    <span className="scorecard-modal-score" style={{ color: modalGaugeAccent }}>
                       {domainScore.toFixed(0)}%
                     </span>
                   </div>
@@ -270,7 +285,7 @@ const ScorecardView = () => {
                       <div className="criterion-header-compact">
                         <h4 className="criterion-title-compact">{criterion.name}</h4>
                         <div className={`score-indicator-compact score-${criterion.score}`} style={{ 
-                          backgroundColor: criterion.score === 0 ? 'var(--need-support-color)' : 
+                          backgroundColor: criterion.score === 0 ? 'var(--section-training)' : 
                                           criterion.score === 1 ? 'var(--restoring-color)' : 'var(--resilient-color)'
                         }}>
                           {criterion.score}
@@ -328,7 +343,7 @@ const ScorecardView = () => {
                         className="progress-fill-modern"
                         style={{
                           width: `${domainScore}%`,
-                          backgroundColor: domainStatus.color
+                          backgroundColor: modalGaugeAccent
                         }}
                       />
                     </div>

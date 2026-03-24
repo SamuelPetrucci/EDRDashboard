@@ -360,5 +360,14 @@ export const getRecoveryStatus = (score) => {
   return { status: 'Need Support', color: 'var(--need-support-color)' }
 }
 
+/**
+ * Accent color for overall score gauges, rings, bars, and badges — aligned with site theme (navy / orange), never stark red.
+ */
+export const getRecoveryGaugeAccent = (score) => {
+  if (score >= 80) return 'var(--resilient-color)'
+  if (score >= 60) return 'var(--primary-color)'
+  return 'var(--section-training)'
+}
+
 
 
