@@ -1,8 +1,7 @@
 import skillvantageLogo from '../../skillvantagelogo.png'
-import drisLogo from '../../DRISlogo.png'
 
 /**
- * Site footer — Skillvantage (left), legal copy (center), DRIS (right).
+ * Site footer — Skillvantage mark and legal copy.
  */
 export default function EnterpriseFooter() {
   const year = new Date().getFullYear()
@@ -23,12 +22,6 @@ export default function EnterpriseFooter() {
             intellectual property owned by Marceen A. Burgher and licensed to SkillVantage
             Enterprise. DRIS™ AI development support by Sam Petrucci.
           </p>
-          <img
-            src={drisLogo}
-            alt="DRIS — Disaster Resilience Intelligence Scorecard"
-            className="enterprise-footer__logo enterprise-footer__logo--dris"
-            decoding="async"
-          />
         </div>
       </div>
     </footer>

@@ -29,17 +29,26 @@ const Layout = ({ children }) => {
     <div className={`layout${isIntelPage ? ' layout--intel-page' : ''}`}>
       <header className="header">
         <div className="header-content">
-          <div className="header-logos" aria-label="Skillvantage and DRIS">
+          <div
+            className="header-logos"
+            aria-label="Skillvantage and Disaster Resilience Intelligence Scorecard"
+          >
             <img
               src={skillvantageLogo}
               alt="Skillvantage Enterprise"
               className="header-logo header-logo--skillvantage"
             />
-            <img
-              src={drisLogo}
-              alt="DRIS — Disaster Resilience Intelligence Scorecard"
-              className="header-logo header-logo--dris"
-            />
+            <div className="header-dris-group">
+              <img
+                src={drisLogo}
+                alt=""
+                className="header-logo header-logo--dris"
+                aria-hidden
+              />
+              <span className="header-scorecard-name">
+                Disaster Resilience Intelligence Scorecard™
+              </span>
+            </div>
           </div>
           <nav className="nav" aria-label="Primary">
             <Link 
