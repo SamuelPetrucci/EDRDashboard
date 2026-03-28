@@ -772,18 +772,169 @@
   text-align: right;
 }
 
+.scorecard-view--error {
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.scorecard-view-error-msg {
+  margin: 0 0 1rem;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.scorecard-panel--inventory-national .scorecard-panel-header {
+  background: linear-gradient(135deg, #0f7669 0%, var(--section-inventory) 50%, #134e4a 100%);
+}
+
+.scorecard-panel--inventory-parish .scorecard-panel-header {
+  background: linear-gradient(135deg, #0c4a6e 0%, var(--navy-dark) 50%, #0f172a 100%);
+}
+
+.scorecard-inventory-national-body,
+.scorecard-inventory-parish-body {
+  padding-top: 1rem;
+}
+
+.scorecard-inventory-national-intro,
+.scorecard-inventory-parish-intro {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.scorecard-inventory-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.scorecard-inventory-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--bg-color);
+  border-radius: 10px;
+  border: var(--card-border-width) solid var(--border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.scorecard-inventory-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.scorecard-inventory-stat-card svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.scorecard-inventory-number {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.scorecard-inventory-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+  line-height: 1.2;
+}
+
+.scorecard-inventory-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: var(--card-border-width) solid var(--border-color);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.scorecard-inventory-context svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.scorecard-inventory-context-sep {
+  opacity: 0.55;
+}
+
+.scorecard-inventory-parish-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 1rem;
+}
+
+.scorecard-inventory-parish-card {
+  min-width: 0;
+}
+
+.scorecard-modal--read-only .score-checkbox-label--disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.scorecard-modal-national-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.score-indicator-compact--avg {
+  min-width: 2.25rem;
+  font-size: 0.8rem;
+}
+
 @media (max-width: 768px) {
+  .scorecard-view {
+    gap: 1rem;
+  }
+
+  .scorecard-header {
+    padding: 1rem;
+  }
+
+  .scorecard-header h1 {
+    font-size: clamp(1.25rem, 5vw, 1.65rem);
+    margin-bottom: 0.4rem;
+  }
+
+  .scorecard-header .subtitle {
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
   .scorecard-header-top {
     flex-direction: column;
   }
 
   .scorecard-parish-filter {
     width: 100%;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   .scorecard-parish-select {
     flex: 1;
     min-width: 0;
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .scorecard-panel-body {
+    padding: 0.85rem 1rem 1rem;
+  }
+
+  .scorecard-inventory-stats {
+    grid-template-columns: 1fr;
   }
 
   .at-a-glance-score {
@@ -800,8 +951,19 @@
     grid-template-columns: 1fr;
   }
 
+  .score-checkboxes-compact {
+    flex-wrap: wrap;
+  }
+
+  .score-checkbox-label {
+    min-height: 44px;
+    flex: 1 1 calc(33% - 0.35rem);
+    min-width: 5.5rem;
+  }
+
   .scorecard-modal {
-    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 1rem);
+    max-height: calc(100vh - 1rem);
   }
 
   .scorecard-modal-header {
@@ -810,5 +972,31 @@
 
   .scorecard-modal-close {
     align-self: flex-end;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .scorecard-modal-done {
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 640px) {
+  .scorecard-modal-backdrop {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .scorecard-modal {
+    width: 100%;
+    max-width: none;
+    max-height: 100dvh;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .scorecard-modal::before {
+    border-radius: 0;
   }
 }

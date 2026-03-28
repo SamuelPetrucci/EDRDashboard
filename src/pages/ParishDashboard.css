@@ -717,5 +717,20 @@
   .inventory-grid-modern {
     grid-template-columns: 1fr;
   }
+
+  .dashboard-header {
+    padding-left: max(0, env(safe-area-inset-left, 0px));
+    padding-right: max(0, env(safe-area-inset-right, 0px));
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    min-height: 72px;
+  }
 }
 

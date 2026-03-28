@@ -1659,3 +1659,25 @@
   }
 
 }
+
+@media (max-width: 480px) {
+  .readiness-stats-grid-compact {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .page-header-dris-tagline {
+    font-size: clamp(0.92rem, 4.2vw, 1.2rem);
+    padding: 0.7rem 0.65rem;
+    letter-spacing: 0.03em;
+  }
+
+  .overview-sidebar {
+    flex-direction: column;
+  }
+
+  .overview-sidebar-card {
+    min-width: 0;
+    width: 100%;
+  }
+}

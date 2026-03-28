@@ -319,6 +319,12 @@
     width: 100%;
   }
 
+  .search-box input,
+  .filter-box select {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
   .emergency-numbers {
     grid-template-columns: 1fr;
   }

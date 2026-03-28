@@ -1490,3 +1490,30 @@
   background: none !important;
   border: none !important;
 }
+
+@media (max-width: 768px) {
+  .intel-page-header {
+    padding: max(0.45rem, env(safe-area-inset-top, 0px)) max(0.65rem, env(safe-area-inset-right, 0px)) 0.5rem
+      max(0.65rem, env(safe-area-inset-left, 0px));
+  }
+
+  .intel-page-header-tabs button {
+    min-height: 44px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.85rem;
+  }
+
+  .intel-camera-modal-overlay {
+    padding: max(0.35rem, env(safe-area-inset-top, 0px)) max(0.35rem, env(safe-area-inset-right, 0px))
+      max(0.35rem, env(safe-area-inset-bottom, 0px)) max(0.35rem, env(safe-area-inset-left, 0px));
+  }
+
+  .intel-camera-modal {
+    max-height: min(92dvh, 92vh);
+  }
+
+  .intel-camera-modal-close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Home, MapPin, FileText, BookOpen, Phone, Moon, Sun, Satellite } from 'lucide-react'
+import { Home, FileText, BookOpen, Phone, Moon, Sun, Satellite, Menu, X } from 'lucide-react'
 import EmergencyBanner from './EmergencyBanner'
 import EnterpriseFooter from './EnterpriseFooter'
 import skillvantageLogo from '../../skillvantagelogo.png'
-import drisLogo from '../../DRISlogo.png'
 import './Layout.css'
 
 const Layout = ({ children }) => {
   const location = useLocation()
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [theme, setTheme] = useState(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') : null
     return saved || 'dark'
@@ -19,11 +19,54 @@ const Layout = ({ children }) => {
     localStorage.setItem('theme', theme)
   }, [theme])
 
+  useEffect(() => {
+    setMobileNavOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (!mobileNavOpen) return
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileNavOpen])
+
+  useEffect(() => {
+    if (!mobileNavOpen) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') setMobileNavOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [mobileNavOpen])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 769px)')
+    const onChange = (e) => {
+      if (e.matches) setMobileNavOpen(false)
+    }
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
   const toggleTheme = () => {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'))
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
   }
 
+  const closeMobileNav = () => setMobileNavOpen(false)
+
   const isIntelPage = location.pathname === '/intel'
+
+  const getNavLinkClass = (opts) => {
+    const { path, scorecard, protocols, contacts } = opts
+    let active = false
+    if (scorecard) active = location.pathname.includes('scorecard')
+    else if (protocols) active = location.pathname === '/protocols'
+    else if (contacts) active = location.pathname === '/contacts'
+    else if (path === '/') active = location.pathname === '/'
+    else if (path) active = location.pathname === path
+    return `nav-link${active ? ' active' : ''}`
+  }
 
   return (
     <div className={`layout${isIntelPage ? ' layout--intel-page' : ''}`}>
@@ -38,71 +81,139 @@ const Layout = ({ children }) => {
               alt="Skillvantage Enterprise"
               className="header-logo header-logo--skillvantage"
             />
-            <div className="header-dris-group">
-              <img
-                src={drisLogo}
-                alt=""
-                className="header-logo header-logo--dris"
-                aria-hidden
-              />
+            <div className="header-scorecard-brand">
               <span className="header-scorecard-name">
                 Disaster Resilience Intelligence Scorecard™
               </span>
             </div>
           </div>
-          <nav className="nav" aria-label="Primary">
-            <Link 
-              to="/" 
-              className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+          <div className="header-nav-cluster">
+            <button
+              type="button"
+              className="nav-mobile-menu-btn"
+              aria-expanded={mobileNavOpen}
+              aria-controls="site-mobile-nav"
+              aria-label={mobileNavOpen ? 'Menu open' : 'Open menu'}
+              onClick={() => setMobileNavOpen(true)}
             >
-              <Home size={18} />
-              <span>Overview</span>
-            </Link>
-            <Link 
-              to="/parish/kingston" 
-              className={`nav-link ${location.pathname.startsWith('/parish') && !location.pathname.includes('scorecard') ? 'active' : ''}`}
-            >
-              <MapPin size={18} />
-              <span>Parishes</span>
-            </Link>
-            <Link 
-              to="/scorecard" 
-              className={`nav-link ${location.pathname.includes('scorecard') ? 'active' : ''}`}
-            >
-              <FileText size={18} />
-              <span>Scorecard</span>
-            </Link>
-            <Link 
-              to="/intel" 
-              className={`nav-link ${location.pathname === '/intel' ? 'active' : ''}`}
-            >
-              <Satellite size={18} />
-              <span>Intel</span>
-            </Link>
-            <Link 
-              to="/protocols" 
-              className={`nav-link ${location.pathname === '/protocols' ? 'active' : ''}`}
-            >
-              <BookOpen size={18} />
-              <span>Protocols & Training</span>
-            </Link>
-            <Link 
-              to="/contacts" 
-              className={`nav-link ${location.pathname === '/contacts' ? 'active' : ''}`}
-            >
-              <Phone size={18} />
-              <span>Contacts</span>
-            </Link>
-            <button 
-              className="theme-toggle"
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-            >
-              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+              <Menu size={22} strokeWidth={2} aria-hidden />
             </button>
-          </nav>
+            <nav className="nav" aria-label="Primary">
+              <div className="nav-scroll">
+                <Link to="/" className={getNavLinkClass({ path: '/' })}>
+                  <Home size={18} aria-hidden />
+                  <span>Overview</span>
+                </Link>
+                <Link to="/scorecard" className={getNavLinkClass({ scorecard: true })}>
+                  <FileText size={18} aria-hidden />
+                  <span>Scorecard</span>
+                </Link>
+                <Link to="/intel" className={getNavLinkClass({ path: '/intel' })}>
+                  <Satellite size={18} aria-hidden />
+                  <span>Intel</span>
+                </Link>
+                <Link
+                  to="/protocols"
+                  className={`${getNavLinkClass({ protocols: true })} nav-link--protocols`}
+                  title="Protocols & Training"
+                >
+                  <BookOpen size={18} aria-hidden />
+                  <span>Protocols & Training</span>
+                </Link>
+                <Link to="/contacts" className={getNavLinkClass({ contacts: true })}>
+                  <Phone size={18} aria-hidden />
+                  <span>Contacts</span>
+                </Link>
+              </div>
+              <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+                {theme === 'light' ? <Moon size={18} aria-hidden /> : <Sun size={18} aria-hidden />}
+              </button>
+            </nav>
+          </div>
         </div>
       </header>
+
+      {mobileNavOpen && (
+        <div className="mobile-nav-root" role="presentation">
+          <button
+            type="button"
+            className="mobile-nav-backdrop"
+            aria-label="Close menu"
+            onClick={closeMobileNav}
+          />
+          <div
+            id="site-mobile-nav"
+            className="mobile-nav-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-nav-title"
+          >
+            <div className="mobile-nav-drawer-header">
+              <span id="mobile-nav-title" className="mobile-nav-drawer-title">
+                Menu
+              </span>
+              <button
+                type="button"
+                className="mobile-nav-close"
+                onClick={closeMobileNav}
+                aria-label="Close menu"
+              >
+                <X size={22} aria-hidden />
+              </button>
+            </div>
+            <nav className="mobile-nav-links" aria-label="Primary">
+              <Link
+                to="/"
+                className={`${getNavLinkClass({ path: '/' })} mobile-nav-link`}
+                onClick={closeMobileNav}
+              >
+                <Home size={20} aria-hidden />
+                <span>Overview</span>
+              </Link>
+              <Link
+                to="/scorecard"
+                className={`${getNavLinkClass({ scorecard: true })} mobile-nav-link`}
+                onClick={closeMobileNav}
+              >
+                <FileText size={20} aria-hidden />
+                <span>Scorecard</span>
+              </Link>
+              <Link
+                to="/intel"
+                className={`${getNavLinkClass({ path: '/intel' })} mobile-nav-link`}
+                onClick={closeMobileNav}
+              >
+                <Satellite size={20} aria-hidden />
+                <span>Intel</span>
+              </Link>
+              <Link
+                to="/protocols"
+                className={`${getNavLinkClass({ protocols: true })} mobile-nav-link mobile-nav-link--wrap`}
+                onClick={closeMobileNav}
+              >
+                <BookOpen size={20} aria-hidden />
+                <span>Protocols & Training</span>
+              </Link>
+              <Link
+                to="/contacts"
+                className={`${getNavLinkClass({ contacts: true })} mobile-nav-link`}
+                onClick={closeMobileNav}
+              >
+                <Phone size={20} aria-hidden />
+                <span>Contacts</span>
+              </Link>
+            </nav>
+            <div className="mobile-nav-drawer-footer">
+              <span className="mobile-nav-theme-label">Appearance</span>
+              <button type="button" className="mobile-nav-theme-btn" onClick={toggleTheme}>
+                {theme === 'light' ? <Moon size={18} aria-hidden /> : <Sun size={18} aria-hidden />}
+                {theme === 'light' ? 'Dark mode' : 'Light mode'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <EmergencyBanner />
       <main className={`main-content ${isIntelPage ? 'main-content--intel' : ''}`}>
         {children}
@@ -113,4 +224,3 @@ const Layout = ({ children }) => {
 }
 
 export default Layout
-

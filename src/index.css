@@ -4,6 +4,17 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Prevent horizontal scroll from wide grids; keep content within the viewport */
+#root {
+  min-height: 100dvh;
+  overflow-x: clip;
+}
+
 :root {
   /* Theme Colors - Subtle Orange Accents */
   --primary-color: #F97316;
@@ -85,8 +96,10 @@ body {
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
+  min-height: 100dvh;
   font-weight: 450;
   letter-spacing: 0.01em;
+  overflow-x: clip;
 }
 
 h1, h2, h3, h4, h5, h6 {

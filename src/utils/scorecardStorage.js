@@ -60,5 +60,32 @@ export const initializeParishScorecard = (parishId, defaultDomains) => {
   return newScorecard.domains
 }
 
+/**
+ * Build domain/criterion structure with scores = mean of each criterion across parishes
+ * that have saved scorecard data. Parishes without a scorecard are excluded from that criterion's mean.
+ */
+export const getNationalAveragedDomains = (templateDomains, allParishes) => {
+  return templateDomains.map((domain) => ({
+    ...domain,
+    criteria: domain.criteria.map((criterion) => {
+      const scores = []
+      for (const p of allParishes) {
+        const sc = getParishScorecard(p.id)
+        if (!sc?.domains) continue
+        const d = sc.domains.find((x) => x.id === domain.id)
+        const c = d?.criteria.find((x) => x.id === criterion.id)
+        if (c && typeof c.score === 'number') scores.push(c.score)
+      }
+      const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
+      return { ...criterion, score: avg }
+    }),
+  }))
+}
 
+/** Parishes with any saved scorecard (used for national averages copy). */
+export const countParishesWithScorecardData = (allParishes) =>
+  allParishes.filter((p) => {
+    const sc = getParishScorecard(p.id)
+    return sc?.domains && Array.isArray(sc.domains)
+  }).length
 

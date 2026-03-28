@@ -603,8 +603,8 @@ const GlobalOverview = () => {
               <Package size={24} />
               <h2>Inventory Summary</h2>
             </div>
-            <Link to="/parish/kingston" className="view-all-link">
-              Manage Inventory <ArrowRight size={16} />
+            <Link to="/scorecard" className="view-all-link">
+              Scorecard & inventory <ArrowRight size={16} />
             </Link>
           </div>
           <div className="inventory-stats">
