@@ -74,7 +74,7 @@ const Layout = ({ children }) => {
         <div className="header-content">
           <div
             className="header-logos"
-            aria-label="Skillvantage and Disaster Resilience Intelligence Scorecard"
+            aria-label="Skillvantage Enterprise and DRIS, Disaster Resilience Intelligence Scorecard"
           >
             <img
               src={skillvantageLogo}
@@ -82,6 +82,10 @@ const Layout = ({ children }) => {
               className="header-logo header-logo--skillvantage"
             />
             <div className="header-scorecard-brand">
+              <span className="header-dris-acronym" aria-hidden="true">
+                <span className="header-dris-letters">DRIS</span>
+                <sup className="header-tm">™</sup>
+              </span>
               <span className="header-scorecard-name">
                 Disaster Resilience Intelligence Scorecard™
               </span>

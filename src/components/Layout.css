@@ -91,17 +91,49 @@
 
 .header-scorecard-brand {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.2rem;
   min-width: 0;
 }
 
+/* Large acronym lockup (reads like the logo mark) */
+.header-dris-acronym {
+  display: flex;
+  align-items: flex-start;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: none;
+}
+
+.header-dris-letters {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  /* Override index.css global span !important so logo text stays light */
+  color: rgba(248, 250, 252, 0.98) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.header-tm {
+  font-size: 0.6em;
+  font-weight: 700;
+  line-height: 0;
+  margin-left: 0.08em;
+  top: 0.18em;
+  position: relative;
+  color: rgba(255, 255, 255, 0.92) !important;
+  letter-spacing: 0;
+}
+
 .header-scorecard-name {
-  font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+  font-size: clamp(0.68rem, 1.05vw, 0.82rem);
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.96);
-  letter-spacing: 0.03em;
-  line-height: 1.35;
-  max-width: min(19rem, 52vw);
+  color: rgba(255, 255, 255, 0.9) !important;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  max-width: min(20rem, 54vw);
+  text-transform: uppercase;
 }
 
 .nav {
@@ -348,7 +380,12 @@
 
   .header-scorecard-name {
     max-width: 100%;
-    font-size: clamp(0.65rem, 2.5vw, 0.78rem);
+    font-size: clamp(0.6rem, 2.4vw, 0.75rem);
+  }
+
+  .header-dris-letters {
+    font-size: clamp(1.1rem, 5.2vw, 1.45rem);
+    letter-spacing: 0.1em;
   }
 
   .nav-mobile-menu-btn {
