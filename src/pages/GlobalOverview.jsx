@@ -222,9 +222,6 @@ const GlobalOverview = () => {
           <h1>National Overview</h1>
           <p className="subtitle">Strategic Emergency Management - 14 Parishes Overview</p>
         </div>
-        <p className="page-header-dris-tagline">
-          Turning Readiness into Intelligence: From Preparedness to Resilience.
-        </p>
       </div>
 
       {/* At-a-Glance Overview */}

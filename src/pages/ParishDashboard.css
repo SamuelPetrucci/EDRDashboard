@@ -40,7 +40,7 @@
 }
 
 .parish-badge {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  background: linear-gradient(135deg, #1e3a5f 0%, var(--navy-dark) 55%, #0f172a 100%);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -429,7 +429,7 @@
 
 .scorecard-link {
   display: inline-block;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  background: linear-gradient(135deg, #1e3a5f 0%, var(--navy-dark) 55%, #0f172a 100%);
   color: white;
   padding: 0.875rem 2rem;
   border-radius: 8px;
@@ -440,7 +440,7 @@
 }
 
 .scorecard-link:hover {
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  background: linear-gradient(135deg, var(--navy-dark) 0%, #0f172a 50%, #020617 100%);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }

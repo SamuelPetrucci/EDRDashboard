@@ -6,13 +6,14 @@
 }
 
 :root {
-  --overview-card-header-bg: linear-gradient(135deg, rgba(51, 65, 85, 0.42) 0%, rgba(71, 85, 105, 0.34) 74%, rgba(249, 115, 22, 0.2) 100%);
+  /* Shared header gradient family – navy with a soft warm edge */
+  --overview-card-header-bg: linear-gradient(135deg, #1e3a5f 0%, #1f2937 55%, rgba(249, 115, 22, 0.22) 100%);
   --overview-card-header-border: rgba(226, 232, 240, 0.2);
   --overview-card-header-text: #f1f5f9;
 
-  /* Scorecard overview – distinct header tints (softer than sharp status reds) */
-  --overview-header-weather: linear-gradient(135deg, #0c4a6e 0%, #155e75 45%, #164e63 100%);
-  --overview-header-summary: linear-gradient(135deg, #1e3a5f 0%, var(--section-overview) 55%, #1e293b 100%);
+  /* Scorecard overview – tints all derived from the same navy band */
+  --overview-header-weather: linear-gradient(135deg, #0c4a6e 0%, #155e75 50%, #0f172a 100%);
+  --overview-header-summary: linear-gradient(135deg, #1e3a5f 0%, var(--section-overview) 55%, #0b1120 100%);
   /* Readiness strip + icons — solid tokens (same as dashboard status colors) */
   --overview-accent-resilient: var(--resilient-color);
   --overview-accent-restoring: var(--restoring-color);

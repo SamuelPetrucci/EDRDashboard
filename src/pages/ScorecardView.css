@@ -78,16 +78,16 @@
 
 .scorecard-panel-header {
   padding: 0.65rem 1.25rem;
-  background: linear-gradient(135deg, #1e3a5f 0%, var(--section-overview) 48%, #0f172a 100%);
+  background: linear-gradient(135deg, #1e3a5f 0%, var(--navy-dark) 55%, #0f172a 100%);
   border-bottom: var(--card-border-width) solid rgba(148, 163, 184, 0.2);
 }
 
 .scorecard-panel--domains .scorecard-panel-header {
-  background: linear-gradient(135deg, #0c4a6e 0%, #155e75 50%, #134e4a 100%);
+  background: linear-gradient(135deg, #0c4a6e 0%, #155e75 55%, #0b1120 100%);
 }
 
 .scorecard-panel--glance .scorecard-panel-header {
-  background: linear-gradient(135deg, #1e3a5f 0%, var(--navy-dark) 45%, #0f172a 100%);
+  background: linear-gradient(135deg, #1e3a5f 0%, var(--navy-dark) 55%, #020617 100%);
 }
 
 .scorecard-panel-title {

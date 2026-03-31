@@ -1,23 +1,21 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Home, FileText, BookOpen, Phone, Moon, Sun, Satellite, Menu, X } from 'lucide-react'
+import { Home, FileText, BookOpen, Phone, Satellite, Menu, X } from 'lucide-react'
 import EmergencyBanner from './EmergencyBanner'
 import EnterpriseFooter from './EnterpriseFooter'
-import skillvantageLogo from '../../skillvantagelogo.png'
+import headerLogo from '../../headerlogo.webp'
 import './Layout.css'
 
 const Layout = ({ children }) => {
   const location = useLocation()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const [theme, setTheme] = useState(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') : null
-    return saved || 'dark'
-  })
 
+  // Apply saved theme (or default to dark) once on mount; no user toggle in UI.
   useEffect(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') : null
+    const theme = saved || 'dark'
     document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-  }, [theme])
+  }, [])
 
   useEffect(() => {
     setMobileNavOpen(false)
@@ -49,10 +47,6 @@ const Layout = ({ children }) => {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
-  }
-
   const closeMobileNav = () => setMobileNavOpen(false)
 
   const isIntelPage = location.pathname === '/intel'
@@ -76,18 +70,15 @@ const Layout = ({ children }) => {
             className="header-logos"
             aria-label="Skillvantage Enterprise and DRIS, Disaster Resilience Intelligence Scorecard"
           >
-            <img
-              src={skillvantageLogo}
-              alt="Skillvantage Enterprise"
-              className="header-logo header-logo--skillvantage"
-            />
+            <img src={headerLogo} alt="Skillvantage Enterprise" className="header-logo" />
             <div className="header-scorecard-brand">
               <span className="header-dris-acronym" aria-hidden="true">
                 <span className="header-dris-letters">DRIS</span>
                 <sup className="header-tm">™</sup>
               </span>
               <span className="header-scorecard-name">
-                Disaster Resilience Intelligence Scorecard™
+                Disaster Resilience
+                <br /> Intelligence Scorecard™
               </span>
             </div>
           </div>
@@ -129,9 +120,6 @@ const Layout = ({ children }) => {
                   <span>Contacts</span>
                 </Link>
               </div>
-              <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-                {theme === 'light' ? <Moon size={18} aria-hidden /> : <Sun size={18} aria-hidden />}
-              </button>
             </nav>
           </div>
         </div>
@@ -207,13 +195,6 @@ const Layout = ({ children }) => {
                 <span>Contacts</span>
               </Link>
             </nav>
-            <div className="mobile-nav-drawer-footer">
-              <span className="mobile-nav-theme-label">Appearance</span>
-              <button type="button" className="mobile-nav-theme-btn" onClick={toggleTheme}>
-                {theme === 'light' ? <Moon size={18} aria-hidden /> : <Sun size={18} aria-hidden />}
-                {theme === 'light' ? 'Dark mode' : 'Light mode'}
-              </button>
-            </div>
           </div>
         </div>
       )}
