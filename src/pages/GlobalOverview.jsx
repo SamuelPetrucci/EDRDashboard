@@ -7,7 +7,7 @@ import { MapPin, Users, Package, AlertCircle, CheckCircle, Clock, BookOpen, Mess
 import DisasterAlerts from '../components/DisasterAlerts'
 import { getParishScorecard } from '../utils/scorecardStorage'
 import { getParishEquipment, getParishPersonnel } from '../utils/equipmentStorage'
-import { calculateOverallScore, getRecoveryStatus, getRecoveryGaugeAccent } from '../data/scorecardDomains'
+import { calculateOverallScore, getRecoveryStatus, getRecoveryGaugeAccent, RESILIENCE_STATUS } from '../data/scorecardDomains'
 import { getRequiredTrainings, getAllTrainings } from '../data/trainings'
 import { getWeatherData } from '../data/weatherFeed'
 import { getCommunications } from '../data/communications'
@@ -139,7 +139,7 @@ const GlobalOverview = () => {
     if (!scorecardData || !scorecardData.domains) {
       return {
         score: 0,
-        status: 'Not Assessed',
+        status: RESILIENCE_STATUS.NOT_YET_STARTED,
         color: 'var(--text-secondary)',
         assessed: false
       }
@@ -198,9 +198,9 @@ const GlobalOverview = () => {
     const readiness = getParishReadiness(parish)
     if (!readiness.assessed) {
       stats.notAssessed++
-    } else if (readiness.status === 'Resilient') {
+    } else if (readiness.status === RESILIENCE_STATUS.RESILIENT) {
       stats.resilient++
-    } else if (readiness.status === 'Restoring') {
+    } else if (readiness.status === RESILIENCE_STATUS.THRIVING) {
       stats.restoring++
     } else {
       stats.needSupport++
@@ -371,21 +371,21 @@ const GlobalOverview = () => {
               <Clock className="readiness-stat-card-compact__icon" size={26} aria-hidden />
               <div className="readiness-stat-card-compact__text">
                 <h4>{readinessStats.restoring}</h4>
-                <p>Restoring</p>
+                <p>Thriving</p>
               </div>
             </div>
             <div className="readiness-stat-card-compact readiness-stat-card-compact--need-support">
               <AlertCircle className="readiness-stat-card-compact__icon" size={26} aria-hidden />
               <div className="readiness-stat-card-compact__text">
                 <h4>{readinessStats.needSupport}</h4>
-                <p>Need Support</p>
+                <p>Needs Support</p>
               </div>
             </div>
             <div className="readiness-stat-card-compact readiness-stat-card-compact--not-assessed">
               <AlertCircle className="readiness-stat-card-compact__icon" size={26} aria-hidden />
               <div className="readiness-stat-card-compact__text">
                 <h4>{readinessStats.notAssessed}</h4>
-                <p>Not Assessed</p>
+                <p>Not Yet Started</p>
               </div>
             </div>
           </div>
@@ -763,9 +763,9 @@ const GlobalOverview = () => {
                     <div className="readiness-header-modern">
                       {readiness.assessed ? (
                         <>
-                          {readiness.status === 'Resilient' && <CheckCircle size={16} style={{ color: readiness.color }} />}
-                          {readiness.status === 'Restoring' && <Clock size={16} style={{ color: readiness.color }} />}
-                          {readiness.status === 'Need Support' && <AlertCircle size={16} style={{ color: readiness.color }} />}
+                          {readiness.status === RESILIENCE_STATUS.RESILIENT && <CheckCircle size={16} style={{ color: readiness.color }} />}
+                          {readiness.status === RESILIENCE_STATUS.THRIVING && <Clock size={16} style={{ color: readiness.color }} />}
+                          {readiness.status === RESILIENCE_STATUS.NEEDS_SUPPORT && <AlertCircle size={16} style={{ color: readiness.color }} />}
                           <span className="readiness-status-modern" style={{ color: readiness.color }}>
                             {readiness.status}
                           </span>

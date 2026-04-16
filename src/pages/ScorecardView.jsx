@@ -1,6 +1,14 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { scorecardDomains, calculateDomainScore, calculateOverallScore, getRecoveryStatus, getRecoveryGaugeAccent, TOTAL_POSSIBLE_SCORE } from '../data/scorecardDomains'
+import {
+  scorecardDomains,
+  calculateDomainScore,
+  calculateOverallScore,
+  getRecoveryStatus,
+  getRecoveryGaugeAccent,
+  TOTAL_POSSIBLE_SCORE,
+  RESILIENCE_STATUS,
+} from '../data/scorecardDomains'
 import { getParishById, getAllParishes } from '../data/jamaicaParishes'
 import {
   initializeParishScorecard,
@@ -156,9 +164,9 @@ const ScorecardView = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'Resilient':
+      case RESILIENCE_STATUS.RESILIENT:
         return <CheckCircle2 size={18} />
-      case 'Restoring':
+      case RESILIENCE_STATUS.THRIVING:
         return <Clock size={18} />
       default:
         return <AlertCircle size={18} />

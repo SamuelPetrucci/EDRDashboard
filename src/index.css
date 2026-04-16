@@ -27,7 +27,7 @@ html {
   /* Status Colors */
   --success-color: #10B981; /* Green for Resilient */
   --warning-color: #F97316;
-  --danger-color: #EF4444; /* Red for Need Support */
+  --danger-color: #EF4444; /* Red for Needs Support band */
   --resilient-color: #10B981;
   --restoring-color: #F97316;
   --need-support-color: #EF4444;

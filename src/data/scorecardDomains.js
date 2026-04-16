@@ -338,6 +338,14 @@ export const scorecardDomains = [
 // Total possible score: 74 points (as per document)
 export const TOTAL_POSSIBLE_SCORE = 74
 
+/** Resilience index labels — use everywhere (overview, map, scorecard, parish cards). */
+export const RESILIENCE_STATUS = {
+  RESILIENT: 'Resilient',
+  THRIVING: 'Thriving',
+  NEEDS_SUPPORT: 'Needs Support',
+  NOT_YET_STARTED: 'Not Yet Started',
+}
+
 // Calculate domain score percentage
 export const calculateDomainScore = (domain) => {
   const totalScore = domain.criteria.reduce((sum, criterion) => sum + criterion.score, 0)
@@ -355,9 +363,9 @@ export const calculateOverallScore = (domains) => {
 
 // Get recovery status based on score
 export const getRecoveryStatus = (score) => {
-  if (score >= 80) return { status: 'Resilient', color: 'var(--resilient-color)' }
-  if (score >= 60) return { status: 'Restoring', color: 'var(--restoring-color)' }
-  return { status: 'Need Support', color: 'var(--need-support-color)' }
+  if (score >= 80) return { status: RESILIENCE_STATUS.RESILIENT, color: 'var(--resilient-color)' }
+  if (score >= 60) return { status: RESILIENCE_STATUS.THRIVING, color: 'var(--restoring-color)' }
+  return { status: RESILIENCE_STATUS.NEEDS_SUPPORT, color: 'var(--need-support-color)' }
 }
 
 /**

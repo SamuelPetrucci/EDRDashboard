@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { getAllParishes } from '../data/jamaicaParishes'
 import { getParishScorecard } from '../utils/scorecardStorage'
-import { calculateOverallScore, getRecoveryStatus, getRecoveryGaugeAccent } from '../data/scorecardDomains'
+import { calculateOverallScore, getRecoveryStatus, getRecoveryGaugeAccent, RESILIENCE_STATUS } from '../data/scorecardDomains'
 import { CheckCircle, Clock, AlertCircle, MapPin } from 'lucide-react'
 import './PreparednessMap.css'
 
@@ -15,7 +15,7 @@ const PreparednessMap = () => {
     if (!scorecardData || !scorecardData.domains) {
       return {
         score: 0,
-        status: 'Not Assessed',
+        status: RESILIENCE_STATUS.NOT_YET_STARTED,
         color: '#64748B',
         icon: MapPin,
         assessed: false
@@ -159,7 +159,13 @@ const PreparednessMap = () => {
                   fontWeight="700"
                   style={{ textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)' }}
                 >
-                  {readiness.status === 'Resilient' ? '✓' : readiness.status === 'Restoring' ? '~' : readiness.status === 'Need Support' ? '!' : '?'}
+                  {readiness.status === RESILIENCE_STATUS.RESILIENT
+                    ? '✓'
+                    : readiness.status === RESILIENCE_STATUS.THRIVING
+                      ? '~'
+                      : readiness.status === RESILIENCE_STATUS.NEEDS_SUPPORT
+                        ? '!'
+                        : '?'}
                 </text>
               </g>
             )
@@ -182,7 +188,7 @@ const PreparednessMap = () => {
                   left: `${position.x}%`,
                   top: `${position.y}%`,
                 }}
-                title={`${parish.name}: ${readiness.status} (${readiness.assessed ? readiness.score.toFixed(1) + '%' : 'Not Assessed'})`}
+                title={`${parish.name}: ${readiness.status} (${readiness.assessed ? readiness.score.toFixed(1) + '%' : RESILIENCE_STATUS.NOT_YET_STARTED})`}
               >
                 <div className="parish-icon-wrapper" style={{ color: readiness.color }}>
                   <Icon size={16} strokeWidth={2.5} />
@@ -221,21 +227,21 @@ const PreparednessMap = () => {
           <div className="legend-item">
             <Clock size={20} style={{ color: 'var(--restoring-color)' }} />
             <div>
-              <strong>Restoring</strong>
+              <strong>Thriving</strong>
               <span>60-79% - Moderate capability</span>
             </div>
           </div>
           <div className="legend-item">
             <AlertCircle size={20} style={{ color: 'var(--need-support-color)' }} />
             <div>
-              <strong>Need Support</strong>
+              <strong>Needs Support</strong>
               <span>0-59% - Requires attention</span>
             </div>
           </div>
           <div className="legend-item">
             <MapPin size={20} style={{ color: 'var(--text-secondary)' }} />
             <div>
-              <strong>Not Assessed</strong>
+              <strong>Not Yet Started</strong>
               <span>No scorecard data</span>
             </div>
           </div>
