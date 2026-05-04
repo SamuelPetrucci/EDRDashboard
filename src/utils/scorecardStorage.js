@@ -1,12 +1,19 @@
 // Utility for storing and retrieving parish-specific scorecard data
-// Uses localStorage for persistence
+// Uses localStorage for persistence. Keys are scoped by dataset (see regionCatalog REGION_USA).
 
-const STORAGE_KEY = 'ltdrr_parish_scorecards'
+import { REGION_JAMAICA, REGION_USA } from '../data/regionCatalog'
+
+const STORAGE_KEY_JM = 'ltdrr_parish_scorecards'
+const STORAGE_KEY_USA = 'ltdrr_parish_scorecards_usa'
+
+function resolveKey(region = REGION_JAMAICA) {
+  return region === REGION_USA ? STORAGE_KEY_USA : STORAGE_KEY_JM
+}
 
 // Get all stored scorecards
-export const getAllScorecards = () => {
+export const getAllScorecards = (region = REGION_JAMAICA) => {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
+    const stored = localStorage.getItem(resolveKey(region))
     return stored ? JSON.parse(stored) : {}
   } catch (error) {
     console.error('Error reading scorecards from storage:', error)
@@ -15,20 +22,20 @@ export const getAllScorecards = () => {
 }
 
 // Get scorecard for a specific parish
-export const getParishScorecard = (parishId) => {
-  const allScorecards = getAllScorecards()
+export const getParishScorecard = (parishId, region = REGION_JAMAICA) => {
+  const allScorecards = getAllScorecards(region)
   return allScorecards[parishId] || null
 }
 
 // Save scorecard for a specific parish
-export const saveParishScorecard = (parishId, scorecardData) => {
+export const saveParishScorecard = (parishId, scorecardData, region = REGION_JAMAICA) => {
   try {
-    const allScorecards = getAllScorecards()
+    const allScorecards = getAllScorecards(region)
     allScorecards[parishId] = {
       ...scorecardData,
       lastUpdated: new Date().toISOString()
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(allScorecards))
+    localStorage.setItem(resolveKey(region), JSON.stringify(allScorecards))
     return true
   } catch (error) {
     console.error('Error saving scorecard to storage:', error)
@@ -37,8 +44,8 @@ export const saveParishScorecard = (parishId, scorecardData) => {
 }
 
 // Initialize scorecard for a parish (if it doesn't exist)
-export const initializeParishScorecard = (parishId, defaultDomains) => {
-  const existing = getParishScorecard(parishId)
+export const initializeParishScorecard = (parishId, defaultDomains, region = REGION_JAMAICA) => {
+  const existing = getParishScorecard(parishId, region)
   if (existing) {
     return existing.domains
   }
@@ -56,7 +63,7 @@ export const initializeParishScorecard = (parishId, defaultDomains) => {
     lastUpdated: new Date().toISOString()
   }
   
-  saveParishScorecard(parishId, newScorecard)
+  saveParishScorecard(parishId, newScorecard, region)
   return newScorecard.domains
 }
 
@@ -64,13 +71,13 @@ export const initializeParishScorecard = (parishId, defaultDomains) => {
  * Build domain/criterion structure with scores = mean of each criterion across parishes
  * that have saved scorecard data. Parishes without a scorecard are excluded from that criterion's mean.
  */
-export const getNationalAveragedDomains = (templateDomains, allParishes) => {
+export const getNationalAveragedDomains = (templateDomains, allParishes, region = REGION_JAMAICA) => {
   return templateDomains.map((domain) => ({
     ...domain,
     criteria: domain.criteria.map((criterion) => {
       const scores = []
       for (const p of allParishes) {
-        const sc = getParishScorecard(p.id)
+        const sc = getParishScorecard(p.id, region)
         if (!sc?.domains) continue
         const d = sc.domains.find((x) => x.id === domain.id)
         const c = d?.criteria.find((x) => x.id === criterion.id)
@@ -83,9 +90,9 @@ export const getNationalAveragedDomains = (templateDomains, allParishes) => {
 }
 
 /** Parishes with any saved scorecard (used for national averages copy). */
-export const countParishesWithScorecardData = (allParishes) =>
+export const countParishesWithScorecardData = (allParishes, region = REGION_JAMAICA) =>
   allParishes.filter((p) => {
-    const sc = getParishScorecard(p.id)
+    const sc = getParishScorecard(p.id, region)
     return sc?.domains && Array.isArray(sc.domains)
   }).length
 

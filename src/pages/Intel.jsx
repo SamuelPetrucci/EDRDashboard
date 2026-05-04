@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, LayerGroup, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import { Satellite, MapPin, Layers, ExternalLink, Plane, Ship, AlertTriangle, Filter, Search, Cloud, Video, X, Navigation, Globe, Info, PanelRightClose, PanelRightOpen, LayoutGrid, Car, Map, Newspaper, Target } from 'lucide-react'
-import { jamaicaCenter, defaultZoom, parishCoordinates } from '../data/parishCoordinates'
-import { getAllParishes } from '../data/jamaicaParishes'
-import { BASEMAP_LAYERS, JAMAICA_BBOX, FEED_REFRESH_MS, boundsToBbox, WEATHER_RADAR_OVERLAY, DISPLAY_LIMIT_OPTIONS } from '../data/intelSources'
+import { BASEMAP_LAYERS, FEED_REFRESH_MS, boundsToBbox, WEATHER_RADAR_OVERLAY, DISPLAY_LIMIT_OPTIONS } from '../data/intelSources'
+import { useRegion } from '../context/RegionContext'
 import { fetchFlightsInBounds } from '../data/flightFeed'
 import { fetchShipsInBounds, isRealAISEnabled } from '../data/maritimeFeed'
 import { searchPlaces } from '../data/geocode'
@@ -60,15 +59,6 @@ const VIEW_PRESETS = {
   horizon: { pitch: 60, bearing: 0, label: 'Horizon' },
 }
 
-/** Initial 3D globe view: angled at Jamaica like a cylindrical globe spawning in */
-const GLOBE_JAMAICA_VIEW = {
-  longitude: jamaicaCenter.lng,
-  latitude: jamaicaCenter.lat,
-  zoom: 5.5,
-  pitch: 48,
-  bearing: 0,
-}
-
 /** Plane icon, rotated by heading (degrees). Anomaly = red ring. */
 function createPlaneIcon(isAnomaly, heading = 0) {
   const size = 28
@@ -120,8 +110,13 @@ function createCameraIcon() {
 }
 
 const Intel = () => {
-  const parishes = getAllParishes()
-  const [mapBbox, setMapBbox] = useState(JAMAICA_BBOX)
+  const { region, catalog } = useRegion()
+  const parishes = catalog.getAllJurisdictions()
+  const coordsMap = catalog.coordinatesMap
+  const leafletCenter = catalog.mapCenter
+  const leafletZoom = catalog.leafletDefaultZoom
+  const globeVs = catalog.globeInitialViewState
+  const [mapBbox, setMapBbox] = useState(() => ({ ...catalog.feedBbox }))
   const [flights, setFlights] = useState([])
   const [ships, setShips] = useState([])
   const [lastUpdated, setLastUpdated] = useState(null)
@@ -186,8 +181,15 @@ const Intel = () => {
 
   // Default selected point so area feeds (weather, webcams) load for initial map view
   useEffect(() => {
-    setSelectedPoint((prev) => prev ?? jamaicaCenter)
+    setSelectedPoint((prev) => prev ?? { ...catalog.mapCenter })
   }, [])
+
+  // When switching Jamaica / USA, reset bbox and probe point to new catalog defaults
+  useEffect(() => {
+    setMapBbox({ ...catalog.feedBbox })
+    setSelectedPoint({ ...catalog.mapCenter })
+    setFlyToTarget(null)
+  }, [region, catalog])
 
   const parishById = useMemo(() => {
     const map = {}
@@ -546,11 +548,12 @@ const Intel = () => {
                 </div>
               )}
               <GlobeView
+                key={`intel-globe-${region}`}
                 mapboxAccessToken={mapboxToken}
-                initialViewState={GLOBE_JAMAICA_VIEW}
+                initialViewState={{ ...globeVs }}
                 spawnFlyToDuration={1800}
-                pitch={VIEW_PRESETS[viewPreset]?.pitch ?? GLOBE_JAMAICA_VIEW.pitch}
-                bearing={VIEW_PRESETS[viewPreset]?.bearing ?? GLOBE_JAMAICA_VIEW.bearing}
+                pitch={VIEW_PRESETS[viewPreset]?.pitch ?? globeVs.pitch}
+                bearing={VIEW_PRESETS[viewPreset]?.bearing ?? globeVs.bearing}
                 flyToTarget={flyToTarget}
                 onFlyToComplete={() => setFlyToTarget(null)}
                 mapStyleKey={mapStyleKey}
@@ -590,9 +593,10 @@ const Intel = () => {
             </div>
           )}
           <MapContainer
+            key={`intel-2d-${region}`}
             className="intel-map intel-map-smooth"
-            center={[jamaicaCenter.lat, jamaicaCenter.lng]}
-            zoom={defaultZoom}
+            center={[leafletCenter.lat, leafletCenter.lng]}
+            zoom={leafletZoom}
             zoomControl={true}
             scrollWheelZoom={true}
             zoomSnap={0.25}
@@ -730,9 +734,10 @@ const Intel = () => {
                 </LayerGroup>
               </Overlay>
             </LayersControl>
-            {Object.entries(parishCoordinates).map(([parishId, coords]) => {
+            {Object.entries(coordsMap).map(([parishId, coords]) => {
               const parish = parishById[parishId]
               const name = parish ? parish.name : parishId.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+              const ju = catalog.jurisdictionLabelSingular.toLowerCase()
               return (
                 <Marker key={parishId} position={[coords.lat, coords.lng]}>
                   <Popup>
@@ -741,7 +746,7 @@ const Intel = () => {
                       {parish && (
                         <>
                           <span className="intel-popup-meta">{parish.region} · Pop. {parish.population?.toLocaleString()}</span>
-                          <Link to={`/parish/${parishId}`} className="intel-popup-link">View parish dashboard <ExternalLink size={12} /></Link>
+                          <Link to={`/parish/${parishId}`} className="intel-popup-link">View {ju} dashboard <ExternalLink size={12} /></Link>
                         </>
                       )}
                     </div>

@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Phone, Mail, Globe, MapPin, Clock, Search, Filter } from 'lucide-react'
 import { getNationalContacts, getParishContacts, emergencyContacts, searchContacts } from '../data/contacts'
-import { getParishById } from '../data/jamaicaParishes'
 import './Contacts.css'
+import { useRegion } from '../context/RegionContext'
+import { REGION_USA } from '../data/regionCatalog'
 
 const Contacts = () => {
   const { parishId } = useParams()
-  const parish = parishId ? getParishById(parishId) : null
+  const { catalog, region } = useRegion()
+  const parish = parishId ? catalog.getJurisdictionById(parishId) : null
   
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -64,10 +66,11 @@ const Contacts = () => {
       <div className="contacts-header">
         <h1>Emergency Contacts</h1>
         <p className="subtitle">
-          {parish 
-            ? `Emergency contacts for ${parish.name} Parish`
-            : 'National and parish emergency contact directory'
-          }
+          {parish
+            ? region === REGION_USA
+              ? `Emergency contacts for ${parish.name} (${catalog.jurisdictionLabelSingular})`
+              : `Emergency contacts for ${parish.name} Parish`
+            : `National and ${catalog.jurisdictionLabelSingular.toLowerCase()} emergency contact directory`}
         </p>
       </div>
 

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getParishById } from '../data/jamaicaParishes'
 import { ArrowLeft, Users, Package, TrendingUp, GraduationCap, MessageSquare, Phone, ArrowRight, BookOpen, Bell, Radio } from 'lucide-react'
 import EditableInventory from '../components/EditableInventory'
 import { getParishEquipment, getParishPersonnel } from '../utils/equipmentStorage'
@@ -10,19 +9,22 @@ import { getRequiredTrainings, getAllTrainings } from '../data/trainings'
 import { getParishContacts } from '../data/contacts'
 import { getCommunications } from '../data/communications'
 import DisasterAlerts from '../components/DisasterAlerts'
+import { useRegion } from '../context/RegionContext'
+import { REGION_USA } from '../data/regionCatalog'
 import './ParishDashboard.css'
 
 const ParishDashboard = () => {
   const { parishId } = useParams()
-  const parish = getParishById(parishId)
+  const { region, catalog } = useRegion()
+  const parish = catalog.getJurisdictionById(parishId)
   const [equipmentData, setEquipmentData] = useState(parish?.equipment || {})
   const [personnelData, setPersonnelData] = useState(parish?.personnel || {})
 
   useEffect(() => {
     if (parish) {
       // Load saved data or use default
-      const savedEquipment = getParishEquipment(parishId)
-      const savedPersonnel = getParishPersonnel(parishId)
+      const savedEquipment = getParishEquipment(parishId, region)
+      const savedPersonnel = getParishPersonnel(parishId, region)
       
       if (savedEquipment) {
         const { lastUpdated, updatedBy, ...equipment } = savedEquipment
@@ -38,12 +40,12 @@ const ParishDashboard = () => {
         setPersonnelData(parish.personnel)
       }
     }
-  }, [parishId, parish])
+  }, [parishId, parish, region])
 
   const handleDataUpdate = () => {
     // Reload data after update
-    const savedEquipment = getParishEquipment(parishId)
-    const savedPersonnel = getParishPersonnel(parishId)
+    const savedEquipment = getParishEquipment(parishId, region)
+    const savedPersonnel = getParishPersonnel(parishId, region)
     
     if (savedEquipment) {
       const { lastUpdated, updatedBy, ...equipment } = savedEquipment
@@ -60,7 +62,7 @@ const ParishDashboard = () => {
     return (
       <div className="parish-dashboard">
         <div className="error-message">
-          <h2>Parish not found</h2>
+          <h2>{catalog.notFoundHeading}</h2>
           <Link to="/">Return to Overview</Link>
         </div>
       </div>
@@ -71,7 +73,7 @@ const ParishDashboard = () => {
   const totalPersonnel = Object.values(personnelData).reduce((a, b) => a + b, 0)
   
   // Get scorecard data
-  const scorecardData = getParishScorecard(parishId)
+  const scorecardData = getParishScorecard(parishId, region)
   const overallScore = scorecardData?.domains ? calculateOverallScore(scorecardData.domains) : 0
 
   // Get training data
@@ -92,7 +94,7 @@ const ParishDashboard = () => {
           <span>Back to Overview</span>
         </Link>
         <div className="parish-title">
-          <h1>{parish.name} Parish</h1>
+          <h1>{region === REGION_USA ? parish.name : `${parish.name} Parish`}</h1>
           <span className="parish-badge">{parish.region} Region</span>
         </div>
       </div>
@@ -242,6 +244,7 @@ const ParishDashboard = () => {
               type="equipment"
               data={parish.equipment}
               parishId={parishId}
+              storageRegion={region}
               onUpdate={handleDataUpdate}
             />
           </div>
@@ -250,6 +253,7 @@ const ParishDashboard = () => {
               type="personnel"
               data={parish.personnel}
               parishId={parishId}
+              storageRegion={region}
               onUpdate={handleDataUpdate}
             />
           </div>

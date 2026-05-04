@@ -1,7 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { getAllParishes } from '../data/jamaicaParishes'
-import { jamaicaCenter } from '../data/parishCoordinates'
+import { useEffect, useMemo, useState } from 'react'
 import GlobeView from '../components/GlobeView'
 import { MapPin, Users, Package, AlertCircle, CheckCircle, Clock, BookOpen, MessageSquare, BarChart3, ArrowRight, GraduationCap, Bell, Cloud, Thermometer, ExternalLink, Radio, Truck, Zap, Heart, UserCheck, Satellite, Shield, Phone, LayoutGrid, Globe, Search, Video } from 'lucide-react'
 import DisasterAlerts from '../components/DisasterAlerts'
@@ -12,21 +10,28 @@ import { getRequiredTrainings, getAllTrainings } from '../data/trainings'
 import { getWeatherData } from '../data/weatherFeed'
 import { getCommunications } from '../data/communications'
 import { fetchNewsForBounds } from '../data/newsFeed'
-import { JAMAICA_BBOX } from '../data/intelSources'
 import { searchPlaces } from '../data/geocode'
+import { useRegion } from '../context/RegionContext'
+import { REGION_USA } from '../data/regionCatalog'
 import { getWeatherAtPoint } from '../data/weatherAtPoint'
 import { fetchCamerasNearPoint } from '../data/cameraFeed'
 import './GlobalOverview.css'
 
 const GlobalOverview = () => {
-  const parishes = getAllParishes()
+  const { region, catalog } = useRegion()
+  const parishes = catalog.getAllJurisdictions()
+  const jp = catalog.jurisdictionLabelPlural
+  const jpLower = jp.toLowerCase()
   const requiredTrainings = getRequiredTrainings()
   const allTrainings = getAllTrainings()
   const communications = getCommunications()
   const [weather, setWeather] = useState(null)
   const [weatherError, setWeatherError] = useState(null)
   const [weatherView, setWeatherView] = useState('3day') // 'hourly' | '3day' | 'week'
-  const satelliteUrl = 'https://www.windy.com/?18.1096,-77.2975,7,satellite'
+  const satelliteUrl = useMemo(() => {
+    const { lat, lng } = catalog.mapCenter
+    return `https://www.windy.com/?${lat},${lng},${region === REGION_USA ? 4 : 7},satellite`
+  }, [catalog.mapCenter, region])
   const mapboxToken = typeof import.meta !== 'undefined' && import.meta.env?.VITE_MAPBOX_TOKEN
 
   const [feedSearchQuery, setFeedSearchQuery] = useState('')
@@ -111,7 +116,7 @@ const GlobalOverview = () => {
       setNewsLoading(true)
       setNewsError(null)
       try {
-        const list = await fetchNewsForBounds(JAMAICA_BBOX, 12)
+        const list = await fetchNewsForBounds(catalog.feedBbox, 12)
         if (cancelled) return
         setNewsArticles(Array.isArray(list) ? list : [])
         setNewsError(null)
@@ -130,11 +135,11 @@ const GlobalOverview = () => {
       cancelled = true
       clearInterval(interval)
     }
-  }, [])
+  }, [region, catalog.feedBbox])
 
   // Get readiness status for each parish
   const getParishReadiness = (parish) => {
-    const scorecardData = getParishScorecard(parish.id)
+    const scorecardData = getParishScorecard(parish.id, region)
     
     if (!scorecardData || !scorecardData.domains) {
       return {
@@ -158,8 +163,8 @@ const GlobalOverview = () => {
 
   // Effective equipment/personnel per parish (storage or default)
   const getEffective = (parish) => {
-    const eq = getParishEquipment(parish.id)
-    const pers = getParishPersonnel(parish.id)
+    const eq = getParishEquipment(parish.id, region)
+    const pers = getParishPersonnel(parish.id, region)
     let equipment = parish.equipment
     let personnel = parish.personnel
     if (eq) {
@@ -220,7 +225,7 @@ const GlobalOverview = () => {
       <div className="page-header">
         <div className="page-header-main">
           <h1>National Overview</h1>
-          <p className="subtitle">Strategic Emergency Management - 14 Parishes Overview</p>
+          <p className="subtitle">{catalog.overviewSubtitle}</p>
         </div>
       </div>
 
@@ -352,7 +357,7 @@ const GlobalOverview = () => {
                 <span className="score-value-large">{averageScore.toFixed(0)}%</span>
               </div>
               <div className="score-info">
-                <h3>Parish aggregate</h3>
+                <h3>{catalog.jurisdictionLabelSingular} aggregate</h3>
                 <div className="status-badge-large status-badge-large--soft" style={{ backgroundColor: averageGaugeAccent }}>
                   {getRecoveryStatus(averageScore).status}
                 </div>
@@ -400,7 +405,12 @@ const GlobalOverview = () => {
                 <Link to="/intel" className="overview-sidebar-link"><Satellite size={16} /> Intel map</Link>
                 <Link to="/protocols" className="overview-sidebar-link"><BookOpen size={16} /> Protocols & training</Link>
                 <Link to="/contacts" className="overview-sidebar-link"><Phone size={16} /> Contacts</Link>
-                <Link to="/parish/kingston" className="overview-sidebar-link"><MapPin size={16} /> Parishes</Link>
+                <Link
+                  to={parishes[0]?.id ? `/parish/${parishes[0].id}` : '/'}
+                  className="overview-sidebar-link"
+                >
+                  <MapPin size={16} /> {jp}
+                </Link>
               </nav>
             </div>
             <div className="overview-sidebar-card overview-live-feeds-card">
@@ -527,11 +537,12 @@ const GlobalOverview = () => {
               <div className="intel-overview-card-body intel-overview-globe-body">
                 {mapboxToken ? (
                   <GlobeView
+                    key={`overview-globe-${region}`}
                     mapboxAccessToken={mapboxToken}
                     initialViewState={{
-                      longitude: jamaicaCenter.lng,
-                      latitude: jamaicaCenter.lat,
-                      zoom: 5.5,
+                      longitude: catalog.mapCenter.lng,
+                      latitude: catalog.mapCenter.lat,
+                      zoom: region === REGION_USA ? 3.6 : 5.5,
                     }}
                     mapStyleKey="satellite"
                     flights={[]}
@@ -650,7 +661,7 @@ const GlobalOverview = () => {
           </div>
           <div className="inventory-context">
             <MapPin size={14} />
-            <span>14 parishes</span>
+            <span>{parishes.length} {jpLower}</span>
             <span className="inventory-context-sep">·</span>
             <span>{totalPopulation.toLocaleString()} population</span>
           </div>
@@ -733,12 +744,12 @@ const GlobalOverview = () => {
         </div>
       </div>
 
-      {/* Parishes Grid */}
+      {/* Parish / state grid */}
       <div className="parishes-section">
         <div className="section-header">
           <div className="section-header-content">
             <MapPin size={24} />
-            <h2>Parish Overview</h2>
+            <h2>{catalog.jurisdictionLabelSingular} overview</h2>
           </div>
         </div>
         <div className="parishes-grid">

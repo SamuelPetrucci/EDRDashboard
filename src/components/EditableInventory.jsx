@@ -10,9 +10,10 @@ import {
   getParishChangeHistory
 } from '../utils/equipmentStorage'
 import { getCurrentUser } from '../data/userRoles'
+import { REGION_JAMAICA } from '../data/regionCatalog'
 import './EditableInventory.css'
 
-const EditableInventory = ({ type, data, parishId, onUpdate }) => {
+const EditableInventory = ({ type, data, parishId, onUpdate, storageRegion = REGION_JAMAICA }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editedData, setEditedData] = useState({})
   const [changeReason, setChangeReason] = useState('')
@@ -27,28 +28,28 @@ const EditableInventory = ({ type, data, parishId, onUpdate }) => {
   useEffect(() => {
     // Load saved data or initialize from default
     if (type === 'equipment') {
-      const saved = getParishEquipment(parishId)
+      const saved = getParishEquipment(parishId, storageRegion)
       if (saved) {
         // Remove metadata fields
         const { lastUpdated, updatedBy, ...equipmentData } = saved
         setEditedData(equipmentData)
       } else {
-        const initialized = initializeParishEquipment(parishId, data)
+        const initialized = initializeParishEquipment(parishId, data, storageRegion)
         const { lastUpdated, updatedBy, ...equipmentData } = initialized
         setEditedData(equipmentData)
       }
     } else {
-      const saved = getParishPersonnel(parishId)
+      const saved = getParishPersonnel(parishId, storageRegion)
       if (saved) {
         const { lastUpdated, updatedBy, ...personnelData } = saved
         setEditedData(personnelData)
       } else {
-        const initialized = initializeParishPersonnel(parishId, data)
+        const initialized = initializeParishPersonnel(parishId, data, storageRegion)
         const { lastUpdated, updatedBy, ...personnelData } = initialized
         setEditedData(personnelData)
       }
     }
-  }, [parishId, type, data])
+  }, [parishId, type, data, storageRegion])
 
   const handleEdit = () => {
     if (!canEdit) {
@@ -67,7 +68,7 @@ const EditableInventory = ({ type, data, parishId, onUpdate }) => {
     setSuccess('')
     // Reload original data
     if (type === 'equipment') {
-      const saved = getParishEquipment(parishId)
+      const saved = getParishEquipment(parishId, storageRegion)
       if (saved) {
         const { lastUpdated, updatedBy, ...equipmentData } = saved
         setEditedData(equipmentData)
@@ -75,7 +76,7 @@ const EditableInventory = ({ type, data, parishId, onUpdate }) => {
         setEditedData(data)
       }
     } else {
-      const saved = getParishPersonnel(parishId)
+      const saved = getParishPersonnel(parishId, storageRegion)
       if (saved) {
         const { lastUpdated, updatedBy, ...personnelData } = saved
         setEditedData(personnelData)
@@ -103,9 +104,9 @@ const EditableInventory = ({ type, data, parishId, onUpdate }) => {
     let success = false
 
     if (type === 'equipment') {
-      success = saveParishEquipment(parishId, editedData, userId, changeReason)
+      success = saveParishEquipment(parishId, editedData, userId, changeReason, storageRegion)
     } else {
-      success = saveParishPersonnel(parishId, editedData, userId, changeReason)
+      success = saveParishPersonnel(parishId, editedData, userId, changeReason, storageRegion)
     }
 
     if (success) {
@@ -135,7 +136,7 @@ const EditableInventory = ({ type, data, parishId, onUpdate }) => {
   }
 
   const loadHistory = () => {
-    const changeHistory = getParishChangeHistory(parishId, 20)
+    const changeHistory = getParishChangeHistory(parishId, 20, storageRegion)
     const filtered = changeHistory.filter(entry => 
       entry.action === `${type}_update`
     )

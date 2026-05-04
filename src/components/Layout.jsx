@@ -3,11 +3,13 @@ import { Link, useLocation } from 'react-router-dom'
 import { Home, FileText, BookOpen, Phone, Satellite, Menu, X } from 'lucide-react'
 import EmergencyBanner from './EmergencyBanner'
 import EnterpriseFooter from './EnterpriseFooter'
+import { useRegion, REGION_JAMAICA, REGION_USA } from '../context/RegionContext'
 import headerLogo from '../../headerlogo.webp'
 import './Layout.css'
 
 const Layout = ({ children }) => {
   const location = useLocation()
+  const { region, setRegion } = useRegion()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   // Apply saved theme (or default to dark) once on mount; no user toggle in UI.
@@ -95,6 +97,28 @@ const Layout = ({ children }) => {
             </button>
             <nav className="nav" aria-label="Primary">
               <div className="nav-scroll">
+                <div
+                  className="nav-region-switch"
+                  role="group"
+                  aria-label="Jurisdiction dataset (beta test)"
+                  title="Switch between Jamaica parishes and US states (local test; data is separate per region)"
+                >
+                  <span className="nav-region-switch-label">Dataset</span>
+                  <button
+                    type="button"
+                    className={`nav-region-btn${region === REGION_JAMAICA ? ' nav-region-btn--active' : ''}`}
+                    onClick={() => setRegion(REGION_JAMAICA)}
+                  >
+                    Jamaica
+                  </button>
+                  <button
+                    type="button"
+                    className={`nav-region-btn${region === REGION_USA ? ' nav-region-btn--active' : ''}`}
+                    onClick={() => setRegion(REGION_USA)}
+                  >
+                    USA
+                  </button>
+                </div>
                 <Link to="/" className={getNavLinkClass({ path: '/' })}>
                   <Home size={18} aria-hidden />
                   <span>Overview</span>
@@ -154,6 +178,31 @@ const Layout = ({ children }) => {
               </button>
             </div>
             <nav className="mobile-nav-links" aria-label="Primary">
+              <div className="mobile-nav-region-switch" role="group" aria-label="Jurisdiction dataset (beta test)">
+                <span className="mobile-nav-region-label">Dataset</span>
+                <div className="mobile-nav-region-btns">
+                  <button
+                    type="button"
+                    className={`nav-region-btn${region === REGION_JAMAICA ? ' nav-region-btn--active' : ''}`}
+                    onClick={() => {
+                      setRegion(REGION_JAMAICA)
+                      closeMobileNav()
+                    }}
+                  >
+                    Jamaica
+                  </button>
+                  <button
+                    type="button"
+                    className={`nav-region-btn${region === REGION_USA ? ' nav-region-btn--active' : ''}`}
+                    onClick={() => {
+                      setRegion(REGION_USA)
+                      closeMobileNav()
+                    }}
+                  >
+                    USA
+                  </button>
+                </div>
+              </div>
               <Link
                 to="/"
                 className={`${getNavLinkClass({ path: '/' })} mobile-nav-link`}

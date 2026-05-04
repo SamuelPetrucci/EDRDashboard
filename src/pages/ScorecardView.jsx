@@ -9,7 +9,6 @@ import {
   TOTAL_POSSIBLE_SCORE,
   RESILIENCE_STATUS,
 } from '../data/scorecardDomains'
-import { getParishById, getAllParishes } from '../data/jamaicaParishes'
 import {
   initializeParishScorecard,
   saveParishScorecard,
@@ -33,13 +32,15 @@ import {
   Heart,
   Users,
 } from 'lucide-react'
+import { useRegion } from '../context/RegionContext'
+import { REGION_USA } from '../data/regionCatalog'
 import './ScorecardView.css'
 
-const buildNationalInventoryAgg = (parishList) => {
+const buildNationalInventoryAgg = (parishList, storageRegion) => {
   return parishList.reduce(
     (acc, parish) => {
-      const eq = getParishEquipment(parish.id)
-      const pers = getParishPersonnel(parish.id)
+      const eq = getParishEquipment(parish.id, storageRegion)
+      const pers = getParishPersonnel(parish.id, storageRegion)
       let equipment = parish.equipment
       let personnel = parish.personnel
       if (eq) {
@@ -82,31 +83,36 @@ const buildNationalInventoryAgg = (parishList) => {
 const ScorecardView = () => {
   const { parishId } = useParams()
   const navigate = useNavigate()
-  const parishes = getAllParishes()
-  const parish = parishId ? getParishById(parishId) : null
+  const { region, catalog } = useRegion()
+  const parishes = catalog.getAllJurisdictions()
+  const parish = parishId ? catalog.getJurisdictionById(parishId) : null
   const isNationalView = !parishId
+  const jp = catalog.jurisdictionLabelPlural
+  const jpLower = jp.toLowerCase()
+  const jl = catalog.jurisdictionLabelSingular
+  const jlLower = jl.toLowerCase()
 
-  const parishesWithScorecards = countParishesWithScorecardData(parishes)
+  const parishesWithScorecards = countParishesWithScorecardData(parishes, region)
   const totalPopulation = useMemo(
     () => parishes.reduce((sum, p) => sum + p.population, 0),
     [parishes]
   )
 
-  const inventoryAgg = useMemo(() => buildNationalInventoryAgg(parishes), [parishes])
+  const inventoryAgg = useMemo(() => buildNationalInventoryAgg(parishes, region), [parishes, region])
 
   const [domains, setDomains] = useState(() =>
     parishId
-      ? initializeParishScorecard(parishId, scorecardDomains)
-      : getNationalAveragedDomains(scorecardDomains, parishes)
+      ? initializeParishScorecard(parishId, scorecardDomains, region)
+      : getNationalAveragedDomains(scorecardDomains, parishes, region)
   )
 
   useEffect(() => {
     if (parishId) {
-      setDomains(initializeParishScorecard(parishId, scorecardDomains))
+      setDomains(initializeParishScorecard(parishId, scorecardDomains, region))
     } else {
-      setDomains(getNationalAveragedDomains(scorecardDomains, parishes))
+      setDomains(getNationalAveragedDomains(scorecardDomains, parishes, region))
     }
-  }, [parishId, parishes])
+  }, [parishId, parishes, region])
 
   const handleScoreChange = (domainId, criterionId, newScore) => {
     if (isNationalView) return
@@ -126,7 +132,7 @@ const ScorecardView = () => {
     setDomains(updatedDomains)
 
     if (parishId) {
-      saveParishScorecard(parishId, { domains: updatedDomains })
+      saveParishScorecard(parishId, { domains: updatedDomains }, region)
     }
   }
 
@@ -182,7 +188,7 @@ const ScorecardView = () => {
   if (parishId && !parish) {
     return (
       <div className="scorecard-view scorecard-view--error">
-        <p className="scorecard-view-error-msg">Parish not found.</p>
+        <p className="scorecard-view-error-msg">{catalog.notFoundHeading}.</p>
         <Link to="/scorecard" className="back-link">
           <ArrowLeft size={20} />
           <span>Back to national scorecard</span>
@@ -206,19 +212,26 @@ const ScorecardView = () => {
             {parish && (
               <Link to={`/parish/${parish.id}`} className="back-link">
                 <ArrowLeft size={20} />
-                <span>Back to {parish.name} Parish</span>
+                <span>
+                  Back to{' '}
+                  {region === REGION_USA ? parish.name : `${parish.name} Parish`}
+                </span>
               </Link>
             )}
             <div>
               <h1>
                 {isNationalView
                   ? 'National Disaster Recovery Scorecard'
-                  : `${parish.name} Parish — Disaster Recovery Scorecard`}
+                  : region === REGION_USA
+                    ? `${parish.name} — Disaster Recovery Scorecard`
+                    : `${parish.name} Parish — Disaster Recovery Scorecard`}
               </h1>
               <p className="subtitle">
                 {isNationalView
-                  ? `Nationwide view: averaged scores from parishes with saved scorecards (${parishesWithScorecards} of ${parishes.length}). Select a parish to view or edit parish-level data.`
-                  : `Long-Term Disaster Recovery Resilience Assessment for ${parish.name} Parish`}
+                  ? `Nationwide view: averaged scores from ${jpLower} with saved scorecards (${parishesWithScorecards} of ${parishes.length}). Select a ${jlLower} to view or edit local data.`
+                  : region === REGION_USA
+                    ? `Long-Term Disaster Recovery Resilience Assessment for ${parish.name}`
+                    : `Long-Term Disaster Recovery Resilience Assessment for ${parish.name} Parish`}
               </p>
             </div>
           </div>
@@ -232,9 +245,9 @@ const ScorecardView = () => {
               className="scorecard-parish-select"
               value={parishId || ''}
               onChange={handleParishFilterChange}
-              aria-label="National or parish scorecard"
+              aria-label={`National or ${jlLower} scorecard`}
             >
-              <option value="">National (all-parish averages)</option>
+              <option value="">National (all-{jpLower} averages)</option>
               {parishes.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -290,7 +303,7 @@ const ScorecardView = () => {
         <div className="scorecard-panel-body">
           <p className="domains-overview-hint">
             {isNationalView
-              ? 'Nationwide averages per domain. Open a domain for detail (read-only). Choose a parish above to edit scores.'
+              ? `Nationwide averages per domain. Open a domain for detail (read-only). Choose a ${jlLower} above to edit scores.`
               : 'Click a domain to assess or edit scores.'}
           </p>
           <div className="domains-grid-overview">
@@ -361,8 +374,8 @@ const ScorecardView = () => {
           </div>
           <div className="scorecard-panel-body scorecard-inventory-national-body">
             <p className="scorecard-inventory-national-intro">
-              Combined equipment and personnel totals across all {parishes.length} parishes (saved
-              overrides included). Select a parish above to manage parish inventory.
+              Combined equipment and personnel totals across all {parishes.length} {jpLower} (saved
+              overrides included). Select a {jlLower} above to manage inventory.
             </p>
             <div className="scorecard-inventory-stats">
               <div className="scorecard-inventory-stat-card">
@@ -422,7 +435,9 @@ const ScorecardView = () => {
             </div>
             <div className="scorecard-inventory-context">
               <MapPin size={14} aria-hidden />
-              <span>{parishes.length} parishes</span>
+              <span>
+                {parishes.length} {jpLower}
+              </span>
               <span className="scorecard-inventory-context-sep">·</span>
               <span>{totalPopulation.toLocaleString()} population</span>
               <span className="scorecard-inventory-context-sep">·</span>
@@ -438,11 +453,11 @@ const ScorecardView = () => {
       {parish && parishId && (
         <section className="scorecard-panel scorecard-panel--inventory-parish">
           <div className="scorecard-panel-header">
-            <h2 className="scorecard-panel-title">Parish inventory</h2>
+            <h2 className="scorecard-panel-title">{jl} inventory</h2>
           </div>
           <div className="scorecard-panel-body scorecard-inventory-parish-body">
             <p className="scorecard-inventory-parish-intro">
-              Equipment and personnel for {parish.name} (same controls as the parish dashboard).
+              Equipment and personnel for {parish.name} (same controls as the {jlLower} dashboard).
             </p>
             <div className="scorecard-inventory-parish-grid">
               <div className="scorecard-inventory-parish-card">
@@ -450,6 +465,7 @@ const ScorecardView = () => {
                   type="equipment"
                   data={parish.equipment}
                   parishId={parishId}
+                  storageRegion={region}
                   onUpdate={() => {}}
                 />
               </div>
@@ -458,6 +474,7 @@ const ScorecardView = () => {
                   type="personnel"
                   data={parish.personnel}
                   parishId={parishId}
+                  storageRegion={region}
                   onUpdate={() => {}}
                 />
               </div>
@@ -492,7 +509,7 @@ const ScorecardView = () => {
                     <p className="scorecard-modal-desc">{domain.description}</p>
                     {isNationalView && (
                       <p className="scorecard-modal-national-note">
-                        Nationwide averages (0–2 scale per criterion). Select a parish from the
+                        Nationwide averages (0–2 scale per criterion). Select a {jlLower} from the
                         header menu to enter or edit scores.
                       </p>
                     )}

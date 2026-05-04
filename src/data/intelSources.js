@@ -12,6 +12,14 @@ export const JAMAICA_BBOX = {
   lomax: -76.0,
 }
 
+/** Continental US (CONUS) bounding box — WGS84; used for Intel / news when jurisdiction = USA */
+export const USA_CONUS_BBOX = {
+  lamin: 24.35,
+  lomin: -125.05,
+  lamax: 49.72,
+  lomax: -66.45,
+}
+
 /** Refresh intervals in ms */
 /** OpenSky anonymous tier is strict; keep a single combined poll interval (see Intel map). */
 export const FEED_REFRESH_MS = {

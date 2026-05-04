@@ -1,14 +1,48 @@
 // Utility for storing and retrieving parish-specific equipment and personnel data
-// Uses localStorage for persistence (will be replaced with API in production)
+// Uses localStorage for persistence (will be replaced with API in production).
 
-const EQUIPMENT_STORAGE_KEY = 'parish_equipment_data'
-const PERSONNEL_STORAGE_KEY = 'parish_personnel_data'
-const CHANGE_HISTORY_KEY = 'equipment_change_history'
+import { REGION_JAMAICA, REGION_USA } from '../data/regionCatalog'
 
-// Get all stored equipment data
-export const getAllEquipmentData = () => {
+const EQUIPMENT_STORAGE_KEY_JM = 'parish_equipment_data'
+const PERSONNEL_STORAGE_KEY_JM = 'parish_personnel_data'
+const CHANGE_HISTORY_KEY_JM = 'equipment_change_history'
+
+const EQUIPMENT_STORAGE_KEY_USA = 'parish_equipment_data_usa'
+const PERSONNEL_STORAGE_KEY_USA = 'parish_personnel_data_usa'
+const CHANGE_HISTORY_KEY_USA = 'equipment_change_history_usa'
+
+function equipmentKey(region = REGION_JAMAICA) {
+  return region === REGION_USA ? EQUIPMENT_STORAGE_KEY_USA : EQUIPMENT_STORAGE_KEY_JM
+}
+
+function personnelKey(region = REGION_JAMAICA) {
+  return region === REGION_USA ? PERSONNEL_STORAGE_KEY_USA : PERSONNEL_STORAGE_KEY_JM
+}
+
+function historyKey(region = REGION_JAMAICA) {
+  return region === REGION_USA ? CHANGE_HISTORY_KEY_USA : CHANGE_HISTORY_KEY_JM
+}
+
+function saveChangeHistory(changeEntry, region = REGION_JAMAICA) {
   try {
-    const stored = localStorage.getItem(EQUIPMENT_STORAGE_KEY)
+    const existing = localStorage.getItem(historyKey(region))
+    const history = existing ? JSON.parse(existing) : []
+
+    history.unshift(changeEntry)
+
+    if (history.length > 1000) {
+      history.splice(1000)
+    }
+
+    localStorage.setItem(historyKey(region), JSON.stringify(history))
+  } catch (error) {
+    console.error('Error saving change history:', error)
+  }
+}
+
+export const getAllEquipmentData = (region = REGION_JAMAICA) => {
+  try {
+    const stored = localStorage.getItem(equipmentKey(region))
     return stored ? JSON.parse(stored) : {}
   } catch (error) {
     console.error('Error reading equipment data from storage:', error)
@@ -16,52 +50,46 @@ export const getAllEquipmentData = () => {
   }
 }
 
-// Get equipment data for a specific parish
-export const getParishEquipment = (parishId) => {
-  const allData = getAllEquipmentData()
+export const getParishEquipment = (parishId, region = REGION_JAMAICA) => {
+  const allData = getAllEquipmentData(region)
   return allData[parishId] || null
 }
 
-// Save equipment data for a specific parish
-export const saveParishEquipment = (parishId, equipmentData, userId, reason = '') => {
+export const saveParishEquipment = (parishId, equipmentData, userId, reason = '', region = REGION_JAMAICA) => {
   try {
-    const allData = getAllEquipmentData()
+    const allData = getAllEquipmentData(region)
     const previousData = allData[parishId] || {}
-    
-    // Create change history entry
+
     const changeHistory = {
       timestamp: new Date().toISOString(),
       userId: userId || 'unknown',
       parishId: parishId,
       action: 'equipment_update',
       changes: [],
-      reason: reason
+      reason,
     }
-    
-    // Track what changed
-    Object.keys(equipmentData).forEach(key => {
+
+    Object.keys(equipmentData).forEach((key) => {
       if (previousData[key] !== equipmentData[key]) {
         changeHistory.changes.push({
           field: key,
           oldValue: previousData[key] || 0,
-          newValue: equipmentData[key]
+          newValue: equipmentData[key],
         })
       }
     })
-    
-    // Save equipment data
+
     allData[parishId] = {
       ...equipmentData,
       lastUpdated: new Date().toISOString(),
-      updatedBy: userId || 'unknown'
+      updatedBy: userId || 'unknown',
     }
-    localStorage.setItem(EQUIPMENT_STORAGE_KEY, JSON.stringify(allData))
-    
-    // Save change history
+    localStorage.setItem(equipmentKey(region), JSON.stringify(allData))
+
     if (changeHistory.changes.length > 0) {
-      saveChangeHistory(changeHistory)
+      saveChangeHistory(changeHistory, region)
     }
-    
+
     return true
   } catch (error) {
     console.error('Error saving equipment data to storage:', error)
@@ -69,10 +97,9 @@ export const saveParishEquipment = (parishId, equipmentData, userId, reason = ''
   }
 }
 
-// Get all stored personnel data
-export const getAllPersonnelData = () => {
+export const getAllPersonnelData = (region = REGION_JAMAICA) => {
   try {
-    const stored = localStorage.getItem(PERSONNEL_STORAGE_KEY)
+    const stored = localStorage.getItem(personnelKey(region))
     return stored ? JSON.parse(stored) : {}
   } catch (error) {
     console.error('Error reading personnel data from storage:', error)
@@ -80,52 +107,46 @@ export const getAllPersonnelData = () => {
   }
 }
 
-// Get personnel data for a specific parish
-export const getParishPersonnel = (parishId) => {
-  const allData = getAllPersonnelData()
+export const getParishPersonnel = (parishId, region = REGION_JAMAICA) => {
+  const allData = getAllPersonnelData(region)
   return allData[parishId] || null
 }
 
-// Save personnel data for a specific parish
-export const saveParishPersonnel = (parishId, personnelData, userId, reason = '') => {
+export const saveParishPersonnel = (parishId, personnelData, userId, reason = '', region = REGION_JAMAICA) => {
   try {
-    const allData = getAllPersonnelData()
+    const allData = getAllPersonnelData(region)
     const previousData = allData[parishId] || {}
-    
-    // Create change history entry
+
     const changeHistory = {
       timestamp: new Date().toISOString(),
       userId: userId || 'unknown',
       parishId: parishId,
       action: 'personnel_update',
       changes: [],
-      reason: reason
+      reason,
     }
-    
-    // Track what changed
-    Object.keys(personnelData).forEach(key => {
+
+    Object.keys(personnelData).forEach((key) => {
       if (previousData[key] !== personnelData[key]) {
         changeHistory.changes.push({
           field: key,
           oldValue: previousData[key] || 0,
-          newValue: personnelData[key]
+          newValue: personnelData[key],
         })
       }
     })
-    
-    // Save personnel data
+
     allData[parishId] = {
       ...personnelData,
       lastUpdated: new Date().toISOString(),
-      updatedBy: userId || 'unknown'
+      updatedBy: userId || 'unknown',
     }
-    localStorage.setItem(PERSONNEL_STORAGE_KEY, JSON.stringify(allData))
-    
-    // Save change history
+    localStorage.setItem(personnelKey(region), JSON.stringify(allData))
+
     if (changeHistory.changes.length > 0) {
-      saveChangeHistory(changeHistory)
+      saveChangeHistory(changeHistory, region)
     }
-    
+
     return true
   } catch (error) {
     console.error('Error saving personnel data to storage:', error)
@@ -133,35 +154,13 @@ export const saveParishPersonnel = (parishId, personnelData, userId, reason = ''
   }
 }
 
-// Save change history
-const saveChangeHistory = (changeEntry) => {
+export const getParishChangeHistory = (parishId, limit = 50, region = REGION_JAMAICA) => {
   try {
-    const existing = localStorage.getItem(CHANGE_HISTORY_KEY)
+    const existing = localStorage.getItem(historyKey(region))
     const history = existing ? JSON.parse(existing) : []
-    
-    // Add new entry at the beginning
-    history.unshift(changeEntry)
-    
-    // Keep only last 1000 entries
-    if (history.length > 1000) {
-      history.splice(1000)
-    }
-    
-    localStorage.setItem(CHANGE_HISTORY_KEY, JSON.stringify(history))
-  } catch (error) {
-    console.error('Error saving change history:', error)
-  }
-}
 
-// Get change history for a parish
-export const getParishChangeHistory = (parishId, limit = 50) => {
-  try {
-    const existing = localStorage.getItem(CHANGE_HISTORY_KEY)
-    const history = existing ? JSON.parse(existing) : []
-    
-    // Filter by parish and limit
     return history
-      .filter(entry => entry.parishId === parishId)
+      .filter((entry) => entry.parishId === parishId)
       .slice(0, limit)
   } catch (error) {
     console.error('Error reading change history:', error)
@@ -169,31 +168,24 @@ export const getParishChangeHistory = (parishId, limit = 50) => {
   }
 }
 
-// Initialize equipment data from default parish data
-export const initializeParishEquipment = (parishId, defaultEquipment) => {
-  const existing = getParishEquipment(parishId)
+export const initializeParishEquipment = (parishId, defaultEquipment, region = REGION_JAMAICA) => {
+  const existing = getParishEquipment(parishId, region)
   if (existing) {
     return existing
   }
-  
-  // Create initial data structure
+
   const initialData = { ...defaultEquipment }
-  saveParishEquipment(parishId, initialData, 'system', 'Initial data setup')
+  saveParishEquipment(parishId, initialData, 'system', 'Initial data setup', region)
   return initialData
 }
 
-// Initialize personnel data from default parish data
-export const initializeParishPersonnel = (parishId, defaultPersonnel) => {
-  const existing = getParishPersonnel(parishId)
+export const initializeParishPersonnel = (parishId, defaultPersonnel, region = REGION_JAMAICA) => {
+  const existing = getParishPersonnel(parishId, region)
   if (existing) {
     return existing
   }
-  
-  // Create initial data structure
+
   const initialData = { ...defaultPersonnel }
-  saveParishPersonnel(parishId, initialData, 'system', 'Initial data setup')
+  saveParishPersonnel(parishId, initialData, 'system', 'Initial data setup', region)
   return initialData
 }
-
-
-
