@@ -1,7 +1,8 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   getRegionCatalog,
+  JAMAICA_DATASET_ONLY,
   normalizeRegion,
   REGION_JAMAICA,
   REGION_USA,
@@ -22,14 +23,32 @@ function readStoredRegion() {
 }
 
 export function RegionProvider({ children }) {
-  const [region, setRegionState] = useState(readStoredRegion)
+  const [region, setRegionState] = useState(() =>
+    JAMAICA_DATASET_ONLY ? REGION_JAMAICA : readStoredRegion()
+  )
   const navigate = useNavigate()
   const location = useLocation()
+
+  // Jamaica-only release: ignore stored USA preference and persist Jamaica.
+  useEffect(() => {
+    if (!JAMAICA_DATASET_ONLY || typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem(STORAGE_KEY, REGION_JAMAICA)
+    } catch {
+      /* ignore */
+    }
+    setRegionState(REGION_JAMAICA)
+  }, [])
 
   const catalog = useMemo(() => getRegionCatalog(region), [region])
 
   const setRegion = useCallback(
     (next) => {
+      if (JAMAICA_DATASET_ONLY) {
+        const n = normalizeRegion(next)
+        if (n === REGION_USA) return
+      }
+
       const n = normalizeRegion(next)
       setRegionState(n)
       try {

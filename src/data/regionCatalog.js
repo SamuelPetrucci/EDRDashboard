@@ -9,6 +9,13 @@ import { JAMAICA_BBOX, USA_CONUS_BBOX } from './intelSources'
 export const REGION_JAMAICA = 'jamaica'
 export const REGION_USA = 'usa'
 
+/**
+ * When `true` (default for current release), the app only exposes Jamaica: no dataset
+ * switcher, and region is always Jamaica. USA catalog code remains for a future toggle.
+ * Set to `false` to show the Layout “Dataset” control and allow `REGION_USA`.
+ */
+export const JAMAICA_DATASET_ONLY = true
+
 /** @typedef {'jamaica'|'usa'} DatasetRegion */
 
 const usaCenter = { lat: 39.5, lng: -98.35 }
