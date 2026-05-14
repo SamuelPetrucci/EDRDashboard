@@ -1,7 +1,7 @@
 /**
- * News feed – simple wrapper around a configurable API.
+ * News feed – configurable backend.
  * Uses VITE_NEWS_API_URL and VITE_NEWS_API_KEY so dev/prod (Vercel) can point
- * at any aggregator (e.g. NewsAPI, custom gateway) without changing code.
+ * at any aggregator (e.g. `/api/news`, custom gateway) without changing code.
  *
  * Expected backend contract (example):
  *   GET <VITE_NEWS_API_URL>?bbox=lamin,lomin,lamax,lomax&limit=20
@@ -38,7 +38,6 @@ export async function fetchNewsForBounds(bbox, limit = 20) {
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_NEWS_API_KEY) || ''
 
   if (!apiUrl) {
-    // No news backend configured – UI will show a setup hint.
     return []
   }
 
@@ -58,7 +57,6 @@ export async function fetchNewsForBounds(bbox, limit = 20) {
       signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) {
-      // Silently fail to avoid breaking the dashboard; caller can show generic error.
       return []
     }
     const data = await res.json().catch(() => [])
@@ -78,4 +76,3 @@ export async function fetchNewsForBounds(bbox, limit = 20) {
     return []
   }
 }
-

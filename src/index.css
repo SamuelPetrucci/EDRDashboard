@@ -113,14 +113,103 @@ p {
   line-height: 1.5;
 }
 
-/* Force high-contrast readable text across dashboard pages */
-body :is(h1, h2, h3, h4, h5, h6, p, span, strong, em, small, li, a, label, input, textarea, select) {
+/* Force theme text inside the app shell — but not on DRIS light-card pages (.main-content--dris), where
+   dris-dashboard.css owns contrast (global !important here was winning and caused light-on-light text). */
+.layout .main-content:not(.main-content--dris) :is(h1, h2, h3, h4, h5, h6, p, span, strong, em, small, li, a, label, input, textarea, select) {
   color: var(--text-primary) !important;
 }
 
-/* Secondary/supporting copy stays off-white, never saturated accent colors */
-body :is(.subtitle, .hint, .meta, .description, .time, .timestamp, .label, .secondary, .muted, .text-secondary) {
+.layout .main-content:not(.main-content--dris) :is(.subtitle, .hint, .meta, .description, .time, .timestamp, .label, .secondary, .muted, .text-secondary) {
   color: var(--text-secondary) !important;
+}
+
+/* Any route that uses .dris-dashboard without .main-content--dris still needs readable copy */
+.layout .dris-dashboard :is(h1, h2, h3, h4, h5, h6, p, span, strong, em, small, li, a, label, input, textarea, select) {
+  color: var(--dris-text, #0f172a) !important;
+}
+
+.layout .dris-dashboard .dris-card__title,
+.layout .dris-dashboard .dris-table th {
+  color: var(--dris-muted, #64748b) !important;
+}
+
+.layout .dris-dashboard .dris-muted,
+.layout .dris-dashboard .dris-gauge-simple__slash {
+  color: var(--dris-muted, #64748b) !important;
+}
+
+.layout .dris-dashboard .dris-link {
+  color: var(--dris-accent, #2563eb) !important;
+}
+
+.layout .dris-dashboard .dris-pill--ok {
+  color: var(--dris-ok, #059669) !important;
+}
+
+.layout .dris-dashboard .dris-pill--warn {
+  color: var(--dris-warn, #d97706) !important;
+}
+
+.layout .dris-dashboard .dris-pill--bad {
+  color: var(--dris-bad, #dc2626) !important;
+}
+
+.layout .dris-dashboard .dris-stat-num--alert {
+  color: var(--dris-bad, #dc2626) !important;
+}
+
+.auth-route-loading {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 40vh;
+}
+
+.auth-route-loading__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  color: var(--text-secondary, #cbd5e1);
+  font-size: 0.95rem;
+}
+
+.auth-route-loading--wide {
+  padding: 1.5rem;
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+.auth-route-loading__inner--column {
+  align-items: stretch;
+  text-align: left;
+}
+
+.auth-setup-hint {
+  margin: 0;
+  line-height: 1.55;
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.9rem;
+}
+
+.auth-setup-hint__code {
+  font-size: 0.82em;
+  word-break: break-word;
+}
+
+.auth-route-loading__dot {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 3px solid rgba(148, 163, 184, 0.25);
+  border-top-color: var(--primary-color, #f97316);
+  animation: auth-route-spin 0.85s linear infinite;
+}
+
+@keyframes auth-route-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 code {

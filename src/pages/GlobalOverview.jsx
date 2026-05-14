@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { appPath, parishPath } from '../constants/paths'
+import { getOperationsMapPath, NATIONAL_OVERVIEW_NAV_LABEL } from '../constants/roles'
 import { useEffect, useMemo, useState } from 'react'
 import GlobeView from '../components/GlobeView'
 import { MapPin, Users, Package, AlertCircle, CheckCircle, Clock, BookOpen, MessageSquare, BarChart3, ArrowRight, GraduationCap, Bell, Cloud, Thermometer, ExternalLink, Radio, Truck, Zap, Heart, UserCheck, Satellite, Shield, Phone, LayoutGrid, Globe, Search, Video } from 'lucide-react'
@@ -15,6 +17,8 @@ import { useRegion } from '../context/RegionContext'
 import { REGION_USA } from '../data/regionCatalog'
 import { getWeatherAtPoint } from '../data/weatherAtPoint'
 import { fetchCamerasNearPoint } from '../data/cameraFeed'
+import { getMapboxAccessToken } from '../lib/env'
+import { isExternalIntelFeedsEnabled, isWindyForecastEnabled } from '../lib/externalIntelFeeds'
 import './GlobalOverview.css'
 
 const GlobalOverview = () => {
@@ -32,7 +36,9 @@ const GlobalOverview = () => {
     const { lat, lng } = catalog.mapCenter
     return `https://www.windy.com/?${lat},${lng},${region === REGION_USA ? 4 : 7},satellite`
   }, [catalog.mapCenter, region])
-  const mapboxToken = typeof import.meta !== 'undefined' && import.meta.env?.VITE_MAPBOX_TOKEN
+  const mapboxToken = getMapboxAccessToken()
+  const externalFeedsEnabled = isExternalIntelFeedsEnabled()
+  const windyForecastEnabled = isWindyForecastEnabled()
 
   const [feedSearchQuery, setFeedSearchQuery] = useState('')
   const [feedSearchResults, setFeedSearchResults] = useState([])
@@ -49,6 +55,13 @@ const GlobalOverview = () => {
 
   useEffect(() => {
     let cancelled = false
+    if (!windyForecastEnabled) {
+      setWeather(null)
+      setWeatherError(null)
+      return () => {
+        cancelled = true
+      }
+    }
     const load = async () => {
       const result = await getWeatherData()
       if (cancelled) return
@@ -66,10 +79,11 @@ const GlobalOverview = () => {
       cancelled = true
       clearInterval(interval)
     }
-  }, [])
+  }, [windyForecastEnabled])
 
   const handleFeedSearch = async (e) => {
     e?.preventDefault()
+    if (!externalFeedsEnabled) return
     const q = feedSearchQuery.trim()
     if (!q) return
     setFeedSearching(true)
@@ -92,6 +106,13 @@ const GlobalOverview = () => {
   }
 
   useEffect(() => {
+    if (!externalFeedsEnabled) {
+      setFeedWeather(null)
+      setFeedCameras([])
+      setFeedLoading(false)
+      setFeedError(null)
+      return
+    }
     if (!feedSelectedPlace || typeof feedSelectedPlace.lat !== 'number' || typeof feedSelectedPlace.lng !== 'number') return
     setFeedLoading(true)
     setFeedError(null)
@@ -108,10 +129,18 @@ const GlobalOverview = () => {
         setFeedError(err?.message || 'Failed to load feeds')
       })
       .finally(() => setFeedLoading(false))
-  }, [feedSelectedPlace?.lat, feedSelectedPlace?.lng])
+  }, [feedSelectedPlace?.lat, feedSelectedPlace?.lng, externalFeedsEnabled])
 
   useEffect(() => {
     let cancelled = false
+    if (!externalFeedsEnabled) {
+      setNewsArticles([])
+      setNewsLoading(false)
+      setNewsError(null)
+      return () => {
+        cancelled = true
+      }
+    }
     const loadNews = async () => {
       setNewsLoading(true)
       setNewsError(null)
@@ -135,7 +164,7 @@ const GlobalOverview = () => {
       cancelled = true
       clearInterval(interval)
     }
-  }, [region, catalog.feedBbox])
+  }, [region, catalog.feedBbox, externalFeedsEnabled])
 
   // Get readiness status for each parish
   const getParishReadiness = (parish) => {
@@ -236,7 +265,7 @@ const GlobalOverview = () => {
             <BarChart3 size={24} />
             <h2>Overview</h2>
           </div>
-          <Link to="/scorecard" className="view-all-link">
+          <Link to={appPath('/scorecard')} className="view-all-link">
             View Full Scorecard <ArrowRight size={16} />
           </Link>
         </div>
@@ -313,6 +342,24 @@ const GlobalOverview = () => {
                     <ExternalLink size={14} />
                     View satellite
                   </a>
+                </div>
+              ) : !windyForecastEnabled ? (
+                <div className="scorecard-weather-card scorecard-weather-card-placeholder scorecard-overview-card scorecard-overview-card--weather">
+                  <div className="weather-card-header">
+                    <Cloud size={20} />
+                    <span>Weather</span>
+                  </div>
+                  <div className="weather-card-main">
+                    <span className="weather-placeholder-text">—</span>
+                    <p className="weather-placeholder-hint">
+                      Windy point forecast is off. Enable with{' '}
+                      <code className="global-overview-code-hint">VITE_ENABLE_WINDY_FORECAST=true</code> (and a Windy key), or turn on all third-party feeds with{' '}
+                      <code className="global-overview-code-hint">VITE_ENABLE_EXTERNAL_INTEL_FEEDS=true</code>.
+                    </p>
+                    <a href={satelliteUrl} target="_blank" rel="noopener noreferrer" className="weather-satellite-link">
+                      <ExternalLink size={14} /> View satellite (Windy)
+                    </a>
+                  </div>
                 </div>
               ) : (
                 <div className="scorecard-weather-card scorecard-weather-card-placeholder scorecard-overview-card scorecard-overview-card--weather">
@@ -400,13 +447,13 @@ const GlobalOverview = () => {
             <div className="overview-sidebar-card">
               <h4 className="overview-sidebar-title"><LayoutGrid size={18} /> Quick access</h4>
               <nav className="overview-sidebar-links">
-                <Link to="/" className="overview-sidebar-link"><BarChart3 size={16} /> Overview</Link>
-                <Link to="/scorecard" className="overview-sidebar-link"><BarChart3 size={16} /> Full scorecard</Link>
-                <Link to="/intel" className="overview-sidebar-link"><Satellite size={16} /> Intel map</Link>
-                <Link to="/protocols" className="overview-sidebar-link"><BookOpen size={16} /> Protocols & training</Link>
-                <Link to="/contacts" className="overview-sidebar-link"><Phone size={16} /> Contacts</Link>
+                <Link to={getOperationsMapPath()} className="overview-sidebar-link"><BarChart3 size={16} /> {NATIONAL_OVERVIEW_NAV_LABEL}</Link>
+                <Link to={appPath('/scorecard')} className="overview-sidebar-link"><BarChart3 size={16} /> Full scorecard</Link>
+                <Link to={appPath('/intel')} className="overview-sidebar-link"><Satellite size={16} /> Intel map</Link>
+                <Link to={appPath('/protocols')} className="overview-sidebar-link"><BookOpen size={16} /> Protocols & training</Link>
+                <Link to={appPath('/contacts')} className="overview-sidebar-link"><Phone size={16} /> Contacts</Link>
                 <Link
-                  to={parishes[0]?.id ? `/parish/${parishes[0].id}` : '/'}
+                  to={parishes[0]?.id ? parishPath(parishes[0].id) : getOperationsMapPath()}
                   className="overview-sidebar-link"
                 >
                   <MapPin size={16} /> {jp}
@@ -415,67 +462,76 @@ const GlobalOverview = () => {
             </div>
             <div className="overview-sidebar-card overview-live-feeds-card">
               <h4 className="overview-sidebar-title"><Video size={18} /> Live feeds</h4>
-              <p className="overview-live-feeds-desc">Search a place to see weather and webcams.</p>
-              <form className="overview-live-feeds-search" onSubmit={handleFeedSearch}>
-                <Search size={16} aria-hidden />
-                <input
-                  type="text"
-                  placeholder="City or place…"
-                  value={feedSearchQuery}
-                  onChange={(e) => { setFeedSearchQuery(e.target.value); setFeedSearchOpen(false) }}
-                  onFocus={() => feedSearchResults.length > 0 && setFeedSearchOpen(true)}
-                  aria-label="Search for live feeds by place"
-                  autoComplete="off"
-                />
-                <button type="submit" disabled={feedSearching} title="Search">{feedSearching ? '…' : 'Go'}</button>
-              </form>
-              {feedSearchOpen && feedSearchResults.length > 0 && (
-                <ul className="overview-live-feeds-results" role="listbox">
-                  {feedSearchResults.map((place, i) => (
-                    <li
-                      key={`${place.lat}-${place.lng}-${i}`}
-                      role="option"
-                      className="overview-live-feeds-result"
-                      onClick={() => pickFeedPlace(place)}
-                    >
-                      {place.displayName}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {feedSelectedPlace && (
-                <div className="overview-live-feeds-result-panel">
-                  <p className="overview-live-feeds-place">{feedSelectedPlace.displayName}</p>
-                  {feedLoading ? (
-                    <p className="overview-live-feeds-loading">Loading…</p>
-                  ) : (
-                    <>
-                      {feedError && <p className="overview-live-feeds-error">{feedError}</p>}
-                      {feedWeather && (
-                        <div className="overview-live-feeds-weather">
-                          <Cloud size={14} />
-                          <span>{feedWeather.temp}°C · {feedWeather.condition} · Wind {feedWeather.windSpeed} km/h</span>
-                        </div>
-                      )}
-                      {feedCameras.length > 0 && (
-                        <div className="overview-live-feeds-cameras">
-                          <strong><Video size={14} /> Webcams</strong>
-                          <ul className="overview-live-feeds-camera-list">
-                            {feedCameras.slice(0, 5).map((c) => (
-                              <li key={c.id}>
-                                <a href={c.url} target="_blank" rel="noopener noreferrer" className="overview-live-feeds-camera-link">{c.name}</a>
-                              </li>
-                            ))}
-                          </ul>
-                          {feedCameras.length > 5 && <p className="overview-live-feeds-more">+{feedCameras.length - 5} more on Intel map</p>}
-                        </div>
-                      )}
-                      {!feedLoading && !feedError && !feedWeather && feedCameras.length === 0 && (
-                        <p className="overview-live-feeds-empty">No weather or webcams found. Try another place.</p>
-                      )}
-                    </>
+              {!externalFeedsEnabled ? (
+                <p className="overview-live-feeds-desc">
+                  Place search and point weather/webcams use third-party APIs and are off in this build. Enable with{' '}
+                  <code className="global-overview-code-hint">VITE_ENABLE_EXTERNAL_INTEL_FEEDS=true</code> when you are ready (see MANUAL_SETUP.md).
+                </p>
+              ) : (
+                <>
+                  <p className="overview-live-feeds-desc">Search a place to see weather and webcams.</p>
+                  <form className="overview-live-feeds-search" onSubmit={handleFeedSearch}>
+                    <Search size={16} aria-hidden />
+                    <input
+                      type="text"
+                      placeholder="City or place…"
+                      value={feedSearchQuery}
+                      onChange={(e) => { setFeedSearchQuery(e.target.value); setFeedSearchOpen(false) }}
+                      onFocus={() => feedSearchResults.length > 0 && setFeedSearchOpen(true)}
+                      aria-label="Search for live feeds by place"
+                      autoComplete="off"
+                    />
+                    <button type="submit" disabled={feedSearching} title="Search">{feedSearching ? '…' : 'Go'}</button>
+                  </form>
+                  {feedSearchOpen && feedSearchResults.length > 0 && (
+                    <ul className="overview-live-feeds-results" role="listbox">
+                      {feedSearchResults.map((place, i) => (
+                        <li
+                          key={`${place.lat}-${place.lng}-${i}`}
+                          role="option"
+                          className="overview-live-feeds-result"
+                          onClick={() => pickFeedPlace(place)}
+                        >
+                          {place.displayName}
+                        </li>
+                      ))}
+                    </ul>
                   )}
-                </div>
+                  {feedSelectedPlace && (
+                    <div className="overview-live-feeds-result-panel">
+                      <p className="overview-live-feeds-place">{feedSelectedPlace.displayName}</p>
+                      {feedLoading ? (
+                        <p className="overview-live-feeds-loading">Loading…</p>
+                      ) : (
+                        <>
+                          {feedError && <p className="overview-live-feeds-error">{feedError}</p>}
+                          {feedWeather && (
+                            <div className="overview-live-feeds-weather">
+                              <Cloud size={14} />
+                              <span>{feedWeather.temp}°C · {feedWeather.condition} · Wind {feedWeather.windSpeed} km/h</span>
+                            </div>
+                          )}
+                          {feedCameras.length > 0 && (
+                            <div className="overview-live-feeds-cameras">
+                              <strong><Video size={14} /> Webcams</strong>
+                              <ul className="overview-live-feeds-camera-list">
+                                {feedCameras.slice(0, 5).map((c) => (
+                                  <li key={c.id}>
+                                    <a href={c.url} target="_blank" rel="noopener noreferrer" className="overview-live-feeds-camera-link">{c.name}</a>
+                                  </li>
+                                ))}
+                              </ul>
+                              {feedCameras.length > 5 && <p className="overview-live-feeds-more">+{feedCameras.length - 5} more on Intel map</p>}
+                            </div>
+                          )}
+                          {!feedLoading && !feedError && !feedWeather && feedCameras.length === 0 && (
+                            <p className="overview-live-feeds-empty">No weather or webcams found. Try another place.</p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -489,7 +545,7 @@ const GlobalOverview = () => {
             <Satellite size={22} />
             <h2>Intelligence overview</h2>
           </div>
-          <Link to="/intel" className="view-all-link">
+          <Link to={appPath('/intel')} className="view-all-link">
             Open Intel dashboard <ArrowRight size={16} />
           </Link>
         </div>
@@ -557,7 +613,7 @@ const GlobalOverview = () => {
                   <div className="overview-intel-placeholder">
                     <p>Live satellite globe preview.</p>
                     <p className="overview-intel-placeholder-sub">
-                      Set <code>VITE_MAPBOX_TOKEN</code> to enable the 3D globe.
+                      Set <code>VITE_MAPBOX_ACCESS_TOKEN</code> (or legacy <code>VITE_MAPBOX_TOKEN</code>) to enable the 3D globe.
                     </p>
                   </div>
                 )}
@@ -576,7 +632,7 @@ const GlobalOverview = () => {
               <GraduationCap size={24} />
               <h2>Training & Protocols</h2>
             </div>
-            <Link to="/protocols" className="view-all-link">
+            <Link to={appPath('/protocols')} className="view-all-link">
               View All <ArrowRight size={16} />
             </Link>
           </div>
@@ -611,7 +667,7 @@ const GlobalOverview = () => {
               <Package size={24} />
               <h2>Inventory Summary</h2>
             </div>
-            <Link to="/scorecard" className="view-all-link">
+            <Link to={appPath('/scorecard')} className="view-all-link">
               Scorecard & inventory <ArrowRight size={16} />
             </Link>
           </div>
@@ -711,7 +767,13 @@ const GlobalOverview = () => {
               <p className="communications-intro">
                 Consolidated headlines and updates relevant to regional operations.
               </p>
-              {newsLoading ? (
+              {!externalFeedsEnabled ? (
+                <p className="communications-empty">
+                  News aggregate uses your configured news URL and is disabled while external feeds are off. Set{' '}
+                  <code className="global-overview-code-hint">VITE_ENABLE_EXTERNAL_INTEL_FEEDS=true</code> and{' '}
+                  <code className="global-overview-code-hint">VITE_NEWS_API_URL</code> when ready.
+                </p>
+              ) : newsLoading ? (
                 <p className="communications-empty">Loading news...</p>
               ) : newsError ? (
                 <p className="communications-empty">{newsError}</p>
@@ -757,7 +819,7 @@ const GlobalOverview = () => {
             const readiness = getParishReadiness(parish)
             return (
               <div key={parish.id} className="parish-card-modern" style={{ borderTopColor: readiness.color }}>
-                <Link to={`/parish/${parish.id}`} className="parish-card-main-link">
+                <Link to={parishPath(parish.id)} className="parish-card-main-link">
                   <div className="parish-card-header-modern">
                     <div>
                       <h3>{parish.name}</h3>
@@ -816,7 +878,7 @@ const GlobalOverview = () => {
                   </div>
                 </Link>
                 <Link 
-                  to={`/parish/${parish.id}/scorecard`} 
+                  to={parishPath(parish.id, 'scorecard')} 
                   className="parish-scorecard-link"
                 >
                   <BarChart3 size={16} />

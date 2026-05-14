@@ -4,6 +4,9 @@
   "description": "Long-Term Disaster Recovery Resilience AI Dashboard",
   "private": true,
   "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
+    "@supabase/supabase-js": "^2.105.3",
     "date-fns": "^2.30.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.294.0",
@@ -14,7 +17,8 @@
     "react-map-gl": "^8.1.0",
     "react-router-dom": "^6.20.0",
     "recharts": "^2.10.3",
-    "satellite.js": "^6.0.2"
+    "satellite.js": "^6.0.2",
+    "three": "^0.170.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -26,6 +30,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed:demo": "node scripts/seed-demo-users.mjs",
+    "create:platform-admin": "node scripts/create-platform-admin.mjs"
   }
 }

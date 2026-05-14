@@ -1,0 +1,14 @@
+# Supabase CLI project config (https://supabase.com/docs/guides/cli/config)
+# project_id is set when you run `supabase link`.
+
+[api]
+enabled = true
+
+[functions]
+enabled = true
+
+[functions.invite-user]
+verify_jwt = true
+
+[functions.cenna-chat]
+verify_jwt = true

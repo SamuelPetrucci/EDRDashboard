@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { parishPath } from '../constants/paths'
 import { getAllParishes } from '../data/jamaicaParishes'
 import { getParishScorecard } from '../utils/scorecardStorage'
 import { calculateOverallScore, getRecoveryStatus, getRecoveryGaugeAccent, RESILIENCE_STATUS } from '../data/scorecardDomains'
@@ -182,7 +183,7 @@ const PreparednessMap = () => {
             return (
               <Link
                 key={parish.id}
-                to={`/parish/${parish.id}`}
+                to={parishPath(parish.id)}
                 className="parish-link"
                 style={{
                   left: `${position.x}%`,

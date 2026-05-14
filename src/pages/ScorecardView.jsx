@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
+import { appPath, parishPath } from '../constants/paths'
 import {
   scorecardDomains,
   calculateDomainScore,
@@ -181,15 +182,15 @@ const ScorecardView = () => {
 
   const handleParishFilterChange = (e) => {
     const id = e.target.value
-    if (id) navigate(`/parish/${id}/scorecard`)
-    else navigate('/scorecard')
+    if (id) navigate(parishPath(id, 'scorecard'))
+    else navigate(appPath('/scorecard'))
   }
 
   if (parishId && !parish) {
     return (
       <div className="scorecard-view scorecard-view--error">
         <p className="scorecard-view-error-msg">{catalog.notFoundHeading}.</p>
-        <Link to="/scorecard" className="back-link">
+        <Link to={appPath('/scorecard')} className="back-link">
           <ArrowLeft size={20} />
           <span>Back to national scorecard</span>
         </Link>
@@ -210,7 +211,7 @@ const ScorecardView = () => {
         <div className="scorecard-header-top">
           <div className="scorecard-header-left">
             {parish && (
-              <Link to={`/parish/${parish.id}`} className="back-link">
+              <Link to={parishPath(parish.id)} className="back-link">
                 <ArrowLeft size={20} />
                 <span>
                   Back to{' '}

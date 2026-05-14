@@ -1,0 +1,64 @@
+.dris-role-shell {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2.5rem;
+}
+
+.dris-role-shell__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted, #64748b);
+  margin: 0 0 0.35rem;
+}
+
+.dris-role-shell__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--text-primary, #0f172a);
+}
+
+[data-theme='dark'] .dris-role-shell__title {
+  color: #f1f5f9;
+}
+
+.dris-role-shell__lede {
+  margin: 0 0 1.25rem;
+  line-height: 1.55;
+  color: var(--text-secondary, #475569);
+  max-width: 65ch;
+}
+
+[data-theme='dark'] .dris-role-shell__lede {
+  color: #94a3b8;
+}
+
+.dris-role-shell__panel {
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.65);
+  padding: 1rem 1.1rem;
+}
+
+[data-theme='dark'] .dris-role-shell__panel {
+  border-color: rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.dris-role-shell__panel h2 {
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem;
+}
+
+.dris-role-shell__panel ul {
+  margin: 0;
+  padding-left: 1.15rem;
+  line-height: 1.5;
+  color: var(--text-secondary, #475569);
+}
+
+[data-theme='dark'] .dris-role-shell__panel ul {
+  color: #94a3b8;
+}

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { appPath, parishPath } from '../constants/paths'
+import { getOperationsMapPath, NATIONAL_OVERVIEW_NAV_LABEL } from '../constants/roles'
 import { ArrowLeft, Users, Package, TrendingUp, GraduationCap, MessageSquare, Phone, ArrowRight, BookOpen, Bell, Radio } from 'lucide-react'
 import EditableInventory from '../components/EditableInventory'
 import { getParishEquipment, getParishPersonnel } from '../utils/equipmentStorage'
@@ -63,7 +65,7 @@ const ParishDashboard = () => {
       <div className="parish-dashboard">
         <div className="error-message">
           <h2>{catalog.notFoundHeading}</h2>
-          <Link to="/">Return to Overview</Link>
+          <Link to={getOperationsMapPath()}>Return to {NATIONAL_OVERVIEW_NAV_LABEL}</Link>
         </div>
       </div>
     )
@@ -89,9 +91,9 @@ const ParishDashboard = () => {
   return (
     <div className="parish-dashboard">
       <div className="dashboard-header">
-        <Link to="/" className="back-link">
+        <Link to={getOperationsMapPath()} className="back-link">
           <ArrowLeft size={20} />
-          <span>Back to Overview</span>
+          <span>Back to {NATIONAL_OVERVIEW_NAV_LABEL}</span>
         </Link>
         <div className="parish-title">
           <h1>{region === REGION_USA ? parish.name : `${parish.name} Parish`}</h1>
@@ -128,7 +130,7 @@ const ParishDashboard = () => {
             <p>Total Equipment</p>
           </div>
         </div>
-        <Link to={`/parish/${parish.id}/scorecard`} className="stat-card stat-card-link">
+        <Link to={parishPath(parish.id, 'scorecard')} className="stat-card stat-card-link">
           <div className="stat-icon" style={{ background: 'linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%)' }}>
             <TrendingUp size={24} />
           </div>
@@ -149,7 +151,7 @@ const ParishDashboard = () => {
               <GraduationCap size={24} />
               <h2>Training & Protocols</h2>
             </div>
-            <Link to="/protocols" className="view-all-link">
+            <Link to={appPath('/protocols')} className="view-all-link">
               View All <ArrowRight size={16} />
             </Link>
           </div>
@@ -186,7 +188,7 @@ const ParishDashboard = () => {
               <MessageSquare size={24} />
               <h2>Communication & Alerts</h2>
             </div>
-            <Link to={`/parish/${parish.id}/contacts`} className="view-all-link">
+            <Link to={parishPath(parish.id, 'contacts')} className="view-all-link">
               View Contacts <ArrowRight size={16} />
             </Link>
           </div>

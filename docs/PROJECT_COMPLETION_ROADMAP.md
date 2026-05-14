@@ -20,7 +20,7 @@ Use this doc to sequence work; dates are for your team to assign.
 
 - **Core:** Parishes (and optional USA-states test mode), scorecard domains, equipment/personnel UI — persistence today is largely **browser `localStorage`** (documented as interim).
 - **Intel:** Map with flights, ships, GDACS, earthquakes, webcams, geocode, news-by-bbox via **`VITE_NEWS_API_URL`**; some layers depend on API keys and rate limits.
-- **Content:** Protocols, contacts, alerts/weather/communications — **mix of live APIs and demo/static** (see [NEW_FEATURES.md](../NEW_FEATURES.md) gaps).
+- **Content:** Protocols, contacts, alerts/weather/communications — **mix of live APIs and demo/static** (optional keys and contracts in [MANUAL_SETUP.md](../MANUAL_SETUP.md)).
 
 ---
 
@@ -34,7 +34,7 @@ Use this doc to sequence work; dates are for your team to assign.
 - **Hosting:** production deploy (e.g. Vercel) with env vars set; preview deploys for PRs.
 - **Secrets:** no keys in client that should be server-only; pattern for **serverless proxies** (news, AIS, future imagery tiles if needed).
 
-**Exit criteria:** Repeatable build and deploy; new engineer can run locally from README + `.env.example`.
+**Exit criteria:** Repeatable build and deploy; new engineer can run locally from [`docs/overview.md`](./overview.md) + `.env.example`.
 
 ---
 
@@ -157,10 +157,9 @@ Phases **3–5** can overlap once **Phase 2** is underway (different owners).
 
 ## Related documents
 
-- [ROADMAP_STATUS_PROMPT.md](./ROADMAP_STATUS_PROMPT.md) — **prompt + template** to add/update *current status* in this roadmap with an LLM  
 - [INTEL_PLATFORM_ROADMAP.md](./INTEL_PLATFORM_ROADMAP.md) — Intel technical layers and file-level hints  
-- [NEW_FEATURES.md](../NEW_FEATURES.md) — feature inventory and “production would connect to…” gaps  
-- README — product overview and stack  
+- [NEW_FEATURES.md](../NEW_FEATURES.md) — feature inventory and historical “what changed” notes  
+- [overview.md](./overview.md) — product overview and stack  
 
 ---
 

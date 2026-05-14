@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { parishPath } from '../constants/paths'
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, LayerGroup, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import { Satellite, MapPin, Layers, ExternalLink, Plane, Ship, AlertTriangle, Filter, Search, Cloud, Video, X, Navigation, Globe, Info, PanelRightClose, PanelRightOpen, LayoutGrid, Car, Map, Newspaper, Target } from 'lucide-react'
@@ -14,6 +15,9 @@ import { fetchNewsForBounds } from '../data/newsFeed'
 import { fetchGdacsEvents } from '../data/gdacsFeed'
 import { fetchEarthquakes } from '../data/earthquakeFeed'
 import { detectAnomalies } from '../utils/anomalyDetection'
+import { getMapboxAccessToken } from '../lib/env'
+import { isExternalIntelFeedsEnabled } from '../lib/externalIntelFeeds'
+import { isWebcamFeedsEnabled } from '../lib/webcamFeeds'
 import MapBoundsReporter from '../components/MapBoundsReporter'
 import MapClickHandler from '../components/MapClickHandler'
 import FlyToTarget from '../components/FlyToTarget'
@@ -163,7 +167,9 @@ const Intel = () => {
   const [newsLoading, setNewsLoading] = useState(false)
   const [newsError, setNewsError] = useState(null)
   const mapSearchWrapRef = useRef(null)
-  const mapboxToken = typeof import.meta !== 'undefined' && import.meta.env?.VITE_MAPBOX_TOKEN
+  const mapboxToken = getMapboxAccessToken()
+  const externalFeedsEnabled = isExternalIntelFeedsEnabled()
+  const webcamFeedsEnabled = isWebcamFeedsEnabled()
   const hasWebcamKey =
     typeof import.meta !== 'undefined' &&
     (import.meta.env?.VITE_WINDY_WEBCAM_API_KEY ||
@@ -178,6 +184,10 @@ const Intel = () => {
     document.addEventListener('mousedown', close)
     return () => document.removeEventListener('mousedown', close)
   }, [searchDropdownOpen])
+
+  useEffect(() => {
+    if (!webcamFeedsEnabled && controlTab === 'webcams') setControlTab('intel')
+  }, [webcamFeedsEnabled, controlTab])
 
   // Default selected point so area feeds (weather, webcams) load for initial map view
   useEffect(() => {
@@ -216,6 +226,14 @@ const Intel = () => {
   }
 
   const fetchFeeds = useCallback(() => {
+    if (!externalFeedsEnabled) {
+      setFlights([])
+      setShips([])
+      setFlightError(false)
+      setShipError(false)
+      setLastUpdated(Date.now())
+      return
+    }
     const bbox = mapBbox
     const nowMs = Date.now()
     const windowMs = trailLengthMinutes > 0 ? trailLengthMinutes * 60 * 1000 : 10 * 60 * 1000
@@ -231,16 +249,25 @@ const Intel = () => {
         if (trailLengthMinutes > 0) setTrailHistory((prev) => mergeTrail(prev, 'ships', data, nowMs, windowMs))
       }).catch(() => setShipError(true)),
     ]).then(() => setLastUpdated(Date.now()))
-  }, [mapBbox, trailLengthMinutes])
+  }, [mapBbox, trailLengthMinutes, externalFeedsEnabled])
 
   useEffect(() => {
     fetchFeeds()
+    if (!externalFeedsEnabled) return undefined
     const ms = Math.max(FEED_REFRESH_MS.flights, FEED_REFRESH_MS.ships)
     const t = setInterval(fetchFeeds, ms)
     return () => clearInterval(t)
-  }, [fetchFeeds])
+  }, [fetchFeeds, externalFeedsEnabled])
 
   useEffect(() => {
+    if (!externalFeedsEnabled) {
+      setGdacsEvents([])
+      setEarthquakes([])
+      setNewsArticles([])
+      setNewsLoading(false)
+      setNewsError(null)
+      return
+    }
     const load = () => {
       fetchGdacsEvents(mapBbox).then(setGdacsEvents).catch(() => setGdacsEvents([]))
       fetchEarthquakes(mapBbox).then(setEarthquakes).catch(() => setEarthquakes([]))
@@ -260,15 +287,18 @@ const Intel = () => {
     load()
     const t = setInterval(load, 5 * 60 * 1000)
     return () => clearInterval(t)
-  }, [mapBbox])
+  }, [mapBbox, externalFeedsEnabled])
 
   useEffect(() => {
+    if (!externalFeedsEnabled) {
+      setAreaFeeds({ weather: null, cameras: [], loading: false, error: null })
+      return
+    }
     if (!selectedPoint) { setAreaFeeds({ weather: null, cameras: [], loading: false, error: null }); return }
     setAreaFeeds((prev) => ({ ...prev, loading: true, error: null }))
-    Promise.all([
-      getWeatherAtPoint(selectedPoint),
-      fetchCamerasNearPoint(selectedPoint, 50),
-    ]).then(([weather, cameras]) => {
+    const pWeather = getWeatherAtPoint(selectedPoint)
+    const pCams = webcamFeedsEnabled ? fetchCamerasNearPoint(selectedPoint, 50) : Promise.resolve([])
+    Promise.all([pWeather, pCams]).then(([weather, cameras]) => {
       setAreaFeeds({ weather: weather ?? null, cameras: cameras ?? [], loading: false, error: null })
     }).catch((err) => {
       setAreaFeeds({
@@ -278,10 +308,11 @@ const Intel = () => {
         error: err?.message || 'Failed to load feeds',
       })
     })
-  }, [selectedPoint?.lat, selectedPoint?.lng])
+  }, [selectedPoint?.lat, selectedPoint?.lng, externalFeedsEnabled, webcamFeedsEnabled])
 
   const handleSearch = async (e) => {
     e?.preventDefault()
+    if (!externalFeedsEnabled) return
     const q = searchQuery.trim()
     if (!q) return
     setSearchLoading(true)
@@ -311,6 +342,7 @@ const Intel = () => {
 
   const handleWebcamSearch = async (e) => {
     e?.preventDefault()
+    if (!externalFeedsEnabled || !webcamFeedsEnabled) return
     const q = webcamSearchQuery.trim()
     if (!q) return
     setWebcamSearching(true)
@@ -333,6 +365,12 @@ const Intel = () => {
   }
 
   useEffect(() => {
+    if (!externalFeedsEnabled || !webcamFeedsEnabled) {
+      setWebcamList([])
+      setWebcamLoading(false)
+      setWebcamError(null)
+      return
+    }
     if (!webcamPlace || typeof webcamPlace.lat !== 'number' || typeof webcamPlace.lng !== 'number') return
     setWebcamLoading(true)
     setWebcamError(null)
@@ -347,7 +385,7 @@ const Intel = () => {
         setWebcamError(err?.message || 'Failed to load webcams')
       })
       .finally(() => setWebcamLoading(false))
-  }, [webcamPlace?.lat, webcamPlace?.lng])
+  }, [webcamPlace?.lat, webcamPlace?.lng, externalFeedsEnabled, webcamFeedsEnabled])
 
   const handleMapClick = useCallback((point) => {
     setSelectedPoint(point)
@@ -395,10 +433,11 @@ const Intel = () => {
   const displayedShips = useMemo(() => shipsWithAnomalies.slice(0, limits.ships), [shipsWithAnomalies, limits.ships])
   const displayedCameras = useMemo(() => {
     const byId = {}
+    if (!webcamFeedsEnabled) return []
     ;(areaFeeds.cameras || []).forEach((c) => { byId[c.id] = c })
     ;(webcamList || []).forEach((c) => { byId[c.id] = c })
     return Object.values(byId)
-  }, [areaFeeds.cameras, webcamList])
+  }, [areaFeeds.cameras, webcamList, webcamFeedsEnabled])
   const anomalyList = useMemo(() => [
     ...flightsWithAnomalies.filter((f) => f.isAnomaly).map((f) => ({ ...f, type: 'flight' })),
     ...shipsWithAnomalies.filter((s) => s.isAnomaly).map((s) => ({ ...s, type: 'ship' })),
@@ -453,7 +492,7 @@ const Intel = () => {
         </div>
       )
     }
-    if (type === 'webcam') {
+    if (type === 'webcam' && webcamFeedsEnabled) {
       const c = displayedCameras.find((x) => x.id === id)
       if (!c) return null
       return (
@@ -470,7 +509,7 @@ const Intel = () => {
       )
     }
     return null
-  }, [selectedMapFeature, displayedFlights, displayedShips, displayedCameras, startTracking])
+  }, [selectedMapFeature, displayedFlights, displayedShips, displayedCameras, startTracking, webcamFeedsEnabled])
 
   const trailWindowMs = trailLengthMinutes * 60 * 1000
   const flightTrailLines = useMemo(() => {
@@ -530,6 +569,13 @@ const Intel = () => {
           </button>
         </div>
       </header>
+      {!externalFeedsEnabled && (
+        <div className="intel-external-feeds-banner" role="status">
+          <strong>Live third-party feeds are off.</strong> The map still works; flights, ships, disasters, geocode search,
+          point weather, webcams, and news are not fetched until you set{' '}
+          <code>VITE_ENABLE_EXTERNAL_INTEL_FEEDS=true</code> and configure the related keys (see <code>MANUAL_SETUP.md</code>).
+        </div>
+      )}
       <div className="intel-dashboard-main">
         <div className="intel-map-wrapper">
           {intelView === 'dashboard' ? (
@@ -746,7 +792,7 @@ const Intel = () => {
                       {parish && (
                         <>
                           <span className="intel-popup-meta">{parish.region} · Pop. {parish.population?.toLocaleString()}</span>
-                          <Link to={`/parish/${parishId}`} className="intel-popup-link">View {ju} dashboard <ExternalLink size={12} /></Link>
+                          <Link to={parishPath(parishId)} className="intel-popup-link">View {ju} dashboard <ExternalLink size={12} /></Link>
                         </>
                       )}
                     </div>
@@ -821,7 +867,7 @@ const Intel = () => {
                           aria-label="Search map for an area"
                           autoComplete="off"
                         />
-                        <button type="submit" disabled={searchLoading} title="Look up area">{searchLoading ? '…' : 'Go'}</button>
+                        <button type="submit" disabled={searchLoading || !externalFeedsEnabled} title="Look up area">{searchLoading ? '…' : 'Go'}</button>
                       </form>
                       {searchDropdownOpen && searchResults.length > 0 && (
                         <ul className="intel-map-search-results" role="listbox">
@@ -991,7 +1037,7 @@ const Intel = () => {
                         aria-label="Search for webcams by place"
                         autoComplete="off"
                       />
-                      <button type="submit" disabled={webcamSearching} title="Search">{webcamSearching ? '…' : 'Go'}</button>
+                      <button type="submit" disabled={webcamSearching || !externalFeedsEnabled} title="Search">{webcamSearching ? '…' : 'Go'}</button>
                     </form>
                     {webcamSearchOpen && webcamSearchResults.length > 0 && (
                       <ul className="intel-map-search-results" role="listbox">

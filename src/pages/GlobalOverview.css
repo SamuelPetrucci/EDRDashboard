@@ -5,6 +5,15 @@
   gap: 1.5rem;
 }
 
+.global-overview-code-hint {
+  font-family: ui-monospace, monospace;
+  font-size: 0.8em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #0c4a6e;
+}
+
 :root {
   /* Shared header gradient family – navy with a soft warm edge */
   --overview-card-header-bg: linear-gradient(135deg, #1e3a5f 0%, #1f2937 55%, rgba(249, 115, 22, 0.22) 100%);

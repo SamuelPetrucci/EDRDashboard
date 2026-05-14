@@ -1,6 +1,6 @@
 /**
  * 3D globe view using Mapbox GL (globe projection + terrain).
- * Requires VITE_MAPBOX_TOKEN. Renders flights and ships as point layers.
+ * Requires `VITE_MAPBOX_ACCESS_TOKEN` (or legacy `VITE_MAPBOX_TOKEN`). Renders flights and ships as point layers.
  */
 import { useRef, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -334,6 +334,61 @@ function GlobeFlyTo({ target, onComplete }) {
   return null
 }
 
+/** Slow globe rotation (bearing) for hero views; pauses briefly after user interaction. */
+function GlobeAmbientBearingSpin({ enabled, degPerSecond = 4.2, delayMs = 0 }) {
+  const mapContext = useMap()
+  const map = mapContext?.current?.getMap?.() ?? mapContext?.current
+  const pauseUntilRef = useRef(0)
+  const [delayDone, setDelayDone] = useState(delayMs <= 0)
+
+  useEffect(() => {
+    if (delayMs <= 0) {
+      setDelayDone(true)
+      return undefined
+    }
+    setDelayDone(false)
+    const t = setTimeout(() => setDelayDone(true), delayMs)
+    return () => clearTimeout(t)
+  }, [delayMs])
+
+  useEffect(() => {
+    if (!enabled || !delayDone || !map) return undefined
+    const bumpPause = () => {
+      pauseUntilRef.current = performance.now() + 2800
+    }
+    map.on('dragstart', bumpPause)
+    map.on('zoomstart', bumpPause)
+    map.on('rotatestart', bumpPause)
+    map.on('pitchstart', bumpPause)
+    let raf = 0
+    let last = performance.now()
+    const tick = (t) => {
+      const dt = Math.min(0.08, (t - last) / 1000)
+      last = t
+      if (performance.now() > pauseUntilRef.current) {
+        try {
+          if (map.isStyleLoaded?.()) {
+            const b = map.getBearing?.() ?? 0
+            map.setBearing?.(b + degPerSecond * dt)
+          }
+        } catch (_) {
+          /* ignore */
+        }
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => {
+      cancelAnimationFrame(raf)
+      map.off('dragstart', bumpPause)
+      map.off('zoomstart', bumpPause)
+      map.off('rotatestart', bumpPause)
+      map.off('pitchstart', bumpPause)
+    }
+  }, [enabled, delayDone, map, degPerSecond])
+  return null
+}
+
 /** One-time spawn animation: fly from zoomed-out globe into the target view (e.g. angled Jamaica). */
 function GlobeSpawnFly({ initialViewState, spawnFlyToDuration }) {
   const mapContext = useMap()
@@ -375,15 +430,20 @@ export default function GlobeView({
   shipTrails = [],
   showFlights = true,
   showShips = true,
+  showDataLayers = true,
   showTraffic = false,
+  ambientBearingSpin = false,
+  ambientBearingDegPerSec = 4.2,
   onClick,
   onBoundsChange,
   onFeatureClick,
+  onMapReady,
   selectedFeature,
   popupContent,
   onClosePopup,
   trackedEntity,
   trackedFlightTrail = [],
+  mapMinHeight = 400,
   style,
   className,
 }) {
@@ -429,7 +489,7 @@ export default function GlobeView({
       <div className={className} style={{ ...style, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: '#94a3b8', borderRadius: 14 }}>
         <div style={{ textAlign: 'center', padding: 24 }}>
           <p style={{ marginBottom: 8 }}>3D Globe requires a Mapbox access token.</p>
-          <p style={{ fontSize: 14 }}>Set <code>VITE_MAPBOX_TOKEN</code> in <code>.env</code> and restart. See MANUAL_SETUP.md.</p>
+          <p style={{ fontSize: 14 }}>Set <code>VITE_MAPBOX_ACCESS_TOKEN</code> (or legacy <code>VITE_MAPBOX_TOKEN</code>) in <code>.env</code> and restart. See MANUAL_SETUP.md.</p>
         </div>
       </div>
     )
@@ -444,7 +504,7 @@ export default function GlobeView({
         initialViewState={defaultView}
         mapStyle={mapStyle}
         projection="globe"
-        style={{ width: '100%', height: '100%', minHeight: 400 }}
+        style={{ width: '100%', height: '100%', minHeight: mapMinHeight }}
         onClick={(e) => {
           const map = e.target
           if (map && typeof map.queryRenderedFeatures === 'function') {
@@ -502,16 +562,24 @@ export default function GlobeView({
                 lomax: b.getEast(),
               })
           }
+          onMapReady?.()
         }}
       >
         <GlobeStyleSync mapStyleKey={mapStyleKey} />
         <GlobeTrafficSync showTraffic={showTraffic} />
         <GlobeCameraSync pitch={pitch} bearing={bearing} />
+        {ambientBearingSpin ? (
+          <GlobeAmbientBearingSpin
+            enabled={ambientBearingSpin}
+            degPerSecond={ambientBearingDegPerSec}
+            delayMs={spawnFlyToDuration > 0 ? Math.round(spawnFlyToDuration) + 600 : 0}
+          />
+        ) : null}
         {spawnFlyToDuration > 0 && <GlobeSpawnFly initialViewState={initialViewState} spawnFlyToDuration={spawnFlyToDuration} />}
         {flyToTarget && <GlobeFlyTo target={flyToTarget} onComplete={onFlyToComplete} />}
         {trackedEntity && <GlobeFollowTracked trackedEntity={trackedEntity} flights={flights} ships={ships} />}
         {selectedFeature && <GlobePopup selectedFeature={selectedFeature} popupContent={popupContent} onClosePopup={onClosePopup} />}
-        {styleLoaded && (
+        {styleLoaded && showDataLayers && (
           <>
             {trailsData.features.length > 0 && (
               <Source id="trails" type="geojson" data={trailsData}>
@@ -526,7 +594,7 @@ export default function GlobeView({
                 />
               </Source>
             )}
-            {Array.isArray(trackedFlightTrail) && trackedFlightTrail.length >= 2 && (
+            {Array.isArray(trackedFlightTrail) && trackedFlightTrail.length >= 2 && showDataLayers && (
               <Source
                 id="tracked-flight-trail"
                 type="geojson"

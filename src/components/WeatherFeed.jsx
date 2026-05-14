@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Cloud, Droplets, Wind, Thermometer, Eye } from 'lucide-react'
 import { getWeatherData, getCurrentEvents } from '../data/weatherFeed'
+import { isWindyForecastEnabled } from '../lib/externalIntelFeeds'
 import './WeatherFeed.css'
 
 const WeatherFeed = () => {
@@ -10,6 +11,8 @@ const WeatherFeed = () => {
   const [forecastView, setForecastView] = useState('hourly') // 'hourly' | 'weekly'
 
   useEffect(() => {
+    if (!isWindyForecastEnabled()) return
+
     const loadData = async () => {
       const weatherData = await getWeatherData()
       const currentEvents = await getCurrentEvents()

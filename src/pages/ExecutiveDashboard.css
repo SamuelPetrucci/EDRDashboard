@@ -1,0 +1,9 @@
+.dris-radar-host {
+  width: 100%;
+  height: 260px;
+}
+
+.dris-radar-host .recharts-polar-angle-axis-tick-value {
+  font-size: 10px;
+  fill: #64748b;
+}

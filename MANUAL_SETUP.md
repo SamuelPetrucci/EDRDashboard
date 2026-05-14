@@ -1,6 +1,6 @@
 # Manual setup for Intelligence features
 
-These optional steps enable **3D globe**, **real AIS ships**, **weather radar**, and **live camera feeds**. Without them, the app still works with mock/demo data and free APIs (OpenSky flights, GDACS, USGS, Open-Meteo weather, Nominatim search). Use the **2D Map** / **3D Globe** toggle on the Intelligence page; the 3D view uses Mapbox satellite imagery and terrain.
+These optional steps enable **3D globe**, **real AIS ships**, **weather**, **news**, and **live camera feeds**. The app always works with **DRIS local/catalog data** (scorecards, trainings, contacts) and **Supabase** when configured. **Third-party intel and overview feeds** (OpenSky, GDACS, USGS, Nominatim, Open-Meteo, Windy, news URL, webcams, AISHub when keys are set) are **off by default** — set `VITE_ENABLE_EXTERNAL_INTEL_FEEDS=true` when keys and endpoints are ready (see the table below). Use the **2D Map** / **3D Globe** toggle on the Intelligence page; the 3D view uses Mapbox satellite imagery and terrain.
 
 ---
 
@@ -8,9 +8,18 @@ These optional steps enable **3D globe**, **real AIS ships**, **weather radar**,
 
 Create a `.env` file in the project root (and optionally `.env.local` for local overrides). **Do not commit `.env` or `.env.local`** if they contain secrets; they are already in `.gitignore`.
 
+The root **`.env.example` lists only Supabase + Mapbox** (auth and the main map). Add the variables below **only when you turn on that feature**; leaving them unset is normal.
+
 | Variable | Purpose | Required |
 |----------|---------|----------|
-| `VITE_MAPBOX_TOKEN` | Mapbox access token (for **3D globe** with satellite + terrain) | No – 3D Globe shows setup message if missing |
+| `VITE_SUPABASE_URL` | Supabase project URL (Auth; `/app` gate when paired with a client key) | No – leave empty for local UI without login |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase **publishable** key (`sb_publishable_…`) — preferred for new projects | No |
+| `VITE_SUPABASE_ANON_KEY` | Legacy **anon** JWT public key — still read by the app if publishable is unset | No |
+| `SUPABASE_SECRET_KEY` | **Secret** key (`sb_secret_…`) — `npm run seed:demo`, CI, server only; never `VITE_*` or browser | No — not used by this SPA bundle |
+| `SUPABASE_SERVICE_ROLE_KEY` | Same service-role secret if your team uses this name (seed script accepts either) | No |
+| `VITE_MAPBOX_ACCESS_TOKEN` | Mapbox **default public** access token (3D globe + map) | No – 3D Globe shows setup message if missing |
+| `VITE_MAPBOX_TOKEN` | Legacy alias — used only if `VITE_MAPBOX_ACCESS_TOKEN` is unset | No |
+| `VITE_ENABLE_EXTERNAL_INTEL_FEEDS` | Set to `true` to enable **all** third-party intel/overview HTTP feeds (OpenSky, GDACS, USGS, Nominatim, Open-Meteo, Windy, `VITE_NEWS_API_URL`, webcams, AISHub when keys set). When unset or not `true`, Intel and Overview **do not call** those services. | No – **recommended off** until keys are configured |
 | `VITE_AISHUB_USERNAME` | AISHub account username (for real ship/AIS data) | No – mock ships used if missing |
 | `VITE_AISHUB_KEY` | AISHub API key | No – mock ships used if missing |
 | `VITE_RAINVIEWER_TILE_URL` | Weather radar tile URL (e.g. RainViewer or OpenWeatherMap radar) | No – radar overlay hidden if missing |
@@ -21,12 +30,14 @@ Create a `.env` file in the project root (and optionally `.env.local` for local 
 | `VITE_NEWS_API_URL` | Backend endpoint for news/articles API (expects bbox + limit) | No – News tab shows placeholder if missing |
 | `VITE_NEWS_API_KEY` | Token sent as Bearer token to news backend | No |
 | `NEWS_BACKEND_TOKEN` | Server-side token to protect `/api/news` | No (recommended for production) |
+| `WINDY_WEBCAM_API_KEY` | Server-only (e.g. Vercel) for `/api/windy-webcams` — avoids browser CORS to Windy | No |
+| `VITE_WINDY_WEBCAM_PROXY_URL` | Set to `0` to force direct Windy webcam API (dev only; prod usually uses `/api/windy-webcams`) | No |
 
 Example `.env`:
 
 ```env
 # 3D Globe (Mapbox) – https://account.mapbox.com/access-tokens/
-# VITE_MAPBOX_TOKEN=pk....
+# VITE_MAPBOX_ACCESS_TOKEN=pk....
 
 # Real maritime (AIS) – get keys from https://www.aishub.net/
 VITE_AISHUB_USERNAME=your_username
@@ -56,14 +67,14 @@ Restart the dev server after changing `.env` (`npm run dev`).
 
 ### Vercel
 
-For deployments on [Vercel](https://vercel.com), add the same variables in **Project → Settings → Environment Variables**. Use the exact names above (e.g. `VITE_MAPBOX_TOKEN`). Add them for **Production**, and optionally for **Preview** and **Development**. Redeploy after adding or changing variables.
+For deployments on [Vercel](https://vercel.com), add the same variables in **Project → Settings → Environment Variables**. Use the exact names above (e.g. `VITE_MAPBOX_ACCESS_TOKEN`). Add them for **Production**, and optionally for **Preview** and **Development**. Redeploy after adding or changing variables.
 
 ---
 
 ## 2. Mapbox (3D globe) and satellite imagery
 
 - Create a free account at [Mapbox](https://account.mapbox.com/) and open [Access tokens](https://account.mapbox.com/access-tokens/).
-- Create a default public token (or use an existing one) and set `VITE_MAPBOX_TOKEN` in `.env`.
+- Create a default public token (or use an existing one) and set `VITE_MAPBOX_ACCESS_TOKEN` in `.env`.
 - On the Intelligence page, use the **3D Globe** toggle to see the Earth with satellite imagery, 3D terrain, and atmosphere. **3D buildings** appear when you zoom in (around zoom 14+) in areas where the style provides building data. Flights and ships appear as points on the globe; click the map to set the selected area and view weather/cameras. **Traffic** (road congestion) can be toggled in the right panel when in 3D view; it uses Mapbox Traffic v1 and shows congestion levels (green → yellow → orange → red) on roads, updated about every 5–8 minutes.
 
 ### How often is satellite imagery updated?
@@ -173,3 +184,41 @@ If you skip all of the above:
 - **Radar:** Layer is hidden if `VITE_RAINVIEWER_TILE_URL` is not set.
 
 No API keys are required for the core experience.
+
+---
+
+## 9. Demo users (Supabase)
+
+Six **role-specific** demo accounts are defined in `src/constants/demoAccounts.js` (emails like `demo-executive@dris.local`). They share one password for walkthroughs:
+
+- Default password: **`DRIS-Demo-2026!`** — override with **`VITE_DEMO_PASSWORD`** in `.env` if you like.
+
+**Create users in your Supabase project** (one-time, from the repo root, with `.env` containing **`SUPABASE_SECRET_KEY`** or **`SUPABASE_SERVICE_ROLE_KEY`** (same service-role value from the dashboard) and **`VITE_SUPABASE_URL`** or **`SUPABASE_URL`**):
+
+```bash
+npm run seed:demo
+```
+
+The script creates confirmed Auth users (or resets their password if they already exist) and sets **`public.profiles.role`** for each.
+
+**Sign-in page:** In **`npm run dev`**, a **Demo logins** panel lists every role with a **Use** button (fills email + password) and **Copy** for the password. For hosted demos, set **`VITE_SHOW_DEMO_LOGIN=1`** in the build environment so the panel appears outside dev — and remove it for real production audiences.
+
+---
+
+## 10. Roles, invitations, and “who can do what”
+
+These roles live on **`public.profiles.role`** and in invitation metadata (`user_invitations.intended_role`). **Platform admin** is the global operator: use **`/app/platform-admin`** to invite users by email (Edge Function `invite-user`) and grant **`user_country_access`** (Jamaica / United States in v1). Invited users get scopes from **`user_invitation_scopes`** when they accept (`apply_pending_invitation` RPC after first sign-in).
+
+| Role | Typical use |
+|------|-------------|
+| **platform_admin** | Create invitations for any supported role; grant country access; full catalog visibility. |
+| **country_admin** | National “control tower” (`/app/admin`) — operational admin for a country (pair with country access rows). |
+| **country_executive** | National dashboard + score heat map (`/app/executive`). |
+| **parish_manager** | Subnational manager view (`/app/manager`). |
+| **data_officer** | Scorecard / KPI validation workspace (`/app/workspace/data`) — connect to Supabase evidence tables as you build flows. |
+| **field_user** | Field submissions (`/app/workspace/field`) — connect for capture and document uploads. |
+| **auditor** | Read-focused audit surface (`/app/audit`). |
+
+**“Admins per location” today:** invite **`country_admin`** (or **country_executive**) and restrict where they work using **`user_country_access`** and **`user_jurisdiction_access`** (parish / state rows in migrations). A future increment can let **country_admin** invite users only inside their country (RLS on `user_invitations`). **Evidence uploads** for inventory are intended around **`kpi_submission_evidence`** / Storage in migrations; wire the workspace UIs when ready.
+
+**Executive map (Jamaica):** Parish outlines use **GADM 4.1** boundaries in `src/data/geo/jmGadm41Parishes.json` (see `jmParishBoundaryGeo.js`). US states still use centroid circles until a similar boundary layer is added.

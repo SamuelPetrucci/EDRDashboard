@@ -4,5 +4,26 @@
   flex-direction: column;
 }
 
+/* Public routes (landing, sign-in): soft enter */
+.dris-route-enter {
+  min-height: 100%;
+  animation: dris-route-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
+@keyframes dris-route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dris-route-enter {
+    animation: none;
+  }
+}
 
