@@ -17,7 +17,6 @@ import {
 } from 'lucide-react'
 import EmergencyBanner from './EmergencyBanner'
 import EnterpriseFooter from './EnterpriseFooter'
-import CennaAssistant from './CennaAssistant'
 import headerLogo from '../../headerlogo.webp'
 import { appPath } from '../constants/paths'
 import { useAuth } from '../context/AuthContext'
@@ -358,7 +357,6 @@ function Layout() {
         </main>
         {!isIntelPage && <EnterpriseFooter />}
       </div>
-      <CennaAssistant withFooterBand={!isIntelPage} />
     </div>
   )
 }
