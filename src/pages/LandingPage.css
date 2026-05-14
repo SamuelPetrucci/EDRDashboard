@@ -233,6 +233,18 @@
   position: relative;
   z-index: 1;
   padding: clamp(1.75rem, 5vw, 4rem) clamp(1.25rem, 4vw, 2.75rem) clamp(2rem, 5vw, 3.5rem);
+  animation: landing-main-enter 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes landing-main-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .landing__hero {
@@ -339,15 +351,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  padding-bottom: 2.5rem;
-}
-
-.landing__visual-caption {
-  margin-top: 1rem;
-  font-size: 0.75rem;
-  color: #64748b;
-  text-align: center;
-  max-width: 18rem;
+  padding-bottom: clamp(0.75rem, 2vw, 1.25rem);
 }
 
 .landing__intel {
@@ -485,4 +489,10 @@
   color: #64748b;
   font-size: 0.75rem;
   text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing__main {
+    animation: none;
+  }
 }

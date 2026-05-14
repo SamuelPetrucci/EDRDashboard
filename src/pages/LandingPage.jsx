@@ -111,7 +111,6 @@ export default function LandingPage() {
           </div>
           <div className="landing__visual">
             <LandingGlobe />
-            <p className="landing__visual-caption">Same live Mapbox 3D globe as Intel — satellite tiles, spin, zoom, and pan.</p>
           </div>
         </section>
 

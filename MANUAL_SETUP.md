@@ -201,7 +201,7 @@ npm run seed:demo
 
 The script creates confirmed Auth users (or resets their password if they already exist) and sets **`public.profiles.role`** for each.
 
-**Sign-in page:** In **`npm run dev`**, a **Demo logins** panel lists every role with a **Use** button (fills email + password) and **Copy** for the password. For hosted demos, set **`VITE_SHOW_DEMO_LOGIN=1`** in the build environment so the panel appears outside dev — and remove it for real production audiences.
+**Sign-in page:** Whenever **Supabase** is configured, a **Demo logins** panel lists every role with a **Use** button (fills email + password) and **Copy** for the password — in dev and in production builds so evaluators can try flows quickly. To hide that panel (e.g. a live site with only invited users), set **`VITE_HIDE_DEMO_LOGIN=1`** in the deployment environment.
 
 ---
 

@@ -19,9 +19,12 @@ export function getDemoPassword() {
   return readViteEnv('VITE_DEMO_PASSWORD') || DEMO_PASSWORD_DEFAULT
 }
 
-/** Demo strip on /sign-in: dev server always, or production when VITE_SHOW_DEMO_LOGIN=1 */
+/**
+ * Demo strip on /sign-in whenever Supabase is configured (dev and production builds).
+ * Set VITE_HIDE_DEMO_LOGIN=1 (or true/yes) to hide for deployments that must not expose demo credentials.
+ */
 export function isDemoLoginUiEnabled() {
-  if (import.meta.env.DEV) return true
-  const v = String(import.meta.env.VITE_SHOW_DEMO_LOGIN ?? '').toLowerCase()
-  return v === '1' || v === 'true' || v === 'yes'
+  const hide = String(import.meta.env.VITE_HIDE_DEMO_LOGIN ?? '').toLowerCase()
+  if (hide === '1' || hide === 'true' || hide === 'yes') return false
+  return true
 }

@@ -43,7 +43,7 @@ export default function LandingGlobe({ className = '' }) {
   }, [mapboxToken])
 
   return (
-    <div className={`landing-globe ${className}`.trim()}>
+    <div className={`landing-globe ${mapReady ? 'landing-globe--ready' : ''} ${className}`.trim()}>
       <div className="landing-globe__glow" aria-hidden="true" />
       <div className="landing-globe__canvas-wrap">
         {!mapReady ? <div className="landing-globe__map-loading" aria-hidden="true" /> : null}
@@ -61,9 +61,6 @@ export default function LandingGlobe({ className = '' }) {
           onMapReady={onMapReady}
         />
       </div>
-      <p className="landing-globe__hint">
-        Live Mapbox globe — drag to rotate the planet · scroll or pinch to zoom
-      </p>
     </div>
   )
 }

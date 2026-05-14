@@ -130,12 +130,10 @@ export default function SignIn() {
                 </li>
               ))}
             </ul>
-            {!import.meta.env.DEV ? (
-              <p className="signin-demo__prod-note">
-                Demo panel is shown because <code>VITE_SHOW_DEMO_LOGIN</code> is enabled. Turn it off for production
-                audiences.
-              </p>
-            ) : null}
+            <p className="signin-demo__prod-note">
+              To hide this panel (e.g. live site with only invited users), set{' '}
+              <code className="signin-demo__code">VITE_HIDE_DEMO_LOGIN=1</code> in your deployment environment.
+            </p>
           </section>
         ) : null}
 

@@ -35,6 +35,12 @@
   z-index: 1;
   width: 100%;
   height: 100%;
+  opacity: 0;
+  transition: opacity 0.55s ease 0.08s;
+}
+
+.landing-globe--ready .landing-globe__mapbox {
+  opacity: 1;
 }
 
 .landing-globe__mapbox > div,
@@ -94,22 +100,6 @@
   outline: none;
 }
 
-.landing-globe__hint {
-  position: absolute;
-  left: 50%;
-  bottom: -2.1rem;
-  transform: translateX(-50%);
-  margin: 0;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(148, 163, 184, 0.95);
-  white-space: nowrap;
-  z-index: 2;
-  pointer-events: none;
-}
-
 @keyframes landing-globe-pulse {
   from {
     opacity: 0.72;
@@ -129,5 +119,10 @@
   .landing-globe__map-loading,
   .landing-globe__map-loading::after {
     animation: none;
+  }
+
+  .landing-globe__mapbox {
+    opacity: 1;
+    transition: none;
   }
 }
