@@ -1,5 +1,8 @@
-// User Roles and Permissions System
-// This is a conceptual structure for role-based access control
+/**
+ * Legacy demo-oriented role helpers + localStorage-backed `getCurrentUser()`.
+ * Authoritative roles live on Supabase `profiles.role` (`country_admin`, `parish_manager`, `data_officer`) via AuthContext.
+ * Prefer session-backed checks when wiring new features — see docs/PROJECT_CLEANUP_AND_DATA_PLAN.md.
+ */
 
 export const USER_ROLES = {
   SYSTEM_ADMIN: 'system_admin',

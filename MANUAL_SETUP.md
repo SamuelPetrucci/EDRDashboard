@@ -189,7 +189,7 @@ No API keys are required for the core experience.
 
 ## 9. Demo users (Supabase)
 
-Six **role-specific** demo accounts are defined in `src/constants/demoAccounts.js` (emails like `demo-executive@dris.local`). They share one password for walkthroughs:
+Three **role-specific** demo accounts are defined in `src/constants/demoAccounts.js` (`demo-admin@dris.local`, `demo-manager@dris.local`, `demo-data@dris.local`). They share one password for walkthroughs:
 
 - Default password: **`DRIS-Demo-2026!`** — override with **`VITE_DEMO_PASSWORD`** in `.env` if you like.
 
@@ -207,18 +207,37 @@ The script creates confirmed Auth users (or resets their password if they alread
 
 ## 10. Roles, invitations, and “who can do what”
 
-These roles live on **`public.profiles.role`** and in invitation metadata (`user_invitations.intended_role`). **Platform admin** is the global operator: use **`/app/platform-admin`** to invite users by email (Edge Function `invite-user`) and grant **`user_country_access`** (Jamaica / United States in v1). Invited users get scopes from **`user_invitation_scopes`** when they accept (`apply_pending_invitation` RPC after first sign-in).
+These roles live on **`public.profiles.role`** and in invitation metadata (`user_invitations.intended_role`). **Administrator** (`country_admin`) invites users by email from **`/app/admin` → Users & invitations** (Edge Function `invite-user`) and grants **`user_country_access`** (Jamaica / United States in v1). Invited users get scopes from **`user_invitation_scopes`** when they accept (`apply_pending_invitation` RPC after first sign-in).
 
-| Role | Typical use |
-|------|-------------|
-| **platform_admin** | Create invitations for any supported role; grant country access; full catalog visibility. |
-| **country_admin** | National “control tower” (`/app/admin`) — operational admin for a country (pair with country access rows). |
-| **country_executive** | National dashboard + score heat map (`/app/executive`). |
-| **parish_manager** | Subnational manager view (`/app/manager`). |
-| **data_officer** | Scorecard / KPI validation workspace (`/app/workspace/data`) — connect to Supabase evidence tables as you build flows. |
-| **field_user** | Field submissions (`/app/workspace/field`) — connect for capture and document uploads. |
-| **auditor** | Read-focused audit surface (`/app/audit`). |
+| Role slug (`profiles.role`) | UI label | Typical use |
+|-----------------------------|----------|-------------|
+| **country_admin** | Administrator | Governance: invitations, grants, KPI catalog writes — uses **`/app/admin`** (overview + users). Full-country visibility when paired with access rows (demo seeds JM + US). |
+| **parish_manager** | Parish Manager | Parish leadership and approvals — **`/app/manager`**. |
+| **data_officer** | Data Officer | KPI submission, evidence, reporting — **`/app/workspace/data`**. |
 
-**“Admins per location” today:** invite **`country_admin`** (or **country_executive**) and restrict where they work using **`user_country_access`** and **`user_jurisdiction_access`** (parish / state rows in migrations). A future increment can let **country_admin** invite users only inside their country (RLS on `user_invitations`). **Evidence uploads** for inventory are intended around **`kpi_submission_evidence`** / Storage in migrations; wire the workspace UIs when ready.
+New Auth users get **`data_officer`** by default until an invitation assigns another role and scopes.
+
+**“Admins per location” today:** restrict where users work using **`user_country_access`** and **`user_jurisdiction_access`** (parish / state rows in migrations). A future increment can let **country_admin** invite users only inside their country (RLS on `user_invitations`). **Evidence uploads** for inventory are intended around **`kpi_submission_evidence`** / Storage in migrations; wire the workspace UIs when ready.
+
+Note: backend helpers still use the SQL name **`is_platform_admin()`**; after migration **`20260516100000_three_role_rbac.sql`** it returns true only when **`profiles.role = 'country_admin'`**.
 
 **Executive map (Jamaica):** Parish outlines use **GADM 4.1** boundaries in `src/data/geo/jmGadm41Parishes.json` (see `jmParishBoundaryGeo.js`). US states still use centroid circles until a similar boundary layer is added.
+
+---
+
+## 11. Database reset & schema reference
+
+**Destructive reset (hosted Supabase)** wipes **every Auth user** and **drops the entire `public` schema** (all tables, functions, policies in `public`). Use only on disposable projects.
+
+Requirements in `.env`: **`DATABASE_URL`** (Dashboard → Connect → URI; prefer **direct/session** connection if DDL fails through the pooler), **`SUPABASE_URL`** or **`VITE_SUPABASE_URL`**, and **`SUPABASE_SERVICE_ROLE_KEY`** (or **`SUPABASE_SECRET_KEY`**).
+
+```bash
+npm install
+CONFIRM_DRIS_DATABASE_RESET=yes npm run db:reset
+supabase db push
+npm run seed:demo
+```
+
+For **local** Supabase linked with the CLI, prefer **`supabase db reset`** instead — it reapplies migrations without this Node script.
+
+Canonical overview of tables and workflows: **[`supabase/SCHEMA.md`](supabase/SCHEMA.md)**.

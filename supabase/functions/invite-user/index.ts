@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
   }
 
   const { data: prof, error: profErr } = await userClient.from('profiles').select('role').eq('id', user.id).maybeSingle()
-  if (profErr || prof?.role !== 'platform_admin') {
+  if (profErr || prof?.role !== 'country_admin') {
     return new Response(JSON.stringify({ error: 'Forbidden' }), {
       status: 403,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -92,15 +92,7 @@ Deno.serve(async (req) => {
     })
   }
 
-  const allowedRoles = [
-    'platform_admin',
-    'country_executive',
-    'country_admin',
-    'parish_manager',
-    'data_officer',
-    'field_user',
-    'auditor',
-  ]
+  const allowedRoles = ['country_admin', 'parish_manager', 'data_officer']
   if (!allowedRoles.includes(intendedRole)) {
     return new Response(JSON.stringify({ error: 'Invalid intendedRole' }), {
       status: 400,

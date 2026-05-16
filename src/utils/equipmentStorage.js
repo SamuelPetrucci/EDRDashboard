@@ -1,5 +1,7 @@
-// Utility for storing and retrieving parish-specific equipment and personnel data
-// Uses localStorage for persistence (will be replaced with API in production).
+/**
+ * Parish equipment/personnel persisted in localStorage (per-browser, not authoritative).
+ * Target replacement: Supabase `parish_inventory_metrics` + Auth-scoped UX — see docs/PROJECT_CLEANUP_AND_DATA_PLAN.md.
+ */
 
 import { REGION_JAMAICA, REGION_USA } from '../data/regionCatalog'
 

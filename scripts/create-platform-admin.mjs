@@ -1,8 +1,8 @@
 /**
- * Create (or promote) a Supabase Auth user and set public.profiles.role = platform_admin.
+ * Create (or promote) a Supabase Auth user and set public.profiles.role = country_admin (Administrator).
  * Uses the service role key — never commit it or use a VITE_* name for secrets.
  *
- * Use this for the *first* platform admin (before anyone can use /app/platform-admin invites).
+ * Use this for the *first* Administrator (before anyone can send invites from /app/admin → Users & invitations).
  *
  * From project root (reads .env like seed-demo-users):
  *   node scripts/create-platform-admin.mjs admin@your.org "YourTempPassword!" "Full Name"
@@ -62,7 +62,7 @@ const nameArg =
 
 function usage() {
   console.error(`
-Create a platform administrator (Auth user + profiles.role).
+Create an Administrator (Auth user + profiles.role = country_admin).
 
   node scripts/create-platform-admin.mjs <email> <password> [display name]
 
@@ -81,7 +81,7 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
 
 const email = String(emailArg).trim()
 const password = String(passwordArg).trim()
-const displayName = (nameArg.trim() || email.split('@')[0] || 'Platform Admin').trim()
+const displayName = (nameArg.trim() || email.split('@')[0] || 'Administrator').trim()
 
 if (!email || !password) {
   usage()
@@ -148,7 +148,7 @@ async function main() {
   const { error: profErr } = await admin.from('profiles').upsert(
     {
       id: userId,
-      role: 'platform_admin',
+      role: 'country_admin',
       display_name: displayName,
       updated_at: new Date().toISOString(),
     },
@@ -160,8 +160,8 @@ async function main() {
 
   console.log(
     createdNew
-      ? `Created platform_admin: ${email} (sign in and change password if this was temporary).`
-      : `Promoted to platform_admin: ${email}`
+      ? `Created Administrator (country_admin): ${email} (sign in and change password if this was temporary).`
+      : `Promoted to Administrator (country_admin): ${email}`
   )
 }
 

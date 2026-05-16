@@ -1,0 +1,32 @@
+.admin-control-tower__header {
+  margin-bottom: 1rem;
+}
+
+.admin-control-tower__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.admin-control-tower__tab {
+  padding: 0.45rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--dris-border, #e2e8f0);
+  background: transparent;
+  color: var(--dris-text, #0f172a);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.admin-control-tower__tab--active {
+  background: var(--dris-navy, #0f2744);
+  color: #fff;
+  border-color: var(--dris-navy, #0f2744);
+}
+
+.admin-control-tower__tab:focus-visible {
+  outline: 2px solid var(--dris-accent, #38bdf8);
+  outline-offset: 2px;
+}

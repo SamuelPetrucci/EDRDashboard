@@ -1,26 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useAuth } from '../context/AuthContext'
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
-import { postInviteUserEdge } from '../lib/inviteUserEdge'
-import { DRIS_ROLES, ROLE_LABELS } from '../constants/roles'
-import '../styles/dris-dashboard.css'
-import './PlatformAdmin.css'
+import { useAuth } from '../../context/AuthContext'
+import { supabase, isSupabaseConfigured } from '../../lib/supabaseClient'
+import { postInviteUserEdge } from '../../lib/inviteUserEdge'
+import { DRIS_ROLES, ROLE_LABELS } from '../../constants/roles'
+import '../../pages/PlatformAdmin.css'
 
-const INVITE_ROLES = [
-  DRIS_ROLES.COUNTRY_EXECUTIVE,
-  DRIS_ROLES.COUNTRY_ADMIN,
-  DRIS_ROLES.PARISH_MANAGER,
-  DRIS_ROLES.DATA_OFFICER,
-  DRIS_ROLES.FIELD_USER,
-  DRIS_ROLES.AUDITOR,
-]
+const INVITE_ROLES = [DRIS_ROLES.COUNTRY_ADMIN, DRIS_ROLES.PARISH_MANAGER, DRIS_ROLES.DATA_OFFICER]
 
-export default function PlatformAdmin() {
+export default function UsersInvitesSection() {
   const { session, refreshProfile } = useAuth()
   const [users, setUsers] = useState([])
   const [loadErr, setLoadErr] = useState('')
   const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState(DRIS_ROLES.FIELD_USER)
+  const [inviteRole, setInviteRole] = useState(DRIS_ROLES.DATA_OFFICER)
   const [inviteJm, setInviteJm] = useState(true)
   const [inviteUs, setInviteUs] = useState(false)
   const [inviteMsg, setInviteMsg] = useState('')
@@ -130,14 +122,13 @@ export default function PlatformAdmin() {
   if (!isSupabaseConfigured) {
     return (
       <div className="dris-dashboard">
-        <p className="dris-muted">Platform admin requires Supabase.</p>
+        <p className="dris-muted">User administration requires Supabase.</p>
       </div>
     )
   }
 
   return (
-    <div className="dris-dashboard platform-admin">
-      <h1 className="dris-dashboard__page-title">Platform administration</h1>
+    <div className="platform-admin">
       <p className="dris-muted platform-admin__lede">Invite users by email and manage country access (v1: Jamaica and United States).</p>
 
       <div className="dris-dashboard__grid dris-dashboard__grid--triple platform-admin__grid">

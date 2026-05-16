@@ -1,5 +1,7 @@
-// Utility for storing and retrieving parish-specific scorecard data
-// Uses localStorage for persistence. Keys are scoped by dataset (see regionCatalog REGION_USA).
+/**
+ * Parish scorecard composites in localStorage (demo / offline convenience).
+ * Published readiness should align with DB KPI workflow (`kpi_submissions`) — see docs/PROJECT_CLEANUP_AND_DATA_PLAN.md.
+ */
 
 import { REGION_JAMAICA, REGION_USA } from '../data/regionCatalog'
 

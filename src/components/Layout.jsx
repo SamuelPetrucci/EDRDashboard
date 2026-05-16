@@ -141,7 +141,7 @@ function Layout() {
   const intelPath = appPath('/intel')
   const scorecardPath = appPath('/scorecard')
   const profilePath = appPath('/profile')
-  const platformAdminPath = appPath('/platform-admin')
+  const adminPath = appPath('/admin')
 
   const showSignOut = isSupabaseConfigured && session
   const primaryHomePath = !isSupabaseConfigured || !session ? overviewPath : getDefaultHomeForRole(role)
@@ -160,12 +160,12 @@ function Layout() {
   const operationsNavActive = pathMatches(location.pathname, operationsPath)
   const showOperationsMapLink = isSupabaseConfigured && session
 
-  const isDrisLightMain = /^\/app\/(executive|admin|manager|profile|platform-admin)\/?$/.test(location.pathname)
+  const isDrisLightMain = /^\/app\/(admin|manager|profile)\/?$/.test(location.pathname)
 
   const isIntelPage = location.pathname === intelPath
 
   const getNavLinkClass = (opts) => {
-    const { overview, operations, scorecard, protocols, contacts, intelPath: intel, profile, platformAdmin } = opts
+    const { overview, operations, scorecard, protocols, contacts, intelPath: intel, profile, adminHome } = opts
     let active = false
     const p = location.pathname
     if (scorecard) active = p.includes('scorecard')
@@ -178,7 +178,7 @@ function Layout() {
     else if (overview) active = overviewNavActive
     else if (intel) active = p === intelPath
     else if (profile) active = p === profilePath
-    else if (platformAdmin) active = p === platformAdminPath
+    else if (adminHome) active = p === adminPath
     return `nav-link sidenav-link${active ? ' active' : ''}`
   }
 
@@ -281,10 +281,10 @@ function Layout() {
             <Phone size={20} aria-hidden />
             <span>Contacts</span>
           </Link>
-          {showSignOut && role === DRIS_ROLES.PLATFORM_ADMIN ? (
-            <Link to={platformAdminPath} className={getNavLinkClass({ platformAdmin: true })} onClick={linkAfterNav}>
+          {showSignOut && role === DRIS_ROLES.COUNTRY_ADMIN ? (
+            <Link to={adminPath} className={getNavLinkClass({ adminHome: true })} onClick={linkAfterNav}>
               <Shield size={20} aria-hidden />
-              <span>Platform admin</span>
+              <span>Administration</span>
             </Link>
           ) : null}
         </nav>

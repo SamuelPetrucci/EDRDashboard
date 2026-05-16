@@ -104,7 +104,7 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  const role = profile?.role ?? DRIS_ROLES.FIELD_USER
+  const role = profile?.role ?? DRIS_ROLES.DATA_OFFICER
 
   const value = useMemo(
     () => ({

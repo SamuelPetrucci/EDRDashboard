@@ -24,6 +24,7 @@
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
+    "pg": "^8.13.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.8"
   },
@@ -32,6 +33,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "seed:demo": "node scripts/seed-demo-users.mjs",
-    "create:platform-admin": "node scripts/create-platform-admin.mjs"
+    "create:platform-admin": "node scripts/create-platform-admin.mjs",
+    "db:reset": "node scripts/reset-database.mjs"
   }
 }

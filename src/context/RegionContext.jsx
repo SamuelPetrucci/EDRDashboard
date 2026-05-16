@@ -67,7 +67,7 @@ export function RegionProvider({ children }) {
       }
 
       const r = profile?.role
-      if (r === 'platform_admin') {
+      if (r === 'country_admin') {
         if (!cancelled) setAllowedRegions(null)
         return
       }

@@ -1,5 +1,5 @@
 /**
- * Creates (or updates) seven DRIS demo Auth users and sets public.profiles.role for each.
+ * Creates (or updates) three DRIS demo Auth users and sets public.profiles.role for each.
  * Requires Supabase secret key — never expose in the browser.
  *
  * Usage (from project root, with .env containing keys):
@@ -55,13 +55,9 @@ const DEMO_PW = (
 ).trim()
 
 const ACCOUNTS = [
-  { email: 'demo-platform@dris.local', role: 'platform_admin', name: 'Demo Platform Admin' },
-  { email: 'demo-executive@dris.local', role: 'country_executive', name: 'Demo Executive' },
   { email: 'demo-admin@dris.local', role: 'country_admin', name: 'Demo Administrator' },
   { email: 'demo-manager@dris.local', role: 'parish_manager', name: 'Demo Parish Manager' },
   { email: 'demo-data@dris.local', role: 'data_officer', name: 'Demo Data Officer' },
-  { email: 'demo-field@dris.local', role: 'field_user', name: 'Demo Field User' },
-  { email: 'demo-auditor@dris.local', role: 'auditor', name: 'Demo Auditor' },
 ]
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
@@ -138,7 +134,7 @@ async function ensureGeoAccess(admin, userId, email) {
   const { data: us } = await admin.from('countries').select('id').eq('slug', 'united-states').maybeSingle()
 
   const em = email.toLowerCase()
-  if (em.includes('demo-platform')) {
+  if (em.includes('demo-admin')) {
     const rows = [{ user_id: userId, country_id: jm.id }]
     if (us?.id) rows.push({ user_id: userId, country_id: us.id })
     const { error } = await admin.from('user_country_access').upsert(rows, { onConflict: 'user_id,country_id' })
@@ -146,18 +142,13 @@ async function ensureGeoAccess(admin, userId, email) {
     return
   }
 
-  if (
-    em.includes('demo-executive') ||
-    em.includes('demo-admin') ||
-    em.includes('demo-data') ||
-    em.includes('demo-field') ||
-    em.includes('demo-auditor')
-  ) {
+  if (em.includes('demo-data')) {
     const { error } = await admin.from('user_country_access').upsert(
       { user_id: userId, country_id: jm.id },
       { onConflict: 'user_id,country_id' }
     )
     if (error) console.warn('  user_country_access:', error.message)
+    return
   }
 
   if (em.includes('demo-manager')) {

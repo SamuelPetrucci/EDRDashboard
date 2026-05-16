@@ -18,7 +18,7 @@ function DatabaseSetupHint() {
           In the Supabase SQL editor, run the migration file{' '}
           <code className="auth-setup-hint__code">supabase/migrations/20260513120000_dris_profiles_roles.sql</code> from this repository.
           That creates <code className="auth-setup-hint__code">public.profiles</code>, row-level security for self-read, and a trigger so
-          new users receive a default <code className="auth-setup-hint__code">field_user</code> role. Then assign roles in the Table
+          new users receive a default <code className="auth-setup-hint__code">data_officer</code> role. Then assign roles in the Table
           Editor as needed.
         </p>
       </div>

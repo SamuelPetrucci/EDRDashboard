@@ -1,80 +1,65 @@
 .jm-heatmap {
-  position: relative;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--dris-border, #e2e8f0);
-  min-height: 220px;
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .jm-heatmap__map {
-  height: 260px;
   width: 100%;
+  height: min(52vh, 440px);
+  min-height: 320px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--dris-border, #e2e8f0);
   z-index: 0;
 }
 
-.jm-heatmap__map .leaflet-container {
-  font-family: inherit;
-}
-
 .jm-heatmap__legend {
-  position: absolute;
-  right: 10px;
-  bottom: 28px;
-  z-index: 500;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem 0.5rem;
-  padding: 0.4rem 0.55rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--dris-text, #0f172a) !important;
-  max-width: 11rem;
+  gap: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  color: var(--dris-muted, #64748b);
 }
 
 .jm-heatmap__legend-title {
-  width: 100%;
-  font-size: 0.62rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--dris-muted, #64748b) !important;
+  font-weight: 700;
+  color: var(--dris-text, #0f172a);
+  margin-right: 0.35rem;
 }
 
 .jm-heatmap__sw {
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 2px;
   display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(15, 23, 42, 0.25);
+  vertical-align: middle;
+  margin-right: 0.15rem;
 }
 
 .jm-heatmap__sw--hi {
   background: #059669;
 }
+
 .jm-heatmap__sw--mid {
-  background: #34d399;
+  background: #d97706;
 }
+
 .jm-heatmap__sw--lo {
-  background: #fbbf24;
-}
-.jm-heatmap__sw--vlo {
-  background: #fb923c;
+  background: #ea580c;
 }
 
-.jm-heatmap__tip {
-  font-size: 0.72rem;
-  font-weight: 600;
+.jm-heatmap__sw--na {
+  background: #94a3b8;
 }
 
-.jm-heatmap__popup {
-  font-size: 0.85rem;
-  line-height: 1.45;
-  color: #0f172a;
+.jm-heatmap-popup strong {
+  display: block;
+  margin-bottom: 0.25rem;
 }
 
-.jm-heatmap__popup strong {
-  color: #0f172a;
+.leaflet-container {
+  font-family: inherit;
 }
